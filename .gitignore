@@ -1,0 +1,38 @@
+# Data and derived artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/manifests/*.csv
+
+# Trained models, cached embeddings, and generated reports
+models/*
+!models/README.md
+reports/figures/*
+!reports/figures/.gitkeep
+reports/metrics/*
+!reports/metrics/.gitkeep
+reports/errors/*
+!reports/errors/.gitkeep
+artifacts/
+
+# Python and notebook state
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# OS, editor, and secrets
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.env
+.env.*
+*.pem
+*.key

@@ -1,0 +1,17 @@
+# Tested target environment: Python 3.10 or 3.11.
+# Install the appropriate PyTorch CUDA wheel separately when GPU acceleration is desired.
+numpy==1.26.4
+pandas==2.2.2
+Pillow==10.3.0
+PyYAML==6.0.1
+scikit-learn==1.5.1
+scipy==1.13.1
+matplotlib==3.9.1
+seaborn==0.13.2
+torch==2.2.2
+torchvision==0.17.2
+tqdm==4.66.4
+jupyter==1.0.0
+ipykernel==6.29.5
+pytest==8.2.2
+

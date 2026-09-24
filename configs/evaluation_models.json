@@ -1,0 +1,14 @@
+{
+  "Frozen ResNet-18 embeddings plus Logistic Regression": {
+    "validation_predictions": "../models/frozen_logistic/validation_predictions.csv",
+    "test_predictions": "../models/frozen_logistic/test_predictions.csv",
+    "selection_record": "../models/frozen_logistic/selection.json",
+    "probability_column": "abnormal_probability"
+  },
+  "Fine-tuned ResNet-18": {
+    "validation_predictions": "../models/resnet18/validation_predictions.csv",
+    "test_predictions": "../models/resnet18/test_predictions.csv",
+    "selection_record": "../models/resnet18/selection.json",
+    "probability_column": "abnormal_probability"
+  }
+}

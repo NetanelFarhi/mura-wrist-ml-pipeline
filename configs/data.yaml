@@ -1,0 +1,12 @@
+# Set MURA_DATA_ROOT or pass --data-root to scripts. Never place raw MURA files in Git.
+data_root: null
+anatomy: XR_WRIST
+seed: 23
+validation_fraction: 0.20
+use_official_valid_as_test: true
+image_extensions:
+  - .png
+  - .jpg
+  - .jpeg
+  - .bmp
+

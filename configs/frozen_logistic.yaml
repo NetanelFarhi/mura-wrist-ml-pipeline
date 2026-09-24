@@ -1,0 +1,11 @@
+seed: 23
+device: auto
+batch_size: 32
+num_workers: 0
+image_size: 224
+normalize_mean: [0.485, 0.456, 0.406]
+normalize_std: [0.229, 0.224, 0.225]
+candidate_c: [0.1, 1.0, 10.0]
+max_iter: 2000
+study_pooling: mean_embedding
+
