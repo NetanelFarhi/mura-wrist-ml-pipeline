@@ -4,7 +4,7 @@ MURA X Phase 1 is a reproducible research pipeline for study-level NORMAL versus
 
 ## Current status
 
-**PARTIAL.** The source documents have been reviewed; the independent pipeline is being implemented and smoke-tested. No authorized local MURA data was found, so no dataset counts, training runs, test metrics, threshold, or model comparison values are reported. See [reports/PHASE1_DATA_ACCESS.md](reports/PHASE1_DATA_ACCESS.md) for the one required data-access action and [reports/PHASE1_SUMMARY.md](reports/PHASE1_SUMMARY.md) for the current evidence.
+**Phase 1 complete.** The project indexed and audited the authorized MURA XR_WRIST data, created patient-safe splits, trained both planned models, froze validation-only selections, and ran one sealed study-level final evaluation. The executed scope contains 3,474 patients, 3,697 studies, and 10,411 images. This repository intentionally tracks code, notebooks, configuration, and documentation only; raw data, derived predictions, embedding caches, checkpoints, and generated reports remain local.
 
 ## Problem, user, and boundary
 
@@ -106,18 +106,20 @@ The commands generate exact manifests, EDA figures, model artifacts, validation 
 
 ## Current measured results
 
-No MURA-dependent experiment has run. The comparison table is intentionally unpopulated:
+The table below is the sealed 237-study MURA XR_WRIST test evaluation. Both operating thresholds were selected and frozen on validation data before this evaluation.
 
-| Model | AUROC | AUPRC | Recall | Specificity | F1 | FN Rate |
+| Model | AUROC | AUPRC | Sensitivity | Specificity | F1 | False-negative rate |
 |---|---:|---:|---:|---:|---:|---:|
-| Frozen ResNet-18 embeddings plus Logistic Regression | Not executed | Not executed | Not executed | Not executed | Not executed | Not executed |
-| Fine-tuned ResNet-18 | Not executed | Not executed | Not executed | Not executed | Not executed | Not executed |
+| Frozen ResNet-18 embeddings plus Logistic Regression | 0.876 | 0.860 | 0.825 | 0.807 | 0.784 | 0.175 (17/97) |
+| Fine-tuned ResNet-18 | 0.897 | 0.894 | 0.732 | 0.950 | 0.811 | 0.268 (26/97) |
+
+Fine-tuning improved overall discrimination and precision-recall ranking, while the frozen selected threshold traded higher specificity for more false negatives. This is a research baseline, not a clinical-deployment claim.
 
 ## Course alignment and known limitations
 
 The BIU DS23 guidelines require a clean, reproducible repository, a data dictionary, ordered notebooks, leakage documentation, error analysis, and a comparison with the simplest reasonable baseline. This repository implements the Phase 1 elements of those requirements. A later course phase must add and evaluate a justified, guarded agentic layer and complete assigned team roles; it is outside this scope.
 
-Current blockers are authorized MURA access and a CUDA-enabled PyTorch environment for practical full training. CPU smoke tests remain supported. Do not substitute FracAtlas automatically: it changes the target task and needs an explicit decision.
+Current limitations are the single 237-study sealed test set, no external validation, no clinically justified sensitivity target, and the absence of the later agentic workflow. Do not substitute FracAtlas automatically: it changes the target task and needs an explicit decision.
 
 ## Project roles
 
