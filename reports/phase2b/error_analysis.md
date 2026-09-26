@@ -1,0 +1,1 @@
+Paired validation table: `paired_error_table.csv`. Attention errors at 0.5: 110; mean errors: 113. No medical explanations inferred.

@@ -1,0 +1,84 @@
+{
+  "uncalibrated": {
+    "auroc": 0.9107153903937079,
+    "auprc": 0.8841093093299863,
+    "brier": 0.10915653594706441,
+    "nll": 0.37341113330340164,
+    "ece_10_bins": 0.048049896227445564
+  },
+  "temperature_cross_fitted": {
+    "auroc": 0.9092748884273784,
+    "auprc": 0.8821605452357336,
+    "brier": 0.109843936163807,
+    "nll": 0.36167527643314096,
+    "ece_10_bins": 0.03923550530328613
+  },
+  "fold_temperatures": [
+    1.4764119409032639,
+    1.301177072162096,
+    1.4651245435578264,
+    1.2984013887680441,
+    1.4168769772242802
+  ],
+  "policies": [
+    {
+      "threshold": 0.3860229253768921,
+      "sensitivity": 0.8,
+      "specificity": 0.8782201405152225,
+      "precision": 0.803030303030303,
+      "f1": 0.8015122873345936,
+      "false_positive_count": 52,
+      "false_negative_count": 53,
+      "true_positive_count": 212,
+      "true_negative_count": 375,
+      "flagged_abnormal_count": 264,
+      "flagged_abnormal_percent": 38.15028901734104,
+      "n_studies": 692,
+      "policy": "P1 historical Youden-J"
+    },
+    {
+      "threshold": 0.2803132832050323,
+      "sensitivity": 0.8528301886792453,
+      "specificity": 0.7985948477751756,
+      "precision": 0.7243589743589743,
+      "f1": 0.783362218370884,
+      "false_positive_count": 86,
+      "false_negative_count": 39,
+      "true_positive_count": 226,
+      "true_negative_count": 341,
+      "flagged_abnormal_count": 312,
+      "flagged_abnormal_percent": 45.08670520231214,
+      "n_studies": 692,
+      "policy": "P2 sensitivity >= 0.85",
+      "sensitivity_target": 0.85,
+      "n_bootstrap": 2000,
+      "seed": 23,
+      "sensitivity_ci_lower": 0.8075471698113208,
+      "sensitivity_ci_upper": 0.8943396226415095,
+      "specificity_ci_lower": 0.7587822014051522,
+      "specificity_ci_upper": 0.8360655737704918
+    },
+    {
+      "threshold": 0.1609840840101242,
+      "sensitivity": 0.9018867924528302,
+      "specificity": 0.7142857142857143,
+      "precision": 0.6620498614958449,
+      "f1": 0.7635782747603834,
+      "false_positive_count": 122,
+      "false_negative_count": 26,
+      "true_positive_count": 239,
+      "true_negative_count": 305,
+      "flagged_abnormal_count": 361,
+      "flagged_abnormal_percent": 52.16763005780347,
+      "n_studies": 692,
+      "policy": "P3 sensitivity >= 0.90",
+      "sensitivity_target": 0.9,
+      "n_bootstrap": 2000,
+      "seed": 23,
+      "sensitivity_ci_lower": 0.8641509433962264,
+      "sensitivity_ci_upper": 0.939622641509434,
+      "specificity_ci_lower": 0.6697892271662763,
+      "specificity_ci_upper": 0.7564402810304449
+    }
+  ]
+}

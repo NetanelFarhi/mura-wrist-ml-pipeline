@@ -1,0 +1,8 @@
+pooling: mean
+encoder: phase1_resnet18_frozen
+embedding_dim: 512
+seed: 23
+learning_rate: 0.001
+weight_decay: 0.0001
+max_epochs: 40
+early_stopping_patience: 7

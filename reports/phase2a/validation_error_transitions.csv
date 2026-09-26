@@ -1,0 +1,4 @@
+policy,false_negatives,false_positives,true_positives,true_negatives
+P1 historical Youden-J,53,52,212,375
+P2 sensitivity >= 0.85,39,86,226,341
+P3 sensitivity >= 0.90,26,122,239,305

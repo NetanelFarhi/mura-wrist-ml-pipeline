@@ -1,6 +1,21 @@
 # Data and derived artifacts
 data/raw/*
 !data/raw/.gitkeep
+**/MURA-v1.1/
+**/XR_WRIST/**/*.png
+**/XR_WRIST/**/*.jpg
+**/XR_WRIST/**/*.jpeg
+**/XR_WRIST/**/*.bmp
+**/XR_WRIST/**/*.tif
+**/XR_WRIST/**/*.tiff
+**/XR_WRIST/**/*.dcm
+**/MURA*/**/*.png
+**/MURA*/**/*.jpg
+**/MURA*/**/*.jpeg
+**/MURA*/**/*.bmp
+**/MURA*/**/*.tif
+**/MURA*/**/*.tiff
+**/MURA*/**/*.dcm
 data/processed/*
 !data/processed/.gitkeep
 data/manifests/*.csv

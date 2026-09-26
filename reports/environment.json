@@ -1,0 +1,43 @@
+{
+  "report_type": "authoritative Phase 1 actual-run environment evidence",
+  "updated_at_utc": "2026-09-23T20:59:49.1393172Z",
+  "note": "This record supersedes the pre-run CPU-only capability snapshot. Values below are sourced from the persisted real Model B run configuration and final-evaluation artifacts; fields not recorded by those artifacts are intentionally not inferred.",
+  "artifact_timestamps_utc": {
+    "model_b_run_config": "2026-09-23T20:53:50Z",
+    "model_b_training_history": "2026-09-23T20:53:07Z",
+    "final_evaluation_metadata": "2026-09-23T20:54:36Z"
+  },
+  "hardware_inventory": {
+    "gpu": "NVIDIA GeForce GTX 1660 Ti",
+    "gpu_memory_mib": 6144,
+    "driver_version": "592.27",
+    "source": "pre-run NVIDIA inventory"
+  },
+  "model_b_actual_run": {
+    "device": "cuda",
+    "cuda_available": true,
+    "torch_version": "2.2.2",
+    "seed": 23,
+    "image_size": 224,
+    "batch_size": 8,
+    "workers": 4,
+    "configured_max_epochs": 15,
+    "epochs_completed": 8,
+    "stopped_early": true,
+    "best_epoch": 4,
+    "weights": "imagenet",
+    "weight_cache_path": "C:\\Users\\netaf\\.cache\\torch\\hub\\checkpoints\\resnet18-f37072fd.pth"
+  },
+  "final_evaluation": {
+    "prediction_unit": "study",
+    "test_studies": 237,
+    "auroc_bootstrap_method": "stratified_study_bootstrap_percentile",
+    "auroc_bootstrap_replicates": 2000,
+    "random_state": 42
+  },
+  "not_recorded": [
+    "wall-clock training duration",
+    "exact Python executable/version used by the successful CUDA run",
+    "CUDA runtime version"
+  ]
+}

@@ -1,0 +1,7 @@
+model,view_group,n_studies,n_normal,n_abnormal,threshold,minimum_class_support,support_sufficient_for_reporting,support_rule,auroc,sensitivity,specificity,false_negative_count,false_positive_count
+Model A — Frozen ResNet-18 embeddings + Logistic Regression,1 view,24,22,2,0.3542854529699628,2,False,at least 10 studies in each class,,,,,
+Model B — Fine-tuned ResNet-18,1 view,24,22,2,0.3860229253768921,2,False,at least 10 studies in each class,,,,,
+Model A — Frozen ResNet-18 embeddings + Logistic Regression,2 views,44,30,14,0.3542854529699628,14,True,at least 10 studies in each class,0.8476190476190476,0.7857142857142857,0.8333333333333334,3.0,5.0
+Model B — Fine-tuned ResNet-18,2 views,44,30,14,0.3860229253768921,14,True,at least 10 studies in each class,0.9476190476190477,0.7857142857142857,0.9333333333333333,3.0,2.0
+Model A — Frozen ResNet-18 embeddings + Logistic Regression,3+ views,169,88,81,0.3542854529699628,81,True,at least 10 studies in each class,0.8895903479236812,0.8518518518518519,0.7840909090909091,12.0,19.0
+Model B — Fine-tuned ResNet-18,3+ views,169,88,81,0.3860229253768921,81,True,at least 10 studies in each class,0.8843995510662177,0.7407407407407407,0.9545454545454546,21.0,4.0

@@ -1,5 +1,7 @@
 # Phase 1 data dictionary
 
+> **Current governance note:** `test` below denotes the historical frozen Phase-1 reference split. Official MURA `valid` has been observed once and is not untouched for later model, threshold, calibration, architecture, or agent selection; see [`../reports/TEST_SET_GOVERNANCE.md`](../reports/TEST_SET_GOVERNANCE.md).
+
 ## `wrist_manifest.csv`
 
 | Column | Type | Meaning | Source / transformation |
