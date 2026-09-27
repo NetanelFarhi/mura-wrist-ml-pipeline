@@ -1,6 +1,6 @@
 # MURA XR_WRIST Capstone Charter
 
-**Submission:** 4.10.2026 | **Team:** [NAME REQUIRED], [NAME REQUIRED], [NAME REQUIRED]
+**Submission:** 4.10.2026 | **Team:** Artium, Hagit, Hodaya, Netanel
 
 ## 1. Problem + user
 User: Emergency Department physician reviewing wrist radiographs before expert review. The MVP flags **MURA-defined musculoskeletal abnormality** per study (NORMAL/ABNORMAL), not acute fracture, lesion location, treatment, or autonomous diagnosis. In the historical Phase-1 reference, selected operating points missed 17 or 26 of 97 abnormal studies; this makes the sensitivity/specificity trade-off measurable. Delayed review is clinical motivation only, because this dataset cannot measure ED revisits/outcomes.
