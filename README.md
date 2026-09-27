@@ -119,7 +119,7 @@ Fine-tuning improved overall discrimination and precision-recall ranking, while 
 
 The future measurable operating target is sensitivity >=90%, reporting resulting specificity, FN rate, precision, F1, AUROC/AUPRC, and bootstrap CIs; it is not claimed as achieved on an untouched advanced-model test. The agent design, product plan, source checks, and traceability are documented in `agents/`, `evaluation/`, and `reports/`.
 
-The concise entry point for preserved historical metrics is [reports/results.md](reports/results.md); the 4 October submission checklist is [reports/SUBMISSION_2026-10-04.md](reports/SUBMISSION_2026-10-04.md). Before committing, run `python scripts/check_repo_data_governance.py --staged` to prevent accidental addition of raw data or credentials.
+The concise entry point for preserved historical metrics is [reports/results.md](reports/results.md). For a GitHub-rendered, read-only display of the saved results and figure, open [notebooks/06_results_viewer.ipynb](notebooks/06_results_viewer.ipynb). The 4 October submission checklist is [reports/SUBMISSION_2026-10-04.md](reports/SUBMISSION_2026-10-04.md). Before committing, run `python scripts/check_repo_data_governance.py --staged` to prevent accidental addition of raw data or credentials.
 
 ## Course alignment and known limitations
 
