@@ -40,7 +40,7 @@ FracAtlas. If MURA access, preprocessing, or compute prevents completion, fine-t
 
 ## 4. System Architecture
 
-![System Architecture](MURA_System_Architecture.png)
+![System Architecture](docs/assets/MURA_System_Architecture.png)
 
 ## 5. Agent Role: Orchestration • Reporting • Safety
 
@@ -70,7 +70,7 @@ Unsupported, incomplete, invalid, inconsistent or insufficiently reliable input/
 
 ## 7. Milestones and Hats
 
-![Milestones and Hats](MURA_Milestones_and_Hats.png)
+![Milestones and Hats](docs/assets/MURA_Milestones_and_Hats.png)
 
 ## 8. Selected References & Data Sources
 
