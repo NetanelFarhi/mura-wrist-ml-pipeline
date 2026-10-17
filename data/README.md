@@ -12,3 +12,6 @@ The path must contain the official MURA structure, including `train/`, `valid/`,
 
 Expected local layout is `MURA_DATA_ROOT/train/` and `MURA_DATA_ROOT/valid/` with the official CSVs. The repository may contain only access scripts, a data dictionary, schemas, and intentionally reviewed aggregate summaries; it never contains full local manifests or raw images. The project uses only `XR_WRIST` and predicts MURA's study-level NORMAL/ABNORMAL label. It is not a fracture detector and does not provide autonomous clinical diagnosis.
 
+## Checkpoint 1 Colab workflow
+
+The current Colab notebooks (01–07) do not use `MURA_DATA_ROOT`; they read the MURA ZIP and the derived files from the team's shared Google Drive folder `DATA/`. Its layout and files are described in [data_dictionary.md](data_dictionary.md) and in the root [README](../README.md).
