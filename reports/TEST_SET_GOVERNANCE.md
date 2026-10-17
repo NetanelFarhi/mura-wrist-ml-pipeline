@@ -10,6 +10,10 @@ After official-valid was opened, the project observed the Phase-1 study-level pr
 
 Because the official-valid result has now been observed, it is not an untouched evaluation population for later model, threshold, calibration, architecture, aggregation, or agent selection. Phase 2 and future development may cite it only as a historical frozen reference; they must not inspect its labels to choose anything. This applies even when a new candidate is compared with an old Phase-1 result.
 
+## Checkpoint 1 protocol (Notebooks 06a and 06b)
+
+Checkpoint 1 follows the rule above. Models, the Model B training seed, study aggregation and operating thresholds are frozen on internal validation only (Notebook 06a, `operating_policy.json`, with the SHA-256 of every frozen file). Notebook 06b then scores official MURA `valid` (XR_WRIST) **once** with the frozen models, selects nothing, and refuses to run if a locked-test result already exists. Its result is reported as a *held-out test previously observed in Phase 1*, not as an untouched test. One internal-train image is byte-identical to one test image (`patient11359/study1_negative`); Notebook 06b reports a pre-specified analysis without that study. This protocol does not settle the open decision below.
+
 ## Open methodological decision for advanced claims
 
 If a genuinely untouched advanced-model evaluation population is required, the team and lecturer must choose and pre-register one of these scientifically defensible options:
