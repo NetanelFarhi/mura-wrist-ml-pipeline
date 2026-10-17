@@ -1,5 +1,11 @@
 # Bounded agent design — planned, not implemented
 
+## 0. Checkpoint 1 status: stub contract
+
+Until Checkpoint 2 the agent seat is filled by a deterministic stub, `src/pipeline/agent_stub.py` (contract version 1.0, tested in `tests/test_agent_stub.py`, run end to end in Notebook 07). It receives one `ModelOutput` per study (`study_id`, `model_version`, `study_probability`, `threshold`, `view_probabilities`) and returns an `AgentReport` (`case_id`, `model_flag`, `agent_status = STUB`, `evidence`, `limitations`, `trace_id`, `contract_version`). Its only rule is the frozen threshold: score ≥ threshold → `ABOVE_THRESHOLD`, otherwise `BELOW_THRESHOLD`.
+
+Relation to the structured output in §5: `case_id` and `trace_id` are kept; `model_flag` is the threshold part of `deterministic_outcome`; `agent_status` becomes `agent_outcome`; `evidence` holds only the primary model output; `allowed_tools_called`, `missing_evidence`, `reason_for_escalation_or_rejection` and `policy_violation` are added with the agent in a new contract version.
+
 ## 1. Deterministic guardrail policy
 
 The deterministic layer runs before and after any agent call. It rejects corrupt inputs and unsupported anatomy, preserves standard human review, applies the frozen safety/threshold policy, and logs every decision. The AI may raise a case's priority for human review; it must never lower a case below standard-of-care review. These rules are not agent decisions and cannot be overridden by a prompt, metadata, tool result, or model probability.
