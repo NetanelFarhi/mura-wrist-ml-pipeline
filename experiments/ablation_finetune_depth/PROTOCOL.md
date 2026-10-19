@@ -136,9 +136,15 @@ No other extensions are allowed.
 
 ## 14. Run registry
 
-| Arm | seed | run_id | Date | Status |
-|---|---|---|---|---|
-| R0 (S4) | 23 | | | pending |
-| S3 | 23 / 42 / 7 | | | pending |
-| S2 | 23 / 42 / 7 | | | pending |
-| S1 | 23 / 42 / 7 | | | pending |
+| Arm | seed | Notebook (`runs/`) | run_id | Date | Status |
+|---|---|---|---|---|---|
+| R0 (S4) | 23 | `05_S4_seed23_R0.ipynb` (upload pending) | `run_20261019T084628Z` | 19.10.2026 | done: AUROC 0.902042, AUPRC 0.868998, best epoch 6 of 10 — identical to `run_20261017T095546Z`; Tesla T4, torch 2.11.0+cu130 → **PASS** (§6): the existing S4 runs stay the control |
+| S3 | 23 | `05_S3_seed23.ipynb` | | | pending |
+| S3 | 42 | `05_S3_seed42.ipynb` | | | pending |
+| S3 | 7 | `05_S3_seed7.ipynb` | | | pending |
+| S2 | 23 | `05_S2_seed23.ipynb` | | | pending |
+| S2 | 42 | `05_S2_seed42.ipynb` | | | pending |
+| S2 | 7 | `05_S2_seed7.ipynb` | | | pending |
+| S1 | 23 | `05_S1_seed23.ipynb` | | | pending |
+| S1 | 42 | `05_S1_seed42.ipynb` | | | pending |
+| S1 | 7 | `05_S1_seed7.ipynb` | | | pending |
