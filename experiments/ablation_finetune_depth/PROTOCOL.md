@@ -132,7 +132,7 @@ No other extensions are allowed.
 
 | Date | What changed | Reason |
 |---|---|---|
-| — | — | — |
+| 19.10.2026, before the first run | The modified code lives in a template, `experiments/ablation_finetune_depth/05_ablation_template.ipynb`, not in `notebooks/05_MURA_ResNet18_FineTune.ipynb` (§4). Run notebooks are copies of this template. The template also stops on a non-T4 GPU and prints the registry row and the R0 check (§6). | `notebooks/05` holds the executed seed-23 run behind the frozen Model B; changing its code would make code and saved outputs disagree. The training logic is otherwise as specified in §3–§4. |
 
 ## 14. Run registry
 
