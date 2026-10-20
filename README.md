@@ -25,10 +25,9 @@ Earlier notebooks are preserved under [notebooks/legacy](notebooks/legacy/)
 for traceability. They are not the canonical workflow and must not be used to
 make new selection decisions without protocol review.
 
-Notebook files are intentionally stored without raw-image outputs. After a
-local or Colab run, only reviewed aggregate tables and figures may be retained
-for presentation; radiographs, study IDs, Drive paths, checkpoints, embeddings,
-and detailed prediction files must remain outside Git.
+The canonical notebooks retain reviewed aggregate tables and figures so their
+results render directly on GitHub. Radiographs, study IDs, Drive paths,
+checkpoints, embeddings, and detailed prediction files must remain outside Git.
 
 ## Checkpoint 1 results — development validation only
 
