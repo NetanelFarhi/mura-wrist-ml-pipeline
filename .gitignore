@@ -19,10 +19,21 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 data/manifests/*.csv
+**/MURA*.zip
 
 # Trained models, cached embeddings, and generated reports
 models/*
 !models/README.md
+*.pt
+*.pth
+*.ckpt
+*.joblib
+*.npy
+*.npz
+**/*embedding*.csv
+**/*embedding*.npy
+**/*embedding*.npz
+**/*predictions*.csv
 reports/figures/*
 !reports/figures/.gitkeep
 reports/metrics/*
@@ -30,6 +41,11 @@ reports/metrics/*
 reports/errors/*
 !reports/errors/.gitkeep
 artifacts/
+
+# Local diagnostic outputs may contain identifiers, paths, or per-study scores.
+# Publish only reviewed aggregate summaries under docs/results/.
+local_audits/
+reports/shortcut_audit/
 
 # Python and notebook state
 __pycache__/
