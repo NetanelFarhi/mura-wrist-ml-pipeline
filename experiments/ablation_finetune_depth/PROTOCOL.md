@@ -141,13 +141,23 @@ No other extensions are allowed.
 | Arm | seed | Notebook (`runs/`) | run_id | Date | Status |
 |---|---|---|---|---|---|
 | R0 (S4) | 23 | `05_S4_seed23_R0.ipynb` (saved 20.10.2026, commit 39cdc7d) | `run_20261019T084628Z` | 19.10.2026 | done: AUROC 0.902042, AUPRC 0.868998, best epoch 6 of 10 — identical to `run_20261017T095546Z`; Tesla T4, torch 2.11.0+cu130 → **PASS** (§6): the existing S4 runs stay the control |
-| R0b (S4, reused runtime) | 23 | `05_S4_seed23_R0b.ipynb` | | | pending |
-| S3 | 23 | `05_S3_seed23.ipynb` | | | pending |
-| S3 | 42 | `05_S3_seed42.ipynb` | | | pending |
-| S3 | 7 | `05_S3_seed7.ipynb` | | | pending |
-| S2 | 23 | `05_S2_seed23.ipynb` | | | pending |
-| S2 | 42 | `05_S2_seed42.ipynb` | | | pending |
-| S2 | 7 | `05_S2_seed7.ipynb` | | | pending |
-| S1 | 23 | `05_S1_seed23.ipynb` | | | pending |
-| S1 | 42 | `05_S1_seed42.ipynb` | | | pending |
-| S1 | 7 | `05_S1_seed7.ipynb` | | | pending |
+| R0b (S4, reused runtime) | 23 | `05_S4_seed23_R0b.ipynb` | `run_20261020T172538Z` | 20.10.2026 | done: AUROC 0.902042, best epoch 6 of 10; `validation_predictions.csv` bit-identical to `run_20261017T095546Z` (max abs Δp = 0) → **PASS** (§6, §13) |
+| S3 | 23 | `05_S3_seed23.ipynb` | `run_20261020T170941Z` | 20.10.2026 | done: AUROC 0.904279, AUPRC 0.879486, best epoch 8 of 12 |
+| S3 | 42 | `05_S3_seed42.ipynb` | `run_20261020T173835Z` | 20.10.2026 | done: AUROC 0.904896, AUPRC 0.880614, best epoch 7 of 11 |
+| S3 | 7 | `05_S3_seed7.ipynb` | `run_20261020T191814Z` | 20.10.2026 | done: AUROC 0.901654, AUPRC 0.870017, best epoch 2 of 6 |
+| S2 | 23 | `05_S2_seed23.ipynb` | `run_20261020T192952Z` | 20.10.2026 | done: AUROC 0.901328, AUPRC 0.872449, best epoch 4 of 8 |
+| S2 | 42 | `05_S2_seed42.ipynb` | `run_20261020T194601Z` | 20.10.2026 | done: AUROC 0.901760, AUPRC 0.869341, best epoch 7 of 11 |
+| S2 | 7 | `05_S2_seed7.ipynb` | `run_20261020T200020Z` | 20.10.2026 | done: AUROC 0.896043, AUPRC 0.864971, best epoch 1 of 5 |
+| S1 | 23 | `05_S1_seed23.ipynb` | `run_20261020T200935Z` | 20.10.2026 | done: AUROC 0.860357, AUPRC 0.820281, best epoch 15 of 15 |
+| S1 | 42 | `05_S1_seed42.ipynb` | `run_20261020T202457Z` | 20.10.2026 | done: AUROC 0.857494, AUPRC 0.815333, best epoch 15 of 15 |
+| S1 | 7 | `05_S1_seed7.ipynb` | `run_20261020T204155Z` | 20.10.2026 | done: AUROC 0.859326, AUPRC 0.814357, best epoch 15 of 15 |
+| S3 | 101 | `05_S3_seed101.ipynb` | `run_20261020T205951Z` | 20.10.2026 | done (stage 2): AUROC 0.900879, AUPRC 0.874321, best epoch 3 of 7 |
+| S4 | 101 | `05_S4_seed101.ipynb` | `run_20261020T211047Z` | 20.10.2026 | done (stage 2): AUROC 0.903742, AUPRC 0.873144, best epoch 6 of 10 |
+| S3 | 202 | `05_S3_seed202.ipynb` | `run_20261020T212344Z` | 20.10.2026 | done (stage 2): AUROC 0.907812, AUPRC 0.889110, best epoch 7 of 11 |
+| S4 | 202 | `05_S4_seed202.ipynb` | `run_20261020T213617Z` | 20.10.2026 | done (stage 2): AUROC 0.902024, AUPRC 0.867068, best epoch 4 of 8 |
+| S2 | 101 | `05_S2_seed101.ipynb` | `run_20261020T214625Z` | 20.10.2026 | done (stage 2): AUROC 0.903363, AUPRC 0.882857, best epoch 3 of 7 |
+| S2 | 202 | `05_S2_seed202.ipynb` | `run_20261020T215534Z` | 20.10.2026 | done (stage 2): AUROC 0.903689, AUPRC 0.879105, best epoch 3 of 7 |
+| S1 | 101 | `05_S1_seed101.ipynb` | `run_20261020T220811Z` | 20.10.2026 | done (stage 2): AUROC 0.863740, AUPRC 0.816789, best epoch 15 of 15 |
+| S1 | 202 | `05_S1_seed202.ipynb` | `run_20261020T222524Z` | 20.10.2026 | done (stage 2): AUROC 0.864629, AUPRC 0.819128, best epoch 15 of 15 |
+
+Stage 2 (§10) was triggered because the stage-1 S3 vs S4 result was "inconclusive" (Δ +0.0009, 95% CI [−0.0091, +0.0117]). Final 5-seed result: Δ +0.0011, 95% CI [−0.0072, +0.0089] → "no practically relevant difference". S4 seeds 23, 42 and 7 are the existing control runs listed in §5. Full results: `RESULTS.md`, `analysis.ipynb`, `results/`.
