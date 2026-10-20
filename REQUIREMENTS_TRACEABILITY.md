@@ -14,10 +14,10 @@ Status is intentionally conservative: **DONE**, **IN PROGRESS**, **PLANNED**, **
 | 6. Three risks + cut line | `CHARTER.md` §6 | DONE | 4.10.2026 |
 | 7. Milestones + named Data/Model/Agent/Product hats | `CHARTER.md` §7 | BLOCKED | 4.10.2026 — team names required |
 | Root `CHARTER.md`, max two pages | `CHARTER.md`; `reports/SUBMISSION_2026-10-04.md` | IN PROGRESS | 4.10.2026 — render check required |
-| README, reproducibility, data dictionary, no raw data | `README.md`; `data/data_dictionary.md`; `data/README.md`; `.gitignore` | DONE | Checkpoint 1 |
-| Cheap baseline comparison | `README.md`; `reports/results.md`; `reports/baseline_results.md` | DONE | Checkpoint 1 |
-| Thin end-to-end baseline without final agent | existing Phase-1 pipeline and reports | DONE | 18.10.2026 |
-| Agent integrated and demo-ready | `agents/AGENT_DESIGN.md`; implementation pending | PLANNED | 30.10.2026 |
+| README, reproducibility, data dictionary, no raw data | `README.md` (Colab pipeline, Drive layout, overwrite rules); `data/data_dictionary.md`; `data/README.md`; `.gitignore` | DONE — except one radiograph preview in the `02_preprocessing.ipynb` output (team decision pending) | Checkpoint 1 |
+| Cheap baseline comparison | `README.md` (Model A vs Model B, Notebooks 03–06a); `reports/results.md`; `reports/baseline_results.md` | DONE | Checkpoint 1 |
+| Thin end-to-end baseline without final agent | Colab Notebooks 01–07; `src/pipeline/agent_stub.py`; `tests/test_agent_stub.py`; Phase-1 pipeline and reports | DONE — Notebook 07 executed 17.10.2026; acceptance run of the updated version pending | 18.10.2026 |
+| Agent integrated and demo-ready | `agents/AGENT_DESIGN.md`; contract fixed by the Checkpoint-1 stub (`src/pipeline/agent_stub.py`); implementation pending | PLANNED | 30.10.2026 |
 | Final evaluation/demo/docs/cost | `evaluation/`; `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | 12.11.2026 |
 
 ## Lecturer Part A — before charter submission
@@ -25,7 +25,7 @@ Status is intentionally conservative: **DONE**, **IN PROGRESS**, **PLANNED**, **
 | Correction | Evidence / planned artifact | Status | Deadline |
 |---|---|---|---|
 | Measurable sensitivity-constrained success metric; no revisit outcome/ambiguous “3% misses” | `CHARTER.md` §2; `reports/SOURCE_VERIFICATION.md` | DONE | 4.10.2026 |
-| Patient-safe internal validation; threshold never selected on official-valid test | `CHARTER.md` §3; `reports/TEST_SET_GOVERNANCE.md`; Phase-1 reports | DONE | 4.10.2026 |
+| Patient-safe internal validation; threshold never selected on official-valid test | `CHARTER.md` §3; `reports/TEST_SET_GOVERNANCE.md`; Phase-1 reports; Notebooks 01 (split, leakage tests) and 06a (policy frozen on internal validation) | DONE | 4.10.2026 |
 | Justified two-layer agent: deterministic safety plus adaptive ambiguity only | `CHARTER.md` §§4–5; `agents/AGENT_DESIGN.md` | DONE (design) | 4.10.2026 |
 | Rule/fixed-workflow/agent comparison on same independent cases | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
 | Mandatory frozen-feature Logistic Regression baseline | `README.md`; `reports/results.md` | DONE | 4.10.2026 |
@@ -34,13 +34,13 @@ Status is intentionally conservative: **DONE**, **IN PROGRESS**, **PLANNED**, **
 
 | Requirement | Evidence / planned artifact | Status | Deadline |
 |---|---|---|---|
-| Early thin baseline, no final agent required | Phase-1 pipeline; `CHARTER.md` §7 | DONE | 18.10.2026 |
+| Early thin baseline, no final agent required | Colab Notebooks 01–07 with the agent stub; Phase-1 pipeline; `CHARTER.md` §7 | DONE | 18.10.2026 |
 | Plan B changes task/anatomy/QC/evaluation assumptions | `CHARTER.md` §3 | DONE | 4.10.2026 |
 | Research/non-commercial licensing; no raw images in Git | `data/README.md`; `.gitignore`; `scripts/check_repo_data_governance.py` | IN PROGRESS | 4.10.2026 — verify official terms |
 | Product hat and named ownership | `CHARTER.md` §7 | BLOCKED | 4.10.2026 — team names required |
 | Future operating-cost estimate | `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | 12.11.2026 |
 | Hostile-input/prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
-| Explicit study aggregation | `CHARTER.md` §4; `README.md` Models section | DONE | 4.10.2026 |
+| Explicit study aggregation | `CHARTER.md` §4; Notebook 03 (mean of view embeddings); Notebook 05 (mean or max of view probabilities, chosen on validation) | DONE | 4.10.2026 |
 
 ## Lecturer Part C — analytical and safety requirements
 
@@ -49,12 +49,12 @@ Status is intentionally conservative: **DONE**, **IN PROGRESS**, **PLANNED**, **
 | Scope MURA abnormality, not acute fracture | `CHARTER.md` §1; `README.md`; `data/README.md` | DONE | 4.10.2026 |
 | Error/shortcut analysis with no fabricated subtypes | `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | 12.11.2026 |
 | Grad-CAM as diagnostic only; no lesion-localization claim | `evaluation/SHORTCUT_ANALYSIS_PLAN.md`; agent design | PLANNED | 12.11.2026 |
-| Bootstrap confidence intervals / no over-precision | `CHARTER.md` §2; Phase-1/2 reports | IN PROGRESS | 12.11.2026 |
+| Bootstrap confidence intervals / no over-precision | `CHARTER.md` §2; Phase-1/2 reports; Notebooks 04 (patient-cluster bootstrap) and 05 (paired ΔAUROC); 06b (planned) | IN PROGRESS | 12.11.2026 |
 | Safety asymmetry: raise priority only | `CHARTER.md` §4; `agents/AGENT_DESIGN.md` | DONE (design) | 4.10.2026 |
 | Independent agent safety suite, not circular threshold ground truth | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
 | Published MURA wrist-performance context with non-identical-protocol disclaimer | `reports/SOURCE_VERIFICATION.md` | NEEDS DECISION | 12.11.2026 |
 | Verify/remove Graif/revisit claim | `reports/SOURCE_VERIFICATION.md` | IN PROGRESS | 4.10.2026 |
-| Honest governance after official-valid was observed | `reports/TEST_SET_GOVERNANCE.md` | DONE | 4.10.2026 |
+| Honest governance after official-valid was observed | `reports/TEST_SET_GOVERNANCE.md`; Notebook 06b one-evaluation guard | DONE | 4.10.2026 |
 
 ## Open decisions requiring team or lecturer input
 

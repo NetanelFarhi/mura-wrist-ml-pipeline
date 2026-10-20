@@ -32,3 +32,11 @@
 - **Decision:** Freeze the reported Phase 1 outcome. Model B has higher discrimination/specificity/F1 point estimates but worse recall and nine additional false negatives at the selected operating points. Per-model AUROC intervals overlap and no paired difference test was run, so no statistical-significance claim is made.
 - **Blocker / limitation:** No Phase 1 execution blocker remains. Limitations are the single 237-study sealed test set, one controlled Model B configuration, no paired difference interval, no external validation, and no clinically justified sensitivity/FNR operating target. MURA labels abnormality, not fracture.
 - **Next step:** Do not retune on the sealed test set. If a subsequent research phase is authorized, pre-register the comparison/operating-point analysis and address false-negative performance before any advanced modelling or agentic workflow.
+
+## 2026-10-17 - Checkpoint 1 Colab pipeline (branch ARTEM)
+
+- **Executed:** Colab Notebooks 01–07 on the shared Drive folder: patient-level split and leakage tests (01), preprocessing (02), Model A (03, 04), Model B with three training seeds (05), operating policy frozen on internal validation (06a), end-to-end run with the agent stub (07).
+- **Measured results (internal validation, 691 studies):** Model A AUROC 0.8804; Model B AUROC 0.9018–0.9043 over training seeds 23, 42 and 7. At sensitivity ≥ 95% (13 false negatives for every model) specificity is 0.393 for Model A and 0.355–0.469 for Model B; pipeline model B seed 7, threshold 0.070447 (policy `run_20261017T105209Z`). Notebook 07: 691 reports, 480 flagged for review.
+- **Decision:** Primary operating target sensitivity ≥ 95% (15.10.2026); the 06a selection rule is kept (17.10.2026); official MURA `valid` is evaluated once with Notebook 06b, only after the team freezes the model.
+- **Limitation:** All numbers are development results on the selection split. The mean specificity gain of Model B over three seeds (+0.015) is below the pre-specified 0.02 margin; the selected seed's gain (+0.076) is optimistic. Model B scores depend on GPU mixed precision.
+- **Next step:** acceptance run of the updated Notebook 07; team freeze; Notebook 06b once; agent layer (Checkpoint 2).
