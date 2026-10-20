@@ -133,12 +133,15 @@ No other extensions are allowed.
 | Date | What changed | Reason |
 |---|---|---|
 | 19.10.2026, before the first run | The modified code lives in a template, `experiments/ablation_finetune_depth/05_ablation_template.ipynb`, not in `notebooks/05_MURA_ResNet18_FineTune.ipynb` (§4). Run notebooks are copies of this template. The template also stops on a non-T4 GPU and prints the registry row and the R0 check (§6). | `notebooks/05` holds the executed seed-23 run behind the frozen Model B; changing its code would make code and saved outputs disagree. The training logic is otherwise as specified in §3–§4. |
+| 20.10.2026, before the first S1–S3 run | All remaining runs are executed in **one Colab T4 session**: the template is opened once; before each run only `seed` and `trainable_layers` in the Configuration cell are changed, then Run all, then File → Save a copy in GitHub under the §14 name. Drive is mounted once, and the images staged on the local disk by the first run are reused through the notebook's own skip logic. Order: S3 seed 23 (fresh runtime), R0b, S3 seeds 42 and 7, S2 × 3, S1 × 3. **R0b** = S4 seed 23 in the reused runtime, judged by the §6 rule against `run_20261017T095546Z` (bit-identical AUROC is expected and reported). If R0b fails, every run made in the reused runtime is repeated in a fresh runtime. | Every new runtime needs a manual Drive OAuth confirmation; one session needs it once. The code is unchanged and all random generators are reseeded in the Configuration cell. |
+| 20.10.2026, before the first S1–S3 run | **Added a descriptive comparison with the frozen Model A (C = 0.1)**, `model_a@e69895841ee1` (AUROC 0.880442; specificity at sensitivity ≥ 95% 0.393365). Its validation predictions are read from Hagit's copy of `BASELINE_MODEL_A/validation_predictions.csv`, whose sha256 `03e93f6e54aa80cb15c0b8445392224b060e843c87e4d243ab59017fd4a91455` equals the value frozen in the 06a policy `run_20261017T105209Z`. For every arm: seed-averaged Δ AUROC vs Model A with the §8 bootstrap, and specificity at sensitivity ≥ 95% vs Model A (06a margin 0.02). Read only; not part of the §9 decision. | The shared `BASELINE_MODEL_A` now holds A′ (C = 0.01, overwritten 18.10.2026). Artem chose the C = 0.1 version as the Model A reference. |
 
 ## 14. Run registry
 
 | Arm | seed | Notebook (`runs/`) | run_id | Date | Status |
 |---|---|---|---|---|---|
-| R0 (S4) | 23 | `05_S4_seed23_R0.ipynb` (upload pending) | `run_20261019T084628Z` | 19.10.2026 | done: AUROC 0.902042, AUPRC 0.868998, best epoch 6 of 10 — identical to `run_20261017T095546Z`; Tesla T4, torch 2.11.0+cu130 → **PASS** (§6): the existing S4 runs stay the control |
+| R0 (S4) | 23 | `05_S4_seed23_R0.ipynb` (saved 20.10.2026, commit 39cdc7d) | `run_20261019T084628Z` | 19.10.2026 | done: AUROC 0.902042, AUPRC 0.868998, best epoch 6 of 10 — identical to `run_20261017T095546Z`; Tesla T4, torch 2.11.0+cu130 → **PASS** (§6): the existing S4 runs stay the control |
+| R0b (S4, reused runtime) | 23 | `05_S4_seed23_R0b.ipynb` | | | pending |
 | S3 | 23 | `05_S3_seed23.ipynb` | | | pending |
 | S3 | 42 | `05_S3_seed42.ipynb` | | | pending |
 | S3 | 7 | `05_S3_seed7.ipynb` | | | pending |
