@@ -1,21 +1,25 @@
-# 4.10.2026 Charter-submission checklist
+# Charter-submission alignment checklist — 4.10.2026
 
-## Required now
+This checklist separates material that is ready to submit as **design/protocol** from work that remains an implementation or evaluation task. It must not be used to imply that planned agent work or future advanced-model testing has occurred.
 
-- [x] Root `CHARTER.md`, concise and explicitly organized into the seven required fields.
-- [x] Measurable target and validation-only threshold/test governance.
-- [x] Data plan, Plan B distinction, licensing/no-raw-Git policy.
-- [x] Architecture sketch, agent justification/boundaries, baseline, risks/cut line, milestones.
-- [x] README baseline table and reproducibility/data documentation.
-- [x] `agents/` and `evaluation/` design/evaluation planning folders required by course structure.
+## Charter packet
 
-## Team action before upload
+- [x] Seven explicit charter fields in `CHARTER.md`.
+- [x] Specific user, scoped MURA-abnormality task, measurable >=95% sensitivity target, and bootstrap-CI requirement.
+- [x] Patient-level internal train/validation design; Logistic Regression C selected inside train by grouped CV; model-specific study-level cutoff chosen only on internal validation.
+- [x] Honest governance note: official MURA `valid` was historically opened for frozen Phase-1 reference evaluation and cannot be called untouched for later model selection.
+- [x] Mandatory frozen-embedding Logistic Regression baseline named alongside fine-tuned ResNet-18.
+- [x] Deterministic safety policy, bounded adaptive-agent seat, agent-evaluation comparator design, Plan B distinction, risks/cut line, and named hats.
+- [x] Research/non-commercial data governance statement: raw MURA images, credentials, and protected manifests are not committed.
 
-1. Replace every `[NAME REQUIRED]` in `CHARTER.md` with verified team names and four-hat ownership.
-2. Confirm the Charter fits the lecturer's two-page limit in the submission renderer.
-3. Push the current repository without raw MURA images, checkpoints, or credentials.
-4. Share the private repository as instructed by the course; do not make protected data public.
+## Verification completed for this branch
 
-## Not due on 4.10
+1. The current Charter was rendered as `docs/submissions/MURA_Agentic_AI_Capstone_Charter_final.docx` and `.pdf`; the PDF is one page.
+2. The rendered packet contains no raw radiograph or protected-data image.
+3. Unverified clinical/background claims were removed or rephrased; outstanding source checks remain tracked in `reports/SOURCE_VERIFICATION.md` rather than presented as success claims.
+4. The repository data-governance check must pass immediately before every push, including this branch.
+5. The branch does not state that the bounded agent is implemented/evaluated, clinically validated, or that advanced models have an untouched final test result.
 
-The working agent/demo is a 30.10 checkpoint deliverable. Do not claim it is implemented now. The existing Phase-1 thin baseline and historical results are documented, while later model claims remain subject to test-set governance.
+## Checkpoint distinction
+
+The thin end-to-end baseline is the early deliverable. The working agent, agent evaluation, advanced model claims, UI/demo, and deployment cost estimate are later work. Historical Phase-1 results stay preserved, but later model selection must not use the already observed official MURA `valid` labels.

@@ -1,16 +1,19 @@
 # Source-verification register
 
-No web research is performed by this documentation task. A claim marked **NEEDS VERIFICATION** must be supported by the primary/official source before appearing as factual clinical evidence in a final submission; otherwise remove or rephrase it.
+No external web research was performed for this documentation update. A claim marked **NEEDS VERIFICATION** must be checked against a primary or official source before it is used as factual background in a final submission. If it cannot be verified, remove it or rephrase it as a project-design statement.
 
-| Current or proposed project claim | Status | Required action |
+| Claim or intended wording | Status | Required action |
 |---|---|---|
-| MURA labels are study-level NORMAL/ABNORMAL rather than fracture localization labels | VERIFIED in local MURA-derived manifests/project documentation | retain the scoped wording |
-| The project uses only MURA `XR_WRIST`, organized patient -> study -> views | VERIFIED in `reports/wrist_data_audit.json` | retain |
-| MURA access is research/non-commercial | NEEDS VERIFICATION | cite the current official Stanford MURA terms before final submission |
-| MURA abnormality can reflect findings other than an acute fracture (for example hardware/cast/degenerative findings) | NEEDS VERIFICATION | verify against MURA documentation/paper before using as an explanatory factual claim |
-| Delayed review or missed imaging abnormality is clinically important | NEEDS VERIFICATION | use a reliable clinical source, or keep only as non-quantified motivation |
-| “<1% 24-hour ED revisit” or the Graif/revisit citation supports this model's success | REMOVE OR REPHRASE | not measurable with MURA; verify the exact source before mentioning as background and never use as a success metric |
-| A 3% miss rate is an established/appropriate clinical target | REMOVE OR REPHRASE | no source/protocol currently establishes it; use the pre-specified sensitivity target instead |
-| Published original-MURA wrist results provide performance context | NEEDS VERIFICATION | cite the original MURA paper and state datasets/protocols are not identical |
-| AI may raise priority but never reduce standard review | VERIFIED AS PROJECT POLICY | describe as a safety design rule, not as evidence of clinical effectiveness |
-| The system can improve clinical outcomes or replace radiology review | REMOVE OR REPHRASE | outside this dataset and project evidence |
+| This project uses local MURA-derived XR_WRIST manifests organised patient -> study -> views, with study-level NORMAL/ABNORMAL labels. | VERIFIED in local project artifacts | Keep the scoped wording; do not change it to fracture detection. |
+| Official MURA `train` was split internally at patient level for development. | VERIFIED in local split/audit artifacts | Retain with the exact split protocol. |
+| Official MURA `valid` was opened once for frozen Phase-1 reference evaluation. | VERIFIED in `reports/TEST_SET_GOVERNANCE.md` | Retain the reuse limitation in all later reports. |
+| MURA access/use is subject to research or non-commercial terms. | NEEDS VERIFICATION | Cite the current official Stanford MURA terms before final submission. |
+| MURA abnormality can include non-acute-fracture findings such as hardware, casts, degenerative change, markers, or artifacts. | NEEDS VERIFICATION | Verify against the MURA paper/documentation before using as a factual distribution claim; treat shortcut review as exploratory unless annotated. |
+| Missing radiographic abnormalities or delayed specialist review are clinically important. | NEEDS VERIFICATION | Use a reliable clinical source or keep this only as non-quantified motivation. |
+| A 3% miss target is clinically established or appropriate for this dataset. | REMOVE OR REPHRASE | No project source establishes this. Use the pre-specified >=95% sensitivity protocol instead. |
+| “<1% 24-hour ED revisit” is a measurable project outcome on MURA. | REMOVE OR REPHRASE | MURA does not contain this outcome; it is not a success metric. |
+| Graif/revisit citation supports the project's success metric. | REMOVE OR REPHRASE | Verify the exact citation before any background use; never use it as model-performance evidence. |
+| Published original-MURA wrist results can anchor context for this project. | NEEDS VERIFICATION | Cite the primary MURA paper and explicitly state that dataset/protocol/model comparisons are not identical. |
+| FracAtlas is a compatible Plan B with stated licence/labels. | NEEDS VERIFICATION | Verify the current source, licence, anatomy, labels, and task compatibility before activation. |
+| The AI may raise priority but must not lower a case below standard review. | VERIFIED AS PROJECT POLICY | Describe as a safety rule, not proof of clinical effectiveness. |
+| The system can replace radiology review, diagnose a fracture, localize a lesion, or improve patient outcomes. | REMOVE OR REPHRASE | Outside this dataset and evidence base. |

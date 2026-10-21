@@ -11,10 +11,10 @@
   "duplicate_paths": [],
   "folder_label_mismatches": [],
   "generated_artifacts": {
-    "manifest": "C:\\Users\\netaf\\Documents\\Codex\\2026-09-23\\important-change-to-phase-1-phase\\mura-x\\data\\manifests\\wrist_manifest.csv",
+    "manifest": "<local-only manifest: wrist_manifest.csv>",
     "official_valid_is_sealed_test": true,
     "seed": 23,
-    "split_manifest": "C:\\Users\\netaf\\Documents\\Codex\\2026-09-23\\important-change-to-phase-1-phase\\mura-x\\data\\manifests\\split_manifest.csv",
+    "split_manifest": "<local-only manifest: split_manifest.csv>",
     "validation_fraction": 0.2
   },
   "image_dimensions": {

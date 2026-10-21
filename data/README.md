@@ -5,7 +5,7 @@ This repository never stores raw MURA files in Git, including in a private repos
 Set a local path before running the pipeline:
 
 ```powershell
-$env:MURA_DATA_ROOT = "G:\datasets\MURA-v1.1"
+$env:MURA_DATA_ROOT = "<local-path-to-MURA-v1.1>"
 ```
 
 The path must contain the official MURA structure, including `train/`, `valid/`, `train_image_paths.csv`, `valid_image_paths.csv`, `train_labeled_studies.csv`, and `valid_labeled_studies.csv`. Run `python scripts/audit_data.py --data-root $env:MURA_DATA_ROOT` first. The script creates full local manifests under `data/manifests/`; those files are reproducibility artifacts but are excluded from Git because they reveal the local dataset inventory.

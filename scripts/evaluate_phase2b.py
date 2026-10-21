@@ -1,4 +1,8 @@
-"""Validation-only reports for bounded Phase 2B models."""
+"""Validation-only aggregate reports for bounded Phase 2B models.
+
+Per-study joins are held in memory only. This script writes no patient/study
+identifiers or per-study probabilities to the repository report directory.
+"""
 from pathlib import Path
 import numpy as np,pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -11,7 +15,18 @@ w=pd.read_csv(root/'attention_weights_validation.csv')
 ent=w.groupby('study_id').attention_weight.apply(lambda x:float(-(x*np.log(np.maximum(x,1e-12))).sum())).rename('attention_entropy')
 d=d.merge(ent,on='study_id');d=d.merge(pd.read_csv('models/resnet18/val_view_probability_summary.csv')[['study_id','range_view_probability']],on='study_id')
 for m in ['mean','max','attention']: d[f'{m}_correct_0_5']=(d[f'{m}_embedding_probability']>=.5)==d.label
-d.to_csv(out/'paired_error_table.csv',index=False)
+summary=[]
+for m in ['mean','max','attention']:
+    correct=d[f'{m}_correct_0_5']
+    summary.append({
+        'method':m,
+        'studies':int(len(d)),
+        'correct':int(correct.sum()),
+        'incorrect':int((~correct).sum()),
+        'false_negative':int(((d.label==1)&(~correct)).sum()),
+        'false_positive':int(((d.label==0)&(~correct)).sum()),
+    })
+pd.DataFrame(summary).to_csv(out/'paired_error_summary.csv',index=False)
 att=d.attention_embedding_probability;low,high=d.range_view_probability.quantile([1/3,2/3]);rows=[]
 for name,mask in [('low',d.range_view_probability<=low),('medium',(d.range_view_probability>low)&(d.range_view_probability<=high)),('high',d.range_view_probability>high)]: rows.append({'group':name,'n':int(mask.sum()),'attention_auroc':roc_auc_score(d.label[mask],att[mask]),'mean_auroc':roc_auc_score(d.label[mask],d.mean_embedding_probability[mask])})
 sub=pd.DataFrame(rows);sub.to_csv(out/'disagreement_subgroups.csv',index=False)
@@ -19,4 +34,9 @@ sub=pd.DataFrame(rows);sub.to_csv(out/'disagreement_subgroups.csv',index=False)
 (out/'disagreement_analysis.md').write_text(sub.to_markdown(index=False))
 metrics.to_csv(out/'model_comparison.csv',index=False)
 (out/'complexity.md').write_text(metrics[['model','total_parameters','trainable_parameters','training_seconds']].to_markdown(index=False)+'\n\nEncoder is frozen/shared; counts are pooling/head only. CPU training times exclude one-time embedding extraction.')
-(out/'error_analysis.md').write_text('Paired validation table: `paired_error_table.csv`. Attention errors at 0.5: %d; mean errors: %d. No medical explanations inferred.' % (int((~d.attention_correct_0_5).sum()),int((~d.mean_correct_0_5).sum())))
+(out/'error_analysis.md').write_text(
+    'Aggregate paired validation summary: `paired_error_summary.csv`. '
+    'Attention errors at 0.5: %d; mean errors: %d. Individual study IDs and '
+    'per-study probabilities are local-only. No medical explanations inferred.'
+    % (int((~d.attention_correct_0_5).sum()),int((~d.mean_correct_0_5).sum()))
+)

@@ -46,6 +46,9 @@ artifacts/
 # Publish only reviewed aggregate summaries under docs/results/.
 local_audits/
 reports/shortcut_audit/
+# Per-study error tables are local-only; publish aggregate summaries instead.
+reports/phase1_5_error_comparison.csv
+reports/phase2b/paired_error_table.csv
 
 # Python and notebook state
 __pycache__/

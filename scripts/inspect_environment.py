@@ -55,7 +55,7 @@ def collect_environment() -> dict[str, Any]:
         "captured_at_utc": datetime.now(timezone.utc).isoformat(),
         "python": {
             "version": sys.version,
-            "executable": sys.executable,
+            "executable": "<local executable redacted>",
             "implementation": platform.python_implementation(),
         },
         "platform": {

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Fine-tune Phase 1 ResNet-18 with one prediction and loss per MURA study.
 
-By default this trains on the patient-safe train split and uses validation only
-for early stopping, mean-vs-max aggregation selection, and threshold selection.
-The final test split remains untouched unless ``--write-test-predictions`` is
-passed; it then writes prediction rows only after those choices are saved.
-``evaluate_phase1.py`` is the sole owner of final test metrics/comparison.
+The primary study aggregation is pre-specified before training (mean by
+default). Validation supports early stopping and selection of that model's own
+high-sensitivity operating threshold; max pooling may be reported only as a
+secondary descriptive diagnostic. The final test split remains untouched unless
+``--write-test-predictions`` is passed after those choices are saved.
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ from src.training.losses import decide_class_weighting, make_study_probability_l
 from src.training.metrics import (
     bootstrap_auroc_ci,
     metrics_at_default_and_selected_threshold,
-    select_operating_threshold_on_validation,
+    select_highest_threshold_for_sensitivity,
 )
 from src.training.trainer import (
     StudyLevelTrainer,
@@ -48,7 +48,6 @@ from src.training.trainer import (
     resolve_device,
     save_json,
     seed_data_loader_worker,
-    select_aggregation_on_validation,
     set_global_seed,
 )
 
@@ -88,7 +87,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Uses training-study counts only; auto requires the configured imbalance threshold.",
     )
     parser.add_argument("--imbalance-ratio-threshold", type=float, default=1.5)
-    parser.add_argument("--train-aggregation", choices=("mean", "max"), default="mean")
+    parser.add_argument(
+        "--train-aggregation",
+        choices=("mean", "max"),
+        default="mean",
+        help="Pre-specified primary study aggregation used by the study-level loss.",
+    )
     parser.add_argument("--monitor-metric", choices=("auroc", "auprc"), default="auroc")
     parser.add_argument("--monitor-aggregation", choices=("mean", "max"), default="mean")
     parser.add_argument("--scheduler", choices=("plateau", "none"), default="plateau")
@@ -96,9 +100,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-patience", type=int, default=2)
     parser.add_argument("--min-learning-rate", type=float, default=1e-6)
     parser.add_argument(
-        "--threshold-objective",
-        choices=("youden_j", "f1", "balanced_accuracy"),
-        default="youden_j",
+        "--sensitivity-target",
+        type=float,
+        default=0.95,
+        help="Pre-specified validation sensitivity floor for the frozen operating policy.",
     )
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument(
@@ -209,6 +214,13 @@ def _validate_arguments(args: argparse.Namespace) -> None:
         raise ValueError("--min-delta cannot be negative.")
     if args.bootstrap_samples < 1:
         raise ValueError("--bootstrap-samples must be at least 1.")
+    if not 0.0 < args.sensitivity_target <= 1.0:
+        raise ValueError("--sensitivity-target must be in (0, 1].")
+    if args.monitor_aggregation != args.train_aggregation:
+        raise ValueError(
+            "--monitor-aggregation must match the pre-specified --train-aggregation. "
+            "Do not choose mean versus max after seeing validation results."
+        )
     if args.scheduler == "plateau":
         if not 0 < args.scheduler_factor < 1:
             raise ValueError("--scheduler-factor must be between 0 and 1.")
@@ -298,24 +310,27 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
     )
     save_json(training_result, output_dir / "training_history.json")
 
-    # The restored model is the validation-best checkpoint.  Both required
-    # aggregations are compared on validation exactly once after training.
+    # The restored model is the validation-best checkpoint. Mean/max outputs
+    # are retained, but the primary aggregation is pre-specified rather than
+    # selected post hoc on validation.
     validation_predictions = trainer.predict(validation_loader, aggregations=("mean", "max"))
-    aggregation_selection = select_aggregation_on_validation(
-        validation_predictions, selection_metric=args.monitor_metric
-    )
-    selected_aggregation = aggregation_selection.selected_aggregation
-    threshold_selection = select_operating_threshold_on_validation(
+    selected_aggregation = args.train_aggregation
+    aggregation_policy = {
+        "primary_aggregation": selected_aggregation,
+        "selection_method": "pre_specified_before_training",
+        "secondary_aggregation": "max_diagnostic_only" if selected_aggregation == "mean" else "mean_diagnostic_only",
+    }
+    threshold_selection = select_highest_threshold_for_sensitivity(
         validation_predictions.labels,
         validation_predictions.probabilities_by_aggregation[selected_aggregation],
-        objective=args.threshold_objective,
+        target_sensitivity=args.sensitivity_target,
     )
     validation_report = {
         "split": "validation",
         "model": "finetuned_resnet18_study_level",
         "best_checkpoint": str(checkpoint_path),
         "training_result": training_result.to_dict(),
-        "aggregation_selection_on_validation": aggregation_selection.to_dict(),
+        "aggregation_policy": aggregation_policy,
         "operating_threshold_selected_on_validation": threshold_selection.to_dict(),
         "class_weighting": class_weight_decision.to_dict(),
         "selected_aggregation_report": _prediction_report(
@@ -352,7 +367,7 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
             "metric": args.monitor_metric,
             "aggregation": args.monitor_aggregation,
         },
-        "aggregation_selection": aggregation_selection.to_dict(),
+        "aggregation_policy": aggregation_policy,
         "threshold_selection": threshold_selection.to_dict(),
         "selection_data": "validation only",
         "test_used_for_selection": False,
@@ -410,7 +425,7 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
             "split": "test",
             "model": "finetuned_resnet18_study_level",
             "frozen_checkpoint": str(checkpoint_path),
-            "frozen_aggregation_selected_on_validation": aggregation_selection.to_dict(),
+            "frozen_aggregation_policy": aggregation_policy,
             "frozen_operating_threshold_selected_on_validation": threshold_selection.to_dict(),
             "test_used_for_selection": False,
             "final_test_metrics_computed": False,

@@ -29,27 +29,38 @@ The canonical notebooks retain reviewed aggregate tables and figures so their
 results render directly on GitHub. Radiographs, study IDs, Drive paths,
 checkpoints, embeddings, and detailed prediction files must remain outside Git.
 
-## Checkpoint 1 results — development validation only
+## Checkpoint 1 results — current development protocol
 
 The current comparison uses the same internal, patient-level validation split:
 691 studies from 653 patients (422 NORMAL, 269 ABNORMAL), drawn from official
-MURA train. The official MURA `valid` split was not read for this run.
+MURA train. It is a **development/validation** analysis, not a final clinical
+claim or an untouched-test result.
 
-| Model | AUROC | AUPRC | Specificity at sensitivity ≥90% | Studies flagged for review |
-|---|---:|---:|---:|---:|
-| Frozen ResNet-18 embeddings + Logistic Regression | 0.880 | 0.852 | 0.531 | 63.8% |
-| Fine-tuned ResNet-18, mean probability pooling | **0.913** | **0.878** | 0.706 | 53.1% |
-| Fine-tuned ResNet-18, max probability pooling | 0.883 | 0.806 | 0.711 | 52.8% |
+- **Model A baseline:** frozen ImageNet ResNet-18 embeddings, mean embedding
+  pooling at study level, and Logistic Regression. Its regularization value
+  (`C`) is selected only with five-fold patient-grouped cross-validation inside
+  the internal training split; the selected model is then fit on all internal
+  training studies.
+- **Model B primary model:** the existing fine-tuned ResNet-18 is reported
+  under the revised protocol's primary mean probability pooling policy at
+  study level. Max probability pooling is retained only as a secondary
+  diagnostic comparison; Model B was not retrained for this reporting update.
+- **Operating policy:** for each model independently, the threshold is the
+  highest threshold that reaches **internal-validation sensitivity >=95%** on
+  study-level probabilities. The threshold is frozen from that validation
+  analysis; it is not transferred from one model to another.
 
-Mean pooling was selected by internal-validation AUROC. At the same observed
-high-sensitivity operating point (90.3%; 26 false negatives), fine-tuned mean
-pooling produced 124 false positives versus 198 for the frozen baseline. That
-is a validation-only development finding, not a clinical claim or a final
-untouched-test result.
+The generated [current Checkpoint 1 results page](docs/results/checkpoint1/README.md)
+contains the exact AUROC, AUPRC, threshold, sensitivity, specificity, review
+workload, false-positive/false-negative counts, and patient-cluster bootstrap
+intervals. It is the source of the currently reported numbers rather than this
+README, so the visible summary cannot become stale after a protocol-preserving
+rerun.
 
-See the [full Checkpoint 1 results page](docs/results/checkpoint1/README.md)
-for ROC/precision–recall curves, training history, patient-cluster bootstrap
-intervals, and the diagnostic shortcut/geometry audit.
+The prior >=90% development-policy outputs are preserved as historical,
+pre-feedback material under
+[docs/results/archive/checkpoint1_pre_95pct](docs/results/archive/checkpoint1_pre_95pct/).
+They are not the current operating-policy result.
 
 ## Data and evaluation governance
 
@@ -62,8 +73,9 @@ All views from a study remain together, and a patient may not appear in both
 internal train and validation. The official MURA `valid` split was used once
 for the historical Phase 1 frozen-reference evaluation. Because that result has
 already been observed, it is not an untouched test set for future architecture,
-threshold, calibration, or agent decisions. The current Checkpoint 1 workflow
-does not read it. See [reports/TEST_SET_GOVERNANCE.md](reports/TEST_SET_GOVERNANCE.md).
+threshold, calibration, or agent decisions. It is not read for the current
+Checkpoint 1 model/threshold-selection workflow. See
+[reports/TEST_SET_GOVERNANCE.md](reports/TEST_SET_GOVERNANCE.md).
 
 ## Scope and limitations
 

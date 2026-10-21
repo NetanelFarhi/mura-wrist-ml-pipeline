@@ -1,63 +1,52 @@
 # Requirements traceability
 
-Status is intentionally conservative: **DONE**, **IN PROGRESS**, **PLANNED**, **BLOCKED**, or **NEEDS DECISION**. “DONE” describes an existing repository artifact, not a claim of clinical readiness.
+Status meanings: **DONE** = an auditable artifact exists; **IN PROGRESS** = work is underway but not yet verified end-to-end; **PLANNED** = designed but not implemented; **NEEDS DECISION** = team/lecturer choice required; **BLOCKED** = cannot proceed without an external input. A design document is not evidence of clinical or agent performance.
 
-## BIU DS23 charter and repository requirements
+## BIU charter fields and lecturer Part A corrections
 
-| Requirement | Evidence / planned artifact | Status | Deadline / checkpoint |
-|---|---|---|---|
-| 1. Quantified problem + specific user | `CHARTER.md` §1 | DONE | 4.10.2026 |
-| 2. Numeric success metric and pre-build evaluation plan | `CHARTER.md` §2; `reports/TEST_SET_GOVERNANCE.md` | DONE | 4.10.2026 |
-| 3. Data source/size/license/access and one-line Plan B | `CHARTER.md` §3; `data/README.md`; `reports/wrist_data_audit.json` | IN PROGRESS | 4.10.2026 — official license citation still needed |
-| 4. Architecture sketch | `CHARTER.md` §4 | DONE | 4.10.2026 |
-| 5. Unique agent seat, tools, failure behavior, works without agent | `CHARTER.md` §5; `agents/AGENT_DESIGN.md` | DONE (design) | 4.10.2026 |
-| 6. Three risks + cut line | `CHARTER.md` §6 | DONE | 4.10.2026 |
-| 7. Milestones + named Data/Model/Agent/Product hats | `CHARTER.md` §7 | BLOCKED | 4.10.2026 — team names required |
-| Root `CHARTER.md`, max two pages | `CHARTER.md`; `reports/SUBMISSION_2026-10-04.md` | IN PROGRESS | 4.10.2026 — render check required |
-| README, reproducibility, data dictionary, no raw data | `README.md`; `data/data_dictionary.md`; `data/README.md`; `.gitignore` | DONE | Checkpoint 1 |
-| Cheap baseline comparison | `README.md`; `reports/results.md`; `reports/baseline_results.md` | DONE | Checkpoint 1 |
-| Thin end-to-end baseline without final agent | existing Phase-1 pipeline and reports | DONE | 18.10.2026 |
-| Agent integrated and demo-ready | `agents/AGENT_DESIGN.md`; implementation pending | PLANNED | 30.10.2026 |
-| Final evaluation/demo/docs/cost | `evaluation/`; `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | 12.11.2026 |
+| Requirement | Repository evidence | Status | Checkpoint |
+|---|---|---:|---|
+| Specific user and scoped problem | `CHARTER.md` §1 | DONE | Charter |
+| Measurable high-sensitivity target; no revisit outcome as success claim | `CHARTER.md` §2 | DONE | Charter |
+| False-negative rate distinguished from NPV | `CHARTER.md` §2 | DONE | Charter |
+| Patient-safe official-train -> internal train/val protocol | `notebooks/01_MURA_Data_Preparation_and_EDA.ipynb`; `reports/TEST_SET_GOVERNANCE.md` | DONE | Checkpoint 1 |
+| Logistic Regression C selected inside train with patient-grouped CV | `src/models/frozen_embedding_baseline.py`; `scripts/train_logistic_baseline.py`; `notebooks/03_MURA_Baseline_ResNet18_LogReg.ipynb`; `docs/results/checkpoint1/model_a_grouped_cv_candidates.csv` | DONE | Checkpoint 1 |
+| Model-specific threshold selected only on internal validation, at study level | `src/training/metrics.py`; notebooks 04/06; `docs/results/checkpoint1/frozen_operating_policies.json` | DONE | Checkpoint 1 |
+| Honest official-valid governance after historical Phase-1 opening | `reports/TEST_SET_GOVERNANCE.md`; `CHARTER.md` §3 | DONE | Charter |
+| Mandatory frozen-feature ResNet-18 + Logistic Regression baseline | `notebooks/03_MURA_Baseline_ResNet18_LogReg.ipynb`; `docs/results/checkpoint1/model_comparison.csv` | DONE (corrected development baseline) | Checkpoint 1 |
+| Fine-tuned ResNet-18 comparison on same population/metrics | `notebooks/05_MURA_FineTuned_ResNet18.ipynb`; `notebooks/06_MURA_ModelB_Evaluation_and_Comparison.ipynb` | DONE (development evidence) | Checkpoint 1 |
+| Explicit primary study aggregation | `CHARTER.md` §4; model/notebook protocol | DONE | Charter / Checkpoint 1 |
+| Architecture and deterministic no-agent path | `CHARTER.md` §4 | DONE (design) | Charter |
+| Adaptive agent justification beyond if/else routing | `CHARTER.md` §5; `agents/AGENT_DESIGN.md` | DONE (design) | Charter |
+| Agent comparison on independent same-case suite | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
+| Agent implementation | no implementation artifact | PLANNED | Checkpoint 2 |
+| Bootstrap CIs for performance estimates | `docs/results/checkpoint1/README.md`; generated safe result artifacts | DONE (internal-validation estimates) | Checkpoint 1 / final evaluation |
 
-## Lecturer Part A — before charter submission
+## Lecturer Part B: development and product alignment
 
-| Correction | Evidence / planned artifact | Status | Deadline |
-|---|---|---|---|
-| Measurable sensitivity-constrained success metric; no revisit outcome/ambiguous “3% misses” | `CHARTER.md` §2; `reports/SOURCE_VERIFICATION.md` | DONE | 4.10.2026 |
-| Patient-safe internal validation; threshold never selected on official-valid test | `CHARTER.md` §3; `reports/TEST_SET_GOVERNANCE.md`; Phase-1 reports | DONE | 4.10.2026 |
-| Justified two-layer agent: deterministic safety plus adaptive ambiguity only | `CHARTER.md` §§4–5; `agents/AGENT_DESIGN.md` | DONE (design) | 4.10.2026 |
-| Rule/fixed-workflow/agent comparison on same independent cases | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
-| Mandatory frozen-feature Logistic Regression baseline | `README.md`; `reports/results.md` | DONE | 4.10.2026 |
+| Requirement | Repository evidence | Status | Checkpoint |
+|---|---|---:|---|
+| Thin end-to-end baseline works before advanced agent | Phase-1 notebooks and historical reports | DONE | Checkpoint 1 |
+| Plan B explicitly changes task, QC, anatomy, and evaluation assumptions | `CHARTER.md` §3 | DONE | Charter |
+| Research/non-commercial data handling; no raw images in Git | `data/README.md`; `.gitignore`; governance checks | DONE for this branch; re-verify before every future push | Charter / every push |
+| Named Data, Model, Agent, Product hats | `CHARTER.md` §7 | DONE | Charter |
+| Product value/workflow and future operating cost | `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | Final |
+| Hostile metadata / prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
 
-## Lecturer Part B — development alignment
+## Lecturer Part C: analysis and safety
 
-| Requirement | Evidence / planned artifact | Status | Deadline |
-|---|---|---|---|
-| Early thin baseline, no final agent required | Phase-1 pipeline; `CHARTER.md` §7 | DONE | 18.10.2026 |
-| Plan B changes task/anatomy/QC/evaluation assumptions | `CHARTER.md` §3 | DONE | 4.10.2026 |
-| Research/non-commercial licensing; no raw images in Git | `data/README.md`; `.gitignore`; `scripts/check_repo_data_governance.py` | IN PROGRESS | 4.10.2026 — verify official terms |
-| Product hat and named ownership | `CHARTER.md` §7 | BLOCKED | 4.10.2026 — team names required |
-| Future operating-cost estimate | `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | 12.11.2026 |
-| Hostile-input/prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
-| Explicit study aggregation | `CHARTER.md` §4; `README.md` Models section | DONE | 4.10.2026 |
+| Requirement | Repository evidence | Status | Checkpoint |
+|---|---|---:|---|
+| Do not equate MURA abnormality with acute fracture | `CHARTER.md` §1; `data/README.md` | DONE | Charter |
+| Error / shortcut plan without fabricated subtypes | `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | Final |
+| Grad-CAM is diagnostic only, never lesion-localization evidence | `CHARTER.md` §6; `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | Final |
+| Safety asymmetry: can raise priority, never reduce standard review | `CHARTER.md` §§4–5; `agents/AGENT_DESIGN.md` | DONE (design) | Charter |
+| Independent agent safety evaluation; no circular threshold ground truth | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
+| Published MURA wrist-performance context with non-identical-protocol caveat | `reports/SOURCE_VERIFICATION.md` | NEEDS DECISION | Final |
+| Clinical citations and Graif/revisit claim verified or removed | `reports/SOURCE_VERIFICATION.md` | IN PROGRESS | Charter / final |
 
-## Lecturer Part C — analytical and safety requirements
+## Open methodological decisions
 
-| Requirement | Evidence / planned artifact | Status | Deadline |
-|---|---|---|---|
-| Scope MURA abnormality, not acute fracture | `CHARTER.md` §1; `README.md`; `data/README.md` | DONE | 4.10.2026 |
-| Error/shortcut analysis with no fabricated subtypes | `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | 12.11.2026 |
-| Grad-CAM as diagnostic only; no lesion-localization claim | `evaluation/SHORTCUT_ANALYSIS_PLAN.md`; agent design | PLANNED | 12.11.2026 |
-| Bootstrap confidence intervals / no over-precision | `CHARTER.md` §2; Phase-1/2 reports | IN PROGRESS | 12.11.2026 |
-| Safety asymmetry: raise priority only | `CHARTER.md` §4; `agents/AGENT_DESIGN.md` | DONE (design) | 4.10.2026 |
-| Independent agent safety suite, not circular threshold ground truth | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | 30.10.2026 |
-| Published MURA wrist-performance context with non-identical-protocol disclaimer | `reports/SOURCE_VERIFICATION.md` | NEEDS DECISION | 12.11.2026 |
-| Verify/remove Graif/revisit claim | `reports/SOURCE_VERIFICATION.md` | IN PROGRESS | 4.10.2026 |
-| Honest governance after official-valid was observed | `reports/TEST_SET_GOVERNANCE.md` | DONE | 4.10.2026 |
-
-## Open decisions requiring team or lecturer input
-
-1. Replace every `[NAME REQUIRED]` in the Charter with verified team members and the four hat owners.
-2. Choose the approved advanced-model evaluation protocol: transparent development CV, compatible external validation, or lecturer-approved alternative. Do not invent a new untouched test from used data.
-3. Verify the official MURA license/source terms and any clinical background citation before final wording.
+1. For advanced-model claims, choose and pre-register one: patient-grouped development CV with transparent reuse limitation; compatible external validation; or a lecturer-approved final protocol. No artificial “new untouched test” may be created from development data.
+2. Confirm current official MURA terms and source citations before final submission wording.
+3. Decide whether compatible external data are available before making any performance-generalisation claim beyond the historical Phase-1 reference.

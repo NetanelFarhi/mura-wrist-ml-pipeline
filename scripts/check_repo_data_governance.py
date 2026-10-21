@@ -1,4 +1,4 @@
-"""Fail if staged/tracked paths look like raw medical data or credentials.
+"""Fail if staged/tracked content looks like protected data or credentials.
 
 This is a lightweight pre-commit guard, not a replacement for manual review.
 Run ``python scripts/check_repo_data_governance.py --staged`` before committing.
@@ -10,15 +10,19 @@ import argparse
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 
 RAW_DATA_PATH = re.compile(
-    r"(?:^|/)(?:data/raw|MURA[^/]*|XR_WRIST)(?:/|$)", re.IGNORECASE
+    r"(?:^|/)(?:data/raw|MURA-v\d+(?:\.\d+)?|XR_WRIST)(?:/|$)", re.IGNORECASE
 )
 RAW_IMAGE = re.compile(
     r"\.(?:dcm|png|jpe?g|bmp|tiff?)$", re.IGNORECASE
 )
 SECRET_PATH = re.compile(r"(?:^|/)(?:\.env(?:\.|$)|[^/]+\.(?:pem|key))", re.IGNORECASE)
+IDENTIFIER_LIKE = re.compile(r"\b(?:patient|study)[_-]?\d{3,}\b", re.IGNORECASE)
+WINDOWS_ABSOLUTE_PATH = re.compile(r"\b[A-Za-z]:[\\/]", re.IGNORECASE)
+PUBLIC_TEXT_EXTENSIONS = {".csv", ".json", ".md", ".txt", ".yaml", ".yml"}
 
 
 def listed_paths(staged: bool) -> list[str]:
@@ -42,6 +46,45 @@ def unsafe_paths(paths: list[str]) -> list[str]:
     return violations
 
 
+def _is_public_text_artifact(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    if Path(normalized).suffix.lower() not in PUBLIC_TEXT_EXTENSIONS:
+        return False
+    return (
+        normalized.startswith("reports/")
+        or normalized.startswith("docs/results/")
+        or normalized in {"README.md", "CHARTER.md", "REQUIREMENTS_TRACEABILITY.md"}
+    )
+
+
+def unsafe_public_content(paths: list[str]) -> list[str]:
+    """Reject identifiers and personal paths in GitHub-facing text artifacts.
+
+    The check intentionally excludes code and notebooks: those may contain safe
+    local setup examples. It protects published reports/results, where row-level
+    data and machine-specific paths have no place.
+    """
+
+    violations: list[str] = []
+    for path in paths:
+        if not _is_public_text_artifact(path):
+            continue
+        artifact = Path(path)
+        if not artifact.is_file():
+            # A staged deletion has no working-tree file to inspect.
+            continue
+        try:
+            text = artifact.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            violations.append(f"non-text public artifact: {path}")
+            continue
+        if IDENTIFIER_LIKE.search(text):
+            violations.append(f"identifier-like value in public artifact: {path}")
+        if WINDOWS_ABSOLUTE_PATH.search(text):
+            violations.append(f"Windows absolute path in public artifact: {path}")
+    return violations
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -51,7 +94,8 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        violations = unsafe_paths(listed_paths(args.staged))
+        paths = listed_paths(args.staged)
+        violations = unsafe_paths(paths) + unsafe_public_content(paths)
     except (OSError, subprocess.CalledProcessError) as error:
         print(f"Could not read Git paths: {error}", file=sys.stderr)
         return 2

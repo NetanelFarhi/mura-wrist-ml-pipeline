@@ -97,13 +97,13 @@ All exact matched rows, including counts and F1, are in
 
 # Error patterns
 
-The complete saved-test error table is
-[phase1_5_error_comparison.csv](phase1_5_error_comparison.csv).  It contains
-all 59 studies misclassified by at least one model at the frozen Phase 1
-thresholds, with study_id, true label, both probabilities, number of views,
-decision agreement, signed margin (probability minus threshold), absolute
-margin, and error role.  Absolute margin is a model-output distance from the
-threshold, not a calibration or clinical-confidence claim.
+The reviewed historical error analysis covers 59 studies misclassified by at
+least one model at the frozen Phase 1 thresholds. For repository governance,
+the public artifact is the aggregate
+[phase1_5_error_summary.csv](phase1_5_error_summary.csv), grouped by error
+role, view group, and agreement. Individual study IDs and per-study scores
+remain local-only. The aggregate does not make a calibration or clinical-
+confidence claim.
 
 | Frozen-test error relationship | Count |
 |---|---:|

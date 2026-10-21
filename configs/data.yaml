@@ -3,6 +3,9 @@ data_root: null
 anatomy: XR_WRIST
 seed: 23
 validation_fraction: 0.20
+# Historical Phase-1 reference split only. Its labels were observed once and
+# must not be used for any later model, threshold, architecture, or calibration
+# selection; see reports/TEST_SET_GOVERNANCE.md.
 use_official_valid_as_test: true
 image_extensions:
   - .png

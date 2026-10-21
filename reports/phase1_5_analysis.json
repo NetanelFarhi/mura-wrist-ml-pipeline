@@ -1,7 +1,7 @@
 {
   "files": {
     "curve_points": "reports/phase1_5_validation_curve_points.csv",
-    "error_table": "reports/phase1_5_error_comparison.csv",
+    "error_summary": "reports/phase1_5_error_summary.csv",
     "key_figure": "reports/team_share/PHASE1_5_KEY_FIGURE.png",
     "matched_operating_points": "reports/phase1_5_matched_operating_points.csv",
     "threshold_table": "reports/phase1_5_validation_threshold_table.csv",

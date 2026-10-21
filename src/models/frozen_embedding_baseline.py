@@ -1,4 +1,15 @@
-"""Validation-tuned Logistic Regression over frozen, study-pooled embeddings."""
+"""Patient-grouped-CV Logistic Regression over frozen study embeddings.
+
+The baseline deliberately separates two development decisions:
+
+* choose Logistic Regression ``C`` with patient-grouped CV *inside* internal
+  training data; then
+* fit the selected estimator on all internal-training studies.
+
+Internal validation is not accepted by :meth:`fit`, which makes it impossible
+for this class to use validation labels while choosing ``C``. Validation is
+reserved for the per-model operating threshold and reporting.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +20,7 @@ from typing import Literal, Sequence
 import joblib
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -20,14 +32,17 @@ SelectionMetric = Literal["auroc", "auprc"]
 
 @dataclass(frozen=True)
 class LogisticBaselineSelection:
-    """The validation-only hyperparameter selection record for Model A."""
+    """Auditable train-only hyperparameter-selection record for Model A."""
 
     selected_c: float
     selection_metric: SelectionMetric
-    validation_scores: dict[str, float]
+    candidate_results: tuple[dict[str, float], ...]
     candidate_c_values: tuple[float, ...]
+    group_cv_folds: int
+    group_field: str
     class_weight: str | None
     random_seed: int
+    tie_break: str = "higher_metric_then_lower_C"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -55,14 +70,54 @@ def _validate_features_and_labels(
     return x, y
 
 
-class FrozenEmbeddingLogisticBaseline:
-    """Small, deterministic C search that never accepts test data in ``fit``.
+def make_patient_grouped_folds(
+    labels: np.ndarray | Sequence[int],
+    patient_ids: np.ndarray | Sequence[str],
+    *,
+    n_splits: int,
+    random_seed: int,
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Return validated, patient-disjoint internal-training folds.
 
-    Each candidate pipeline is fitted on training studies only.  The validation
-    set is only scored to choose C.  The selected fitted estimator remains the
-    train-only version by default, which makes it impossible for the usual
-    script path to leak validation samples into model fitting.
+    Stratification is used only to make class mix more stable. The non-
+    negotiable safety condition is grouping by ``patient_id``.
     """
+
+    y = np.asarray(labels, dtype=np.int64).reshape(-1)
+    groups = np.asarray(patient_ids, dtype=str).reshape(-1)
+    if len(y) != len(groups):
+        raise ValueError("patient_ids must have one value per training study.")
+    if n_splits < 2:
+        raise ValueError("group_cv_folds must be at least 2.")
+    if len(np.unique(y)) < 2:
+        raise ValueError("Grouped CV C selection requires both NORMAL and ABNORMAL training studies.")
+    if np.any(groups == ""):
+        raise ValueError("Every training study needs a non-empty patient_id for grouped CV.")
+    if len(np.unique(groups)) < n_splits:
+        raise ValueError("Not enough unique patients for the requested grouped CV folds.")
+
+    splitter = StratifiedGroupKFold(
+        n_splits=n_splits,
+        shuffle=True,
+        random_state=int(random_seed),
+    )
+    folds: list[tuple[np.ndarray, np.ndarray]] = []
+    for train_index, holdout_index in splitter.split(np.zeros(len(y)), y, groups):
+        train_index = np.asarray(train_index, dtype=np.int64)
+        holdout_index = np.asarray(holdout_index, dtype=np.int64)
+        if len(train_index) == 0 or len(holdout_index) == 0:
+            raise RuntimeError("Grouped CV produced an empty fold.")
+        if set(groups[train_index]).intersection(groups[holdout_index]):
+            raise RuntimeError("Patient leakage detected inside grouped CV.")
+        folds.append((train_index, holdout_index))
+
+    if len(folds) != n_splits:
+        raise RuntimeError("Grouped CV did not produce the requested number of folds.")
+    return folds
+
+
+class FrozenEmbeddingLogisticBaseline:
+    """Small, deterministic Model A baseline with train-only C selection."""
 
     def __init__(
         self,
@@ -76,7 +131,7 @@ class FrozenEmbeddingLogisticBaseline:
         parsed_c_values = tuple(float(value) for value in c_values)
         if not 1 <= len(parsed_c_values) <= 3:
             raise ValueError(
-                "Phase 1 permits a deliberately small validation search: provide one to three C values."
+                "Phase 1 permits a deliberately small grouped-CV search: provide one to three C values."
             )
         if len(set(parsed_c_values)) != len(parsed_c_values) or any(value <= 0 for value in parsed_c_values):
             raise ValueError("C values must be unique positive numbers.")
@@ -94,8 +149,6 @@ class FrozenEmbeddingLogisticBaseline:
         self.fitted_on_: str | None = None
 
     def _make_estimator(self, c_value: float) -> Pipeline:
-        # liblinear is deterministic under random_state and behaves well for
-        # the small/medium study-level feature table expected in Phase 1.
         classifier = LogisticRegression(
             C=float(c_value),
             class_weight=self.class_weight,
@@ -109,103 +162,89 @@ class FrozenEmbeddingLogisticBaseline:
         self,
         train_embeddings: np.ndarray | Sequence[Sequence[float]],
         train_labels: np.ndarray | Sequence[int],
-        validation_embeddings: np.ndarray | Sequence[Sequence[float]],
-        validation_labels: np.ndarray | Sequence[int],
+        train_patient_ids: np.ndarray | Sequence[str],
+        *,
+        group_cv_folds: int = 5,
     ) -> "FrozenEmbeddingLogisticBaseline":
-        """Fit candidates on train and select C by validation score only."""
+        """Choose ``C`` with grouped CV inside internal training only.
+
+        There are intentionally no validation arguments. After this method
+        returns, callers may score a separate internal validation set once to
+        select the pre-registered study-level operating threshold.
+        """
 
         x_train, y_train = _validate_features_and_labels(
             train_embeddings, train_labels, split_name="train"
         )
-        x_validation, y_validation = _validate_features_and_labels(
-            validation_embeddings, validation_labels, split_name="validation"
+        groups = np.asarray(train_patient_ids, dtype=str).reshape(-1)
+        folds = make_patient_grouped_folds(
+            y_train,
+            groups,
+            n_splits=int(group_cv_folds),
+            random_seed=self.random_seed,
         )
-        if x_train.shape[1] != x_validation.shape[1]:
-            raise ValueError("Train and validation embeddings have different feature dimensions.")
-        if len(np.unique(y_train)) < 2:
-            raise ValueError("Logistic Regression training requires both NORMAL and ABNORMAL studies.")
-        if len(np.unique(y_validation)) < 2:
-            raise ValueError("Validation C selection requires both NORMAL and ABNORMAL studies.")
 
-        best_estimator: Pipeline | None = None
         best_c: float | None = None
         best_score = float("-inf")
-        validation_scores: dict[str, float] = {}
+        candidate_results: list[dict[str, float]] = []
         epsilon = 1e-12
         for c_value in sorted(self.c_values):
-            candidate = self._make_estimator(c_value)
-            candidate.fit(x_train, y_train)
-            probabilities = candidate.predict_proba(x_validation)[:, 1]
-            score = (
-                safe_auroc(y_validation, probabilities)
-                if self.selection_metric == "auroc"
-                else safe_auprc(y_validation, probabilities)
+            oof_probability = np.full(len(y_train), np.nan, dtype=np.float64)
+            for train_index, holdout_index in folds:
+                candidate = self._make_estimator(c_value)
+                candidate.fit(x_train[train_index], y_train[train_index])
+                oof_probability[holdout_index] = candidate.predict_proba(
+                    x_train[holdout_index]
+                )[:, 1]
+            if not np.all(np.isfinite(oof_probability)):
+                raise RuntimeError("Grouped CV did not create one OOF probability per train study.")
+            auroc = safe_auroc(y_train, oof_probability)
+            auprc = safe_auprc(y_train, oof_probability)
+            if auroc is None or auprc is None:
+                raise ValueError("Cannot compute grouped-CV metrics for a one-class training population.")
+            score = auroc if self.selection_metric == "auroc" else auprc
+            candidate_results.append(
+                {
+                    "C": float(c_value),
+                    "train_group_cv_auroc": float(auroc),
+                    "train_group_cv_auprc": float(auprc),
+                }
             )
-            if score is None:  # covered by the validation class check, kept defensive
-                raise ValueError(f"Cannot compute validation {self.selection_metric} for a one-class split.")
-            validation_scores[str(c_value)] = float(score)
             if score > best_score + epsilon or (
                 abs(score - best_score) <= epsilon and (best_c is None or c_value < best_c)
             ):
-                best_estimator, best_c, best_score = candidate, c_value, float(score)
+                best_c, best_score = float(c_value), float(score)
 
-        if best_estimator is None or best_c is None:
+        if best_c is None:
             raise RuntimeError("No Logistic Regression candidate was fitted.")
-        self.estimator_ = best_estimator
+        final_estimator = self._make_estimator(best_c)
+        final_estimator.fit(x_train, y_train)
+        self.estimator_ = final_estimator
         self.selection_ = LogisticBaselineSelection(
-            selected_c=float(best_c),
+            selected_c=best_c,
             selection_metric=self.selection_metric,
-            validation_scores=validation_scores,
+            candidate_results=tuple(candidate_results),
             candidate_c_values=tuple(sorted(self.c_values)),
+            group_cv_folds=int(group_cv_folds),
+            group_field="patient_id",
             class_weight=self.class_weight,
             random_seed=self.random_seed,
         )
-        self.fitted_on_ = "train_only"
-        return self
-
-    def refit_on_train_and_validation_after_freeze(
-        self,
-        train_embeddings: np.ndarray | Sequence[Sequence[float]],
-        train_labels: np.ndarray | Sequence[int],
-        validation_embeddings: np.ndarray | Sequence[Sequence[float]],
-        validation_labels: np.ndarray | Sequence[int],
-    ) -> "FrozenEmbeddingLogisticBaseline":
-        """Optionally refit with the already-selected C after all choices freeze.
-
-        This method deliberately has no test-data parameters.  Call it only
-        after recording the validation-selected C and threshold; the standard
-        Phase 1 scripts retain the train-only estimator by default.
-        """
-
-        if self.selection_ is None:
-            raise RuntimeError("Call fit(train, validation) before refitting the selected C.")
-        x_train, y_train = _validate_features_and_labels(
-            train_embeddings, train_labels, split_name="train"
-        )
-        x_validation, y_validation = _validate_features_and_labels(
-            validation_embeddings, validation_labels, split_name="validation"
-        )
-        if x_train.shape[1] != x_validation.shape[1]:
-            raise ValueError("Train and validation embeddings have different feature dimensions.")
-        x_combined = np.concatenate((x_train, x_validation), axis=0)
-        y_combined = np.concatenate((y_train, y_validation), axis=0)
-        self.estimator_ = self._make_estimator(self.selection_.selected_c)
-        self.estimator_.fit(x_combined, y_combined)
-        self.fitted_on_ = "train_plus_validation_after_selection_freeze"
+        self.fitted_on_ = "all_internal_train_after_patient_grouped_cv"
         return self
 
     def predict_proba(self, embeddings: np.ndarray | Sequence[Sequence[float]]) -> np.ndarray:
-        """Return abnormal-study probability for each mean-pooled embedding."""
+        """Return abnormal-study probabilities for mean-pooled study embeddings."""
 
         if self.estimator_ is None:
-            raise RuntimeError("The baseline is not fitted. Call fit with train and validation data first.")
+            raise RuntimeError("The baseline is not fitted. Call fit on internal training data first.")
         x = np.asarray(embeddings, dtype=np.float32)
         if x.ndim != 2 or x.shape[0] == 0:
             raise ValueError("embeddings must be a non-empty [studies, features] matrix.")
         return np.asarray(self.estimator_.predict_proba(x)[:, 1], dtype=np.float64)
 
     def save(self, output_path: str | Path) -> Path:
-        """Save the fitted pipeline and its validation-selection provenance."""
+        """Save the fitted pipeline and its train-only-C-selection provenance."""
 
         if self.estimator_ is None or self.selection_ is None:
             raise RuntimeError("Cannot save an unfitted baseline.")
@@ -226,11 +265,16 @@ class FrozenEmbeddingLogisticBaseline:
     def selection_metadata(self) -> dict[str, object]:
         if self.selection_ is None:
             raise RuntimeError("The baseline is not fitted.")
-        return {**self.selection_.to_dict(), "fitted_on": self.fitted_on_}
+        return {
+            **self.selection_.to_dict(),
+            "fitted_on": self.fitted_on_,
+            "internal_validation_used_for_c_selection": False,
+        }
 
 
 __all__ = [
     "FrozenEmbeddingLogisticBaseline",
     "LogisticBaselineSelection",
     "SelectionMetric",
+    "make_patient_grouped_folds",
 ]

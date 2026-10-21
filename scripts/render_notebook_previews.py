@@ -76,7 +76,31 @@ def remove_previous_preview(notebook: dict) -> None:
     ]
 
 
-def compact_model_table(rows: pd.DataFrame) -> pd.DataFrame:
+def sensitivity_policy_label(target: float) -> str:
+    """Format one pre-specified sensitivity target for safe presentation."""
+
+    return f"Sensitivity @ >={target:.0%} policy"
+
+
+def specificity_policy_label(target: float) -> str:
+    """Format the matching specificity label without requiring a Python 3.9 API."""
+
+    return f"Specificity @ >={target:.0%} policy"
+
+
+def extract_sensitivity_target(comparison: pd.DataFrame) -> float:
+    """Read and validate the one policy target in the generated result table."""
+
+    targets = pd.to_numeric(comparison["sensitivity_target"], errors="raise").unique()
+    if len(targets) != 1:
+        raise ValueError("Expected exactly one sensitivity target in model_comparison.csv.")
+    target = float(targets[0])
+    if not 0 < target <= 1:
+        raise ValueError("The sensitivity target must be between 0 and 1.")
+    return target
+
+
+def compact_model_table(rows: pd.DataFrame, target: float) -> pd.DataFrame:
     columns = [
         "model",
         "auroc",
@@ -88,13 +112,15 @@ def compact_model_table(rows: pd.DataFrame) -> pd.DataFrame:
         "flagged_percent_at_target",
     ]
     display = rows[columns].copy()
+    policy_label = sensitivity_policy_label(target)
+    specificity_label = specificity_policy_label(target)
     display = display.rename(
         columns={
             "model": "Model",
             "auroc": "AUROC",
             "auprc": "AUPRC",
-            "sensitivity_at_target": "Sensitivity @ ≥90% policy",
-            "specificity_at_target": "Specificity @ ≥90% policy",
+            "sensitivity_at_target": policy_label,
+            "specificity_at_target": specificity_label,
             "false_negative_at_target": "False negatives",
             "false_positive_at_target": "False positives",
             "flagged_percent_at_target": "Flagged for review (%)",
@@ -103,8 +129,8 @@ def compact_model_table(rows: pd.DataFrame) -> pd.DataFrame:
     for column in (
         "AUROC",
         "AUPRC",
-        "Sensitivity @ ≥90% policy",
-        "Specificity @ ≥90% policy",
+        policy_label,
+        specificity_label,
         "Flagged for review (%)",
     ):
         display[column] = display[column].map(lambda value: round(float(value), 3))
@@ -124,19 +150,22 @@ def model_table_source(model_name: str | None = None) -> str:
         "import pandas as pd\n"
         "comparison = pd.read_csv(Path('../docs/results/checkpoint1/model_comparison.csv'))\n"
         f"{selection}"
+        "target = float(comparison['sensitivity_target'].iloc[0])\n"
+        "policy_label = f'Sensitivity @ >={target:.0%} policy'\n"
+        "specificity_label = f'Specificity @ >={target:.0%} policy'\n"
         "columns = ['model', 'auroc', 'auprc', 'sensitivity_at_target', "
         "'specificity_at_target', 'false_negative_at_target', "
         "'false_positive_at_target', 'flagged_percent_at_target']\n"
         "notebook_summary = comparison[columns].rename(columns={\n"
         "    'model': 'Model', 'auroc': 'AUROC', 'auprc': 'AUPRC',\n"
-        "    'sensitivity_at_target': 'Sensitivity @ ≥90% policy',\n"
-        "    'specificity_at_target': 'Specificity @ ≥90% policy',\n"
+        "    'sensitivity_at_target': policy_label,\n"
+        "    'specificity_at_target': specificity_label,\n"
         "    'false_negative_at_target': 'False negatives',\n"
         "    'false_positive_at_target': 'False positives',\n"
         "    'flagged_percent_at_target': 'Flagged for review (%)',\n"
         "})\n"
-        "for column in ['AUROC', 'AUPRC', 'Sensitivity @ ≥90% policy', "
-        "'Specificity @ ≥90% policy', 'Flagged for review (%)']:\n"
+        "for column in ['AUROC', 'AUPRC', policy_label, specificity_label, "
+        "'Flagged for review (%)']:\n"
         "    notebook_summary[column] = notebook_summary[column].round(3)\n"
         "display(notebook_summary)"
     )
@@ -180,6 +209,7 @@ def main() -> int:
     comparison_path = results_dir / "model_comparison.csv"
     required = [
         comparison_path,
+        results_dir / "model_a_grouped_cv_candidates.csv",
         results_dir / "validation_model_comparison.png",
         results_dir / "finetuning_history.png",
         results_dir / "shortcut_audit_summary.csv",
@@ -190,6 +220,7 @@ def main() -> int:
         raise FileNotFoundError("Missing reviewed result artifact(s): " + ", ".join(missing))
 
     comparison = pd.read_csv(comparison_path)
+    sensitivity_target = extract_sensitivity_target(comparison)
     baseline = comparison.loc[
         comparison["model"].eq("Frozen ResNet-18 + Logistic Regression")
     ].copy()
@@ -263,18 +294,36 @@ def main() -> int:
     audit_display["Decision flips (%)"] = audit_display["Decision flips (%)"].map(
         lambda value: round(float(value), 2)
     )
-    candidate_c = pd.DataFrame(
-        [
-            {"Logistic Regression C": 0.1, "Validation AUROC": 0.880442, "Selected": "Yes"},
-            {"Logistic Regression C": 1.0, "Validation AUROC": 0.867968, "Selected": "No"},
-            {"Logistic Regression C": 10.0, "Validation AUROC": 0.862374, "Selected": "No"},
-        ]
+    candidate_c_path = results_dir / "model_a_grouped_cv_candidates.csv"
+    candidate_c = pd.read_csv(candidate_c_path)
+    required_candidate_columns = {"C", "train_group_cv_auroc", "train_group_cv_auprc", "selected"}
+    missing_candidate_columns = required_candidate_columns - set(candidate_c.columns)
+    if missing_candidate_columns:
+        raise ValueError(
+            "model_a_grouped_cv_candidates.csv is missing required column(s): "
+            + ", ".join(sorted(missing_candidate_columns))
+        )
+    candidate_c = candidate_c[
+        ["C", "train_group_cv_auroc", "train_group_cv_auprc", "selected"]
+    ].rename(
+        columns={
+            "C": "Logistic Regression C",
+            "train_group_cv_auroc": "Patient-grouped CV AUROC",
+            "train_group_cv_auprc": "Patient-grouped CV AUPRC",
+            "selected": "Selected",
+        }
+    )
+    candidate_c["Patient-grouped CV AUROC"] = candidate_c["Patient-grouped CV AUROC"].round(3)
+    candidate_c["Patient-grouped CV AUPRC"] = candidate_c["Patient-grouped CV AUPRC"].round(3)
+    candidate_c["Selected"] = candidate_c["Selected"].map({True: "Yes", False: "No"}).fillna(
+        candidate_c["Selected"].astype(str)
     )
     training_summary = pd.DataFrame(
         [
             {"Item": "Best validation epoch", "Value": "9"},
             {"Item": "Epochs completed", "Value": "13 (early stopping)"},
-            {"Item": "Checkpoint selection", "Value": "Validation AUROC, mean pooling"},
+            {"Item": "Checkpoint selection", "Value": "Validation AUROC, pre-specified mean pooling"},
+            {"Item": "Operating policy", "Value": f"Highest validation threshold at {sensitivity_target:.0%} sensitivity"},
             {"Item": "Official MURA valid/test read", "Value": "No"},
         ]
     )
@@ -334,20 +383,22 @@ def main() -> int:
     )
     add_preview(
         notebooks_dir / "03_MURA_Baseline_ResNet18_LogReg.ipynb",
-        "## Published output snapshot\n\nModel A result from the completed internal-validation run.",
+        "## Published output snapshot\n\nModel A result from the completed internal-validation run. Logistic Regression C was selected with patient-grouped cross-validation inside internal training only.",
         [
             preview_code(
                 "# Aggregate Model A metrics from the completed development run.\n"
                 + model_table_source("Frozen ResNet-18 + Logistic Regression"),
-                [table_output(compact_model_table(baseline))],
+                [table_output(compact_model_table(baseline, sensitivity_target))],
             ),
             preview_code(
-                "# Validation-only selection among the pre-specified Logistic Regression C values.\n"
-                "candidate_c = pd.DataFrame([\n"
-                "    {'Logistic Regression C': 0.1, 'Validation AUROC': 0.880442, 'Selected': 'Yes'},\n"
-                "    {'Logistic Regression C': 1.0, 'Validation AUROC': 0.867968, 'Selected': 'No'},\n"
-                "    {'Logistic Regression C': 10.0, 'Validation AUROC': 0.862374, 'Selected': 'No'},\n"
-                "])\n"
+                "# C selection was performed within internal training by patient-grouped CV.\n"
+                "candidate_c = pd.read_csv(Path('../docs/results/checkpoint1/model_a_grouped_cv_candidates.csv'))\n"
+                "candidate_c = candidate_c[['C', 'train_group_cv_auroc', 'train_group_cv_auprc', 'selected']].rename(columns={\n"
+                "    'C': 'Logistic Regression C',\n"
+                "    'train_group_cv_auroc': 'Patient-grouped CV AUROC',\n"
+                "    'train_group_cv_auprc': 'Patient-grouped CV AUPRC',\n"
+                "    'selected': 'Selected',\n"
+                "})\n"
                 "display(candidate_c)",
                 [table_output(candidate_c)],
             ),
@@ -360,7 +411,7 @@ def main() -> int:
             preview_code(
                 "# Baseline operating-policy metrics from the completed development run.\n"
                 + model_table_source("Frozen ResNet-18 + Logistic Regression"),
-                [table_output(compact_model_table(baseline))],
+                [table_output(compact_model_table(baseline, sensitivity_target))],
             )
         ],
     )
@@ -374,7 +425,8 @@ def main() -> int:
                 "training_summary = pd.DataFrame([\n"
                 "    {'Item': 'Best validation epoch', 'Value': '9'},\n"
                 "    {'Item': 'Epochs completed', 'Value': '13 (early stopping)'},\n"
-                "    {'Item': 'Checkpoint selection', 'Value': 'Validation AUROC, mean pooling'},\n"
+                "    {'Item': 'Checkpoint selection', 'Value': 'Validation AUROC, pre-specified mean pooling'},\n"
+                f"    {{'Item': 'Operating policy', 'Value': 'Highest validation threshold at {sensitivity_target:.0%} sensitivity'}},\n"
                 "    {'Item': 'Official MURA valid/test read', 'Value': 'No'},\n"
                 "])\n"
                 "display(training_summary)",
@@ -383,7 +435,7 @@ def main() -> int:
             preview_code(
                 "# Aggregate Model B metrics from the completed development run.\n"
                 + model_table_source("Fine-tuned ResNet-18 mean pooling"),
-                [table_output(compact_model_table(fine_tuned_mean))],
+                [table_output(compact_model_table(fine_tuned_mean, sensitivity_target))],
             ),
             preview_code(
                 "# Training loss and validation AUROC over epochs.\n"
@@ -395,12 +447,12 @@ def main() -> int:
     )
     add_preview(
         notebooks_dir / "06_MURA_ModelB_Evaluation_and_Comparison.ipynb",
-        "## Published output snapshot\n\nFair comparison on the same internal-validation studies; not an untouched test result.",
+        "## Published output snapshot\n\nFair comparison on the same internal-validation studies; not an untouched test result. Mean probability pooling is the pre-specified Model B primary aggregation; max pooling is a secondary diagnostic comparison.",
         [
             preview_code(
                 "# Aggregate comparison for all evaluated study-level methods.\n"
                 + model_table_source(),
-                [table_output(compact_model_table(comparison))],
+                [table_output(compact_model_table(comparison, sensitivity_target))],
             ),
             preview_code(
                 "# ROC, precision–recall, and high-sensitivity workload comparison.\n"

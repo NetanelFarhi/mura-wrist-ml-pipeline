@@ -1,0 +1,38 @@
+[
+  {
+    "model":"Frozen ResNet-18 + Logistic Regression",
+    "sensitivity_target":0.95,
+    "threshold_at_target":0.0637739507,
+    "sensitivity_at_target":0.9516728625,
+    "specificity_at_target":0.3933649289,
+    "precision_at_target":0.5,
+    "f1_at_target":0.6555697823,
+    "false_negative_at_target":13,
+    "false_positive_at_target":256,
+    "flagged_percent_at_target":74.0955137482
+  },
+  {
+    "model":"Fine-tuned ResNet-18 mean pooling",
+    "sensitivity_target":0.95,
+    "threshold_at_target":0.2635677159,
+    "sensitivity_at_target":0.9516728625,
+    "specificity_at_target":0.5829383886,
+    "precision_at_target":0.5925925926,
+    "f1_at_target":0.7303851641,
+    "false_negative_at_target":13,
+    "false_positive_at_target":176,
+    "flagged_percent_at_target":62.518089725
+  },
+  {
+    "model":"Fine-tuned ResNet-18 max pooling (secondary diagnostic)",
+    "sensitivity_target":0.95,
+    "threshold_at_target":0.6150987148,
+    "sensitivity_at_target":0.9516728625,
+    "specificity_at_target":0.6208530806,
+    "precision_at_target":0.6153846154,
+    "f1_at_target":0.7474452555,
+    "false_negative_at_target":13,
+    "false_positive_at_target":160,
+    "flagged_percent_at_target":60.2026049204
+  }
+]

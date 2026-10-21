@@ -4,7 +4,7 @@
 
 ## Executed state
 
-The authorized official Stanford MURA release was made available locally for this Phase 1 run. The project indexed only `XR_WRIST`; it did not substitute FracAtlas or another dataset. The executed audit produced [wrist_manifest.csv](../data/manifests/wrist_manifest.csv), [split_manifest.csv](../data/manifests/split_manifest.csv), and [wrist_data_audit.json](wrist_data_audit.json).
+The authorized official Stanford MURA release was made available locally for this Phase 1 run. The project indexed only `XR_WRIST`; it did not substitute FracAtlas or another dataset. The executed audit produced local-only wrist and split manifests (excluded from Git) plus the safe aggregate [wrist_data_audit.json](wrist_data_audit.json).
 
 The measured XR_WRIST scope is 3,474 patients, 3,697 studies, and 10,411 images. The official MURA `valid` source was retained as the sealed 237-study final test set. Raw MURA files remain local and are not included in the repository.
 
@@ -14,7 +14,7 @@ To repeat the pipeline in an authorized environment, point `MURA_DATA_ROOT` at a
 
 ```powershell
 $env:MURA_DATA_ROOT = "<authorized-local-path-to-MURA-v1.1>"
-cd C:\Users\netaf\Documents\Codex\2026-09-23\important-change-to-phase-1-phase\mura-x
+cd <local-project-directory>
 python scripts\audit_data.py --data-root $env:MURA_DATA_ROOT
 ```
 

@@ -14,14 +14,20 @@ checkpoints, or local paths are committed.
 ## Model comparison
 
 The threshold in this table is the highest internal-validation threshold that
-achieves sensitivity ≥ 90%; it is an operating-policy analysis on the
+achieves sensitivity ≥ 95%; it is an operating-policy analysis on the
 same development split, not a final clinical claim.
 
-| model                                  |   auroc |   auprc |   threshold_at_target |   sensitivity_at_target |   specificity_at_target |   precision_at_target |   f1_at_target |   false_negative_at_target |   false_positive_at_target |   flagged_percent_at_target |
-|:---------------------------------------|--------:|--------:|----------------------:|------------------------:|------------------------:|----------------------:|---------------:|---------------------------:|---------------------------:|----------------------------:|
-| Frozen ResNet-18 + Logistic Regression |   0.88  |   0.852 |                 0.128 |                   0.903 |                   0.531 |                 0.551 |          0.685 |                         26 |                        198 |                      63.821 |
-| Fine-tuned ResNet-18 mean pooling      |   0.913 |   0.878 |                 0.381 |                   0.903 |                   0.706 |                 0.662 |          0.764 |                         26 |                        124 |                      53.111 |
-| Fine-tuned ResNet-18 max pooling       |   0.883 |   0.806 |                 0.863 |                   0.903 |                   0.711 |                 0.666 |          0.767 |                         26 |                        122 |                      52.822 |
+The primary comparison is the required frozen-embedding Logistic Regression
+baseline versus the existing fine-tuned ResNet-18 under the revised protocol's
+primary mean study-pooling policy. Max pooling is included only as a
+transparent secondary diagnostic. The saved Model B weights were not retrained
+for this reporting update.
+
+| model                                                   |   auroc |   auprc |   threshold_at_target |   sensitivity_at_target |   specificity_at_target |   precision_at_target |   f1_at_target |   false_negative_at_target |   false_positive_at_target |   flagged_percent_at_target |
+|:--------------------------------------------------------|--------:|--------:|----------------------:|------------------------:|------------------------:|----------------------:|---------------:|---------------------------:|---------------------------:|----------------------------:|
+| Frozen ResNet-18 + Logistic Regression                  |   0.88  |   0.852 |                 0.064 |                   0.952 |                   0.393 |                 0.5   |          0.656 |                         13 |                        256 |                      74.096 |
+| Fine-tuned ResNet-18 mean pooling                       |   0.913 |   0.878 |                 0.264 |                   0.952 |                   0.583 |                 0.593 |          0.73  |                         13 |                        176 |                      62.518 |
+| Fine-tuned ResNet-18 max pooling (secondary diagnostic) |   0.883 |   0.806 |                 0.615 |                   0.952 |                   0.621 |                 0.615 |          0.747 |                         13 |                        160 |                      60.203 |
 
 ## Patient-cluster bootstrap uncertainty
 
@@ -29,11 +35,11 @@ The following 95% intervals resample patients rather than individual views.
 Sensitivity and specificity treat the displayed sensitivity-constrained
 threshold as fixed within each resample.
 
-| model                                  | AUROC 95% CI   | AUPRC 95% CI   | Sensitivity 95% CI   | Specificity 95% CI   |
-|:---------------------------------------|:---------------|:---------------|:---------------------|:---------------------|
-| Frozen ResNet-18 + Logistic Regression | 0.854–0.907    | 0.812–0.889    | 0.866–0.936          | 0.485–0.579          |
-| Fine-tuned ResNet-18 mean pooling      | 0.889–0.935    | 0.832–0.916    | 0.865–0.937          | 0.663–0.751          |
-| Fine-tuned ResNet-18 max pooling       | 0.855–0.907    | 0.750–0.855    | 0.869–0.935          | 0.671–0.754          |
+| model                                                   | AUROC 95% CI   | AUPRC 95% CI   | Sensitivity 95% CI   | Specificity 95% CI   |
+|:--------------------------------------------------------|:---------------|:---------------|:---------------------|:---------------------|
+| Frozen ResNet-18 + Logistic Regression                  | 0.854–0.907    | 0.812–0.889    | 0.927–0.974          | 0.349–0.441          |
+| Fine-tuned ResNet-18 mean pooling                       | 0.889–0.935    | 0.832–0.916    | 0.924–0.976          | 0.536–0.628          |
+| Fine-tuned ResNet-18 max pooling (secondary diagnostic) | 0.855–0.907    | 0.750–0.855    | 0.924–0.975          | 0.575–0.666          |
 
 ![Validation model comparison](validation_model_comparison.png)
 

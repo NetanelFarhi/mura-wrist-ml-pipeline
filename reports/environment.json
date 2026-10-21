@@ -26,7 +26,7 @@
     "stopped_early": true,
     "best_epoch": 4,
     "weights": "imagenet",
-    "weight_cache_path": "C:\\Users\\netaf\\.cache\\torch\\hub\\checkpoints\\resnet18-f37072fd.pth"
+    "weight_cache_path": "<local Torch cache redacted>"
   },
   "final_evaluation": {
     "prediction_unit": "study",

@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Optional local diagnostic-audit directory; only aggregate perturbation fields are published.",
     )
-    parser.add_argument("--sensitivity-target", type=float, default=0.90)
+    parser.add_argument("--sensitivity-target", type=float, default=0.95)
     parser.add_argument("--bootstrap-samples", type=int, default=1_000)
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args()
@@ -104,21 +104,30 @@ def load_validation_predictions(name: str, path: Path) -> ModelPredictions:
 
 
 def _load_validation_selection(model_dir: Path, *, model_name: str) -> dict:
-    """Require saved provenance that states model selection was validation-only.
+    """Require selection provenance compatible with the current protocol.
 
-    This does not prove the provenance of an arbitrarily renamed CSV, but it
-    makes the results publisher fail closed when the run's own selection
-    record is missing or explicitly says test data informed a decision.
+    Model A must select ``C`` in patient-grouped CV inside internal training.
+    Model B may use internal validation for checkpoint selection, but neither
+    model may use official-valid/test data. This cannot prove an arbitrarily
+    renamed CSV's provenance; it does fail closed when a record contradicts
+    the documented protocol.
     """
 
     selection_path = model_dir / "selection.json"
     if not selection_path.is_file():
         raise FileNotFoundError(f"Missing selection record for {model_name}: {selection_path}")
     selection = json.loads(selection_path.read_text(encoding="utf-8"))
-    if selection.get("selection_data") != "validation only":
-        raise ValueError(f"{model_name} selection record is not validation-only.")
     if selection.get("test_used_for_selection") is not False:
         raise ValueError(f"{model_name} selection record does not rule out test use.")
+    if model_name == "Model A":
+        if selection.get("c_selection_data") != "internal_train_patient_grouped_cv_only":
+            raise ValueError("Model A C selection is not recorded as internal-train grouped CV.")
+        if selection.get("internal_validation_labels_used_for_c_selection") is not False:
+            raise ValueError("Model A selection record does not rule out validation-label use for C.")
+        if selection.get("threshold_selection_data") != "internal_validation_only":
+            raise ValueError("Model A threshold is not recorded as internal-validation only.")
+    elif model_name == "Model B" and selection.get("selection_data") != "validation only":
+        raise ValueError("Model B selection record is not validation-only.")
     return selection
 
 
@@ -273,7 +282,9 @@ def summarize_model(
     return result
 
 
-def write_figures(predictions: list[ModelPredictions], summaries: pd.DataFrame, output_dir: Path) -> None:
+def write_figures(
+    predictions: list[ModelPredictions], summaries: pd.DataFrame, output_dir: Path, *, target: float
+) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -299,15 +310,20 @@ def write_figures(predictions: list[ModelPredictions], summaries: pd.DataFrame, 
     axes[2].bar(x - width, summaries["sensitivity_at_target"], width, label="Sensitivity", color="#1d4ed8")
     axes[2].bar(x, summaries["specificity_at_target"], width, label="Specificity", color="#059669")
     axes[2].bar(x + width, summaries["flagged_percent_at_target"] / 100, width, label="Flagged for review", color="#b45309")
-    axes[2].axhline(0.90, color="#475569", ls="--", lw=1, label="90% target")
+    axes[2].axhline(target, color="#475569", ls="--", lw=1, label=f"{target:.0%} target")
+    policy_labels = {
+        "Frozen ResNet-18 + Logistic Regression": "Model A\nbaseline",
+        "Fine-tuned ResNet-18 mean pooling": "Model B mean\n(primary)",
+        "Fine-tuned ResNet-18 max pooling (secondary diagnostic)": "Model B max\n(secondary)",
+    }
     axes[2].set(
         xticks=x,
-        xticklabels=[str(name).replace("Fine-tuned ResNet-18 ", "") for name in summaries["model"]],
+        xticklabels=[policy_labels.get(str(name), str(name)) for name in summaries["model"]],
         ylim=(0, 1.05),
         ylabel="Proportion of validation studies",
         title="High-sensitivity operating policy",
     )
-    axes[2].tick_params(axis="x", labelrotation=13, labelsize=8)
+    axes[2].tick_params(axis="x", labelsize=8)
     axes[2].legend(fontsize=8, loc="lower left")
     fig.suptitle("Checkpoint 1 — internal validation only", fontsize=13, fontweight="bold")
     fig.tight_layout()
@@ -338,6 +354,27 @@ def write_training_curve(history_path: Path, output_dir: Path) -> None:
     fig.tight_layout()
     fig.savefig(output_dir / "finetuning_history.png", dpi=180, bbox_inches="tight")
     plt.close(fig)
+
+
+def write_model_a_grouped_cv_summary(selection: dict, output_dir: Path) -> None:
+    """Publish the safe, aggregate C-selection table used by the baseline.
+
+    The table intentionally contains no study, patient, image, or embedding
+    data.  It lets the notebook snapshot show that regularization was selected
+    inside internal training with patient-grouped cross-validation.
+    """
+
+    c_selection = selection.get("c_selection", {})
+    rows = pd.DataFrame(c_selection.get("candidate_results", []))
+    required = {"C", "train_group_cv_auroc", "train_group_cv_auprc"}
+    missing = required - set(rows.columns)
+    if missing:
+        raise ValueError(f"Model A grouped-CV record is incomplete: {sorted(missing)}")
+    selected_c = float(c_selection.get("selected_c"))
+    rows = rows.loc[:, ["C", "train_group_cv_auroc", "train_group_cv_auprc"]].copy()
+    rows["selected"] = np.isclose(rows["C"].astype(float), selected_c)
+    rows.sort_values("C", inplace=True)
+    rows.to_csv(output_dir / "model_a_grouped_cv_candidates.csv", index=False)
 
 
 def write_markdown(
@@ -407,6 +444,12 @@ checkpoints, or local paths are committed.
 The threshold in this table is the highest internal-validation threshold that
 achieves sensitivity ≥ {target:.0%}; it is an operating-policy analysis on the
 same development split, not a final clinical claim.
+
+The primary comparison is the required frozen-embedding Logistic Regression
+baseline versus the existing fine-tuned ResNet-18 under the revised protocol's
+primary mean study-pooling policy. Max pooling is included only as a
+transparent secondary diagnostic. The saved Model B weights were not retrained
+for this reporting update.
 
 {markdown_table}
 
@@ -543,7 +586,7 @@ def main() -> int:
     output_dir = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    _load_validation_selection(args.model_a_dir, model_name="Model A")
+    model_a_selection = _load_validation_selection(args.model_a_dir, model_name="Model A")
     _load_validation_selection(args.model_b_dir, model_name="Model B")
 
     model_a = load_validation_predictions(
@@ -555,7 +598,7 @@ def main() -> int:
         args.model_b_dir / "validation_predictions_mean.csv",
     )
     model_b_max = load_validation_predictions(
-        "Fine-tuned ResNet-18 max pooling",
+        "Fine-tuned ResNet-18 max pooling (secondary diagnostic)",
         args.model_b_dir / "validation_predictions_max.csv",
     )
     predictions = [model_a, model_b_mean, model_b_max]
@@ -576,7 +619,23 @@ def main() -> int:
         ]
     )
     summaries.to_csv(output_dir / "model_comparison.csv", index=False)
-    write_figures(predictions, summaries, output_dir)
+    write_model_a_grouped_cv_summary(model_a_selection, output_dir)
+    policy_columns = [
+        "model",
+        "sensitivity_target",
+        "threshold_at_target",
+        "sensitivity_at_target",
+        "specificity_at_target",
+        "precision_at_target",
+        "f1_at_target",
+        "false_negative_at_target",
+        "false_positive_at_target",
+        "flagged_percent_at_target",
+    ]
+    summaries[policy_columns].to_json(
+        output_dir / "frozen_operating_policies.json", orient="records", indent=2
+    )
+    write_figures(predictions, summaries, output_dir, target=args.sensitivity_target)
     write_training_curve(args.model_b_dir / "training_history.json", output_dir)
     if args.shortcut_audit_dir is not None:
         write_shortcut_audit_summary(args.shortcut_audit_dir, output_dir)

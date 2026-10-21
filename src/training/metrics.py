@@ -150,6 +150,21 @@ class ThresholdSelection:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class SensitivityConstrainedThresholdSelection:
+    """A validation-only threshold chosen to satisfy a fixed sensitivity floor."""
+
+    threshold: float
+    target_sensitivity: float
+    achieved_sensitivity: float
+    achieved_specificity: float
+    candidates_evaluated: int
+    selection_rule: str = "highest_threshold_with_sensitivity_at_least_target"
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
 def _objective_value(metrics: BinaryStudyMetrics, objective: ThresholdObjective) -> float:
     if objective == "youden_j":
         if metrics.sensitivity is None or metrics.specificity is None:
@@ -207,6 +222,44 @@ def select_operating_threshold_on_validation(
         objective=objective,
         objective_value=float(best_value),
         candidates_evaluated=int(len(candidates)),
+    )
+
+
+def select_highest_threshold_for_sensitivity(
+    validation_labels: Sequence[int] | np.ndarray,
+    validation_probabilities: Sequence[float] | np.ndarray,
+    *,
+    target_sensitivity: float,
+) -> SensitivityConstrainedThresholdSelection:
+    """Select the most specific validation threshold meeting a fixed sensitivity target.
+
+    The input must contain one probability per study after the model's declared
+    study-level aggregation. Candidate thresholds are considered in descending
+    order, so the first eligible threshold is the highest (most selective)
+    threshold that meets the pre-specified sensitivity floor.
+    """
+
+    if not 0.0 < float(target_sensitivity) <= 1.0:
+        raise ValueError("target_sensitivity must be in (0, 1].")
+    y_true, y_score = _validate_labels_and_scores(validation_labels, validation_probabilities)
+    if len(np.unique(y_true)) < 2:
+        raise ValueError("Sensitivity-constrained threshold selection requires both classes.")
+
+    candidates = np.unique(y_score)[::-1]
+    for candidate in candidates.tolist():
+        metrics = compute_binary_study_metrics(y_true, y_score, threshold=float(candidate))
+        if metrics.sensitivity is not None and metrics.sensitivity >= float(target_sensitivity):
+            if metrics.specificity is None:  # defensive; two classes were checked above
+                raise RuntimeError("Specificity was unexpectedly unavailable.")
+            return SensitivityConstrainedThresholdSelection(
+                threshold=float(candidate),
+                target_sensitivity=float(target_sensitivity),
+                achieved_sensitivity=float(metrics.sensitivity),
+                achieved_specificity=float(metrics.specificity),
+                candidates_evaluated=int(len(candidates)),
+            )
+    raise RuntimeError(
+        f"No validation threshold reached sensitivity >= {float(target_sensitivity):.0%}."
     )
 
 
@@ -283,11 +336,13 @@ def bootstrap_auroc_ci(
 
 __all__ = [
     "BinaryStudyMetrics",
+    "SensitivityConstrainedThresholdSelection",
     "ThresholdSelection",
     "bootstrap_auroc_ci",
     "compute_binary_study_metrics",
     "metrics_at_default_and_selected_threshold",
     "safe_auprc",
     "safe_auroc",
+    "select_highest_threshold_for_sensitivity",
     "select_operating_threshold_on_validation",
 ]

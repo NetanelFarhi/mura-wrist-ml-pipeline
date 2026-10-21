@@ -1,0 +1,4 @@
+method,studies,correct,incorrect,false_negative,false_positive
+mean,692,579,113,45,68
+max,692,584,108,46,62
+attention,692,582,110,48,62

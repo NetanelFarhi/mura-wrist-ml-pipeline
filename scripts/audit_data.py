@@ -404,8 +404,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     if generated_manifest is not None and generated_split is not None:
         report["generated_artifacts"] = {
-            "manifest": str(generated_manifest),
-            "split_manifest": str(generated_split),
+            "manifest": f"<local-only manifest: {generated_manifest.name}>",
+            "split_manifest": f"<local-only manifest: {generated_split.name}>",
             "official_valid_is_sealed_test": True,
             "validation_fraction": args.validation_fraction,
             "seed": args.seed,

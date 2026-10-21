@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 """Train the frozen-embedding Logistic Regression Phase 1 baseline.
 
-The script accepts separate train and validation embedding artifacts, selects a
-small C grid using validation AUROC/AUPRC only, then selects an operating
-threshold from validation predictions only.  With ``--write-test-predictions``
-it can generate a sealed test prediction CSV after those choices are written;
-final test metrics and model comparison belong to ``evaluate_phase1.py``.
+``C`` is selected only with patient-grouped cross-validation inside internal
+training data. The selected estimator is then fit on all internal training
+studies. Internal validation is reserved for the pre-specified
+sensitivity-constrained operating threshold and development reporting.
+
+With ``--write-test-predictions`` the script can generate a sealed test
+prediction CSV after choices are frozen; final test metrics/comparison belong
+to ``evaluate_phase1.py``.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from src.models.frozen_embedding_baseline import FrozenEmbeddingLogisticBaseline
 from src.training.metrics import (
     bootstrap_auroc_ci,
     metrics_at_default_and_selected_threshold,
-    select_operating_threshold_on_validation,
+    select_highest_threshold_for_sensitivity,
 )
 
 
@@ -47,14 +50,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         nargs="+",
         default=(0.1, 1.0, 10.0),
-        help="One to three validation candidates only (default: 0.1 1.0 10.0).",
+        help="One to three train-grouped-CV candidates (default: 0.1 1.0 10.0).",
     )
     parser.add_argument("--selection-metric", choices=("auroc", "auprc"), default="auroc")
-    parser.add_argument(
-        "--threshold-objective",
-        choices=("youden_j", "f1", "balanced_accuracy"),
-        default="youden_j",
-    )
+    parser.add_argument("--group-cv-folds", type=int, default=5)
+    parser.add_argument("--sensitivity-target", type=float, default=0.95)
     parser.add_argument(
         "--class-weight",
         choices=("none", "balanced"),
@@ -73,11 +73,6 @@ def build_parser() -> argparse.ArgumentParser:
             "Final test metrics/comparison are deferred to evaluate_phase1.py; "
             "--evaluate-test is retained as a legacy alias."
         ),
-    )
-    parser.add_argument(
-        "--refit-on-train-plus-val",
-        action="store_true",
-        help="After C/threshold are frozen, refit the selected C on train+val before optional test evaluation.",
     )
     return parser
 
@@ -161,6 +156,10 @@ def _report(
 def run(args: argparse.Namespace) -> dict[str, Path]:
     if args.bootstrap_samples < 1:
         raise ValueError("--bootstrap-samples must be at least 1.")
+    if args.group_cv_folds < 2:
+        raise ValueError("--group-cv-folds must be at least 2.")
+    if not 0.0 < args.sensitivity_target <= 1.0:
+        raise ValueError("--sensitivity-target must be in (0, 1].")
     output_dir = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     train = load_study_embeddings(args.train_embeddings)
@@ -188,15 +187,20 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
         selection_metric=args.selection_metric,
         class_weight="balanced" if args.class_weight == "balanced" else None,
         random_seed=args.seed,
-    ).fit(train.embeddings, train.labels, validation.embeddings, validation.labels)
+    ).fit(
+        train.embeddings,
+        train.labels,
+        train.patient_ids,
+        group_cv_folds=args.group_cv_folds,
+    )
 
-    # These predictions belong to the train-only candidates and are the only
-    # data used for C and threshold selection.
+    # Internal validation is used after C is frozen, only to choose the
+    # pre-specified operating threshold and report development metrics.
     validation_probabilities = baseline.predict_proba(validation.embeddings)
-    threshold_selection = select_operating_threshold_on_validation(
+    threshold_selection = select_highest_threshold_for_sensitivity(
         validation.labels,
         validation_probabilities,
-        objective=args.threshold_objective,
+        target_sensitivity=args.sensitivity_target,
     )
     validation_report = {
         "split": "validation",
@@ -218,15 +222,14 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
         {
             "c_selection": baseline.selection_metadata(),
             "threshold_selection": threshold_selection.to_dict(),
-            "selection_data": "validation only",
+            "c_selection_data": "internal_train_patient_grouped_cv_only",
+            "threshold_selection_data": "internal_validation_only",
+            "internal_validation_labels_used_for_c_selection": False,
+            "selection_data": "internal_train_grouped_cv_then_validation_threshold",
             "test_used_for_selection": False,
         },
     )
 
-    if args.refit_on_train_plus_val:
-        baseline.refit_on_train_and_validation_after_freeze(
-            train.embeddings, train.labels, validation.embeddings, validation.labels
-        )
     model_path = baseline.save(output_dir / "frozen_embedding_logistic.joblib")
     outputs: dict[str, Path] = {
         "model": model_path,

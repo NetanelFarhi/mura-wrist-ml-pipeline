@@ -1,4 +1,4 @@
 variant,mean_absolute_probability_change,decision_flips_at_frozen_threshold,decision_flip_percent_at_frozen_threshold,display_variant
-padding_midgray,0.0491371599441985,19,2.7496382054992763,Padding → gray
-outer_border_black_5pct,0.023405072203098,12,1.7366136034732274,5% border mask
-direct_resize,0.0681625038973933,34,4.92040520984081,Direct resize
+padding_midgray,0.0491371599441985,52,7.525325615050652,Padding → gray
+outer_border_black_5pct,0.023405072203098,21,3.039073806078148,5% border mask
+direct_resize,0.0681625038973933,64,9.261939218523878,Direct resize

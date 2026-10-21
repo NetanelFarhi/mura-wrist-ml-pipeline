@@ -1,0 +1,16 @@
+error_roles,view_group,models_agree,study_count
+A_FN,2 views,no,1
+A_FN,3+ views,no,2
+A_FN; B_FN,1 view,yes,2
+A_FN; B_FN,2 views,yes,2
+A_FN; B_FN,3+ views,yes,10
+A_FP,1 view,no,2
+A_FP,2 views,no,4
+A_FP,3+ views,no,17
+A_FP; B_FP,1 view,yes,1
+A_FP; B_FP,2 views,yes,1
+A_FP; B_FP,3+ views,yes,2
+B_FN,2 views,no,1
+B_FN,3+ views,no,11
+B_FP,2 views,no,1
+B_FP,3+ views,no,2

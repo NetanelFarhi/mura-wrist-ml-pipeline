@@ -4,7 +4,7 @@
 
 ## Scope and evidence
 
-This report covers only Stanford MURA `XR_WRIST` records. Counts were recomputed from [wrist_manifest.csv](../data/manifests/wrist_manifest.csv) and its study-level [split_manifest.csv](../data/manifests/split_manifest.csv), then checked against [wrist_data_audit.json](wrist_data_audit.json). The recomputed totals agree with the audit: **3,474 patients, 3,697 studies, and 10,411 images**.
+This report covers only Stanford MURA `XR_WRIST` records. Counts were recomputed from local-only wrist and study-level split manifests (excluded from Git), then checked against [wrist_data_audit.json](wrist_data_audit.json). The recomputed totals agree with the audit: **3,474 patients, 3,697 studies, and 10,411 images**.
 
 MURA label `0` denotes a NORMAL study and label `1` an ABNORMAL study. This is an abnormality-classification dataset; these values do not establish fracture diagnoses or locations.
 

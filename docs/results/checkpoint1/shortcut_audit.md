@@ -20,9 +20,9 @@ anatomy.
 
 | Perturbation | Mean \|Δ probability\| | Decision flips at frozen threshold |
 |---|---:|---:|
-| padding_midgray | 0.049 | 19 (2.75%) |
-| outer_border_black_5pct | 0.023 | 12 (1.74%) |
-| direct_resize | 0.068 | 34 (4.92%) |
+| padding_midgray | 0.049 | 52 (7.53%) |
+| outer_border_black_5pct | 0.023 | 21 (3.04%) |
+| direct_resize | 0.068 | 64 (9.26%) |
 
 
 ![Aggregate shortcut-audit diagnostics](shortcut_audit.png)
