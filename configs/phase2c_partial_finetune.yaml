@@ -1,0 +1,49 @@
+# Phase 2C fixed recipe. Local paths are supplied at runtime and are never committed.
+experiment: phase2c_partial_finetune
+source_population: official_mura_train_xr_wrist_only
+test_access: forbidden
+seed: 42
+device: cuda
+input:
+  image_size: 224
+  study_batch_size: 2
+  workers: 0
+model:
+  initialization: phase1_finetuned_resnet18_checkpoint
+  aggregation: masked_mean_embedding
+  embedding_dim: 512
+  frozen_modules:
+    - conv1
+    - bn1
+    - layer1
+    - layer2
+    - layer3
+  trainable_modules:
+    - layer4
+    - study_head
+reference_control:
+  encoder: frozen
+  optimizer: AdamW
+  head_learning_rate: 0.001
+  weight_decay: 0.0001
+  max_epochs: 40
+  early_stopping_patience: 7
+partial_finetuning:
+  optimizer: AdamW
+  encoder_layer4_learning_rate: 0.00001
+  study_head_learning_rate: 0.0001
+  weight_decay: 0.0001
+  max_epochs: 15
+  early_stopping_patience: 4
+loss:
+  name: BCEWithLogitsLoss
+  positive_weight: training_studies_only_auto
+selection:
+  monitor: validation_auroc
+  primary_sensitivity_target: 0.95
+  descriptive_sensitivity_targets:
+    - 0.85
+    - 0.90
+uncertainty:
+  paired_patient_bootstrap_replicates: 2000
+  seed: 42

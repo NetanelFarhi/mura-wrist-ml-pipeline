@@ -20,6 +20,7 @@ in order, using the same patient-safe internal train/validation split.
 | 05 | [Fine-tuned ResNet-18](notebooks/05_MURA_FineTuned_ResNet18.ipynb) | Defines the controlled study-level Model B experiment using the same split as the baseline. | Completed on internal validation |
 | 06 | [Model B evaluation and comparison](notebooks/06_MURA_ModelB_Evaluation_and_Comparison.ipynb) | Compares Model A and Model B on the same internal validation studies and reports a validation-only operating policy. | Completed on internal validation |
 | 07 | [Shortcut and geometry audit](notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb) | Tests geometry/padding sensitivity and records diagnostic evidence about possible shortcut learning. | Completed diagnostic audit |
+| 08 | [Local runtime study viewer](notebooks/08_MURA_Runtime_Study_Viewer.ipynb) | Displays the separate views of one authorised local internal-train study for visual QC. It is code-only in Git and defaults to no displayed image output. | Optional local/Colab utility |
 
 Earlier notebooks are preserved under [notebooks/legacy](notebooks/legacy/)
 for traceability. They are not the canonical workflow and must not be used to
@@ -61,6 +62,23 @@ The prior >=90% development-policy outputs are preserved as historical,
 pre-feedback material under
 [docs/results/archive/checkpoint1_pre_95pct](docs/results/archive/checkpoint1_pre_95pct/).
 They are not the current operating-policy result.
+
+## Current controlled multi-view result — development only
+
+One pre-registered Phase 2C experiment tested whether unfreezing only the
+highest ResNet-18 block improves a study-level **mean embedding** model. It
+did not: the frozen reference was stronger on internal validation (AUROC
+0.914983 / AUPRC 0.878652 versus 0.913767 / 0.873423), and at the
+pre-specified >=95% sensitivity policy it retained higher specificity (0.585308
+versus 0.571090). Patient-cluster bootstrap intervals for all paired differences
+included zero. The project therefore freezes the simpler frozen mean-embedding
+ML core rather than continuing architecture tuning.
+
+The aggregate tables, paired uncertainty, training curve, error counts and
+diagnostic checks are in [reports/phase2c/PHASE2C_SUMMARY.md](reports/phase2c/PHASE2C_SUMMARY.md).
+The rendered [results viewer](notebooks/06_results_viewer.ipynb) contains those
+safe aggregate outputs for GitHub. It contains no raw radiographs or per-study
+predictions.
 
 ## Data and evaluation governance
 

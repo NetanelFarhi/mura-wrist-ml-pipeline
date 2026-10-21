@@ -1,0 +1,4 @@
+metric,difference_candidate_minus_baseline,ci_lower_95,ci_upper_95,n_bootstrap_requested,n_bootstrap_valid,seed,resampling_unit
+AUROC,-0.0012156662379536,-0.004395295847921,0.0020441408508665,2000,2000,42,patient cluster
+AUPRC,-0.0052290451381945,-0.0193582932150725,0.0099812470657339,2000,2000,42,patient cluster
+Specificity@95%,-0.014218009478673,-0.0764022435897435,0.0924225495604011,2000,2000,42,patient cluster

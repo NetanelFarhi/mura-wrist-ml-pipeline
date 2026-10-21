@@ -55,13 +55,15 @@ def build_notebook():
             "    ROOT / 'reports' / 'team_share' / 'PHASE1_5_KEY_FIGURE.png',\n"
             "    ROOT / 'reports' / 'phase2a' / 'operating_points.csv',\n"
             "    ROOT / 'reports' / 'phase2b' / 'model_comparison.csv',\n"
+            "    ROOT / 'reports' / 'phase2c' / 'model_comparison.csv',\n"
+            "    ROOT / 'reports' / 'phase2c' / 'training_curves.png',\n"
+            "    ROOT / 'reports' / 'phase2c' / 'PHASE2C_SUMMARY.md',\n"
             "    ROOT / 'reports' / 'TEST_SET_GOVERNANCE.md',\n"
             "]\n"
             "missing = [str(path.relative_to(ROOT)) for path in SAFE_ARTIFACTS if not path.exists()]\n"
             "if missing:\n"
             "    raise FileNotFoundError(f'Missing committed presentation artifacts: {missing}')\n"
-            "print('Read-only artifact check passed.')\n"
-            "print('Project root:', ROOT)"
+            "print('Read-only artifact check passed.')"
         ),
         markdown_cell("## Historical Phase-1 baseline reference"),
         code_cell(
@@ -104,6 +106,18 @@ def build_notebook():
             "    'Specificity @ >=85% sensitivity',\n"
             "    'Specificity @ >=90% sensitivity',\n"
             "]]"
+        ),
+        markdown_cell("## Controlled Phase 2C development experiment"),
+        code_cell(
+            "from IPython.display import Image, Markdown, display\n\n"
+            "phase2c = pd.read_csv(ROOT / 'reports' / 'phase2c' / 'model_comparison.csv')\n"
+            "display(Markdown(\n"
+            "    '**Scope.** This is one pre-registered development/validation experiment on the '\n"
+            "    'internal patient-safe split only. It does not use the historical official MURA valid/test split.'\n"
+            "))\n"
+            "display(phase2c)\n"
+            "display(Image(filename=str(ROOT / 'reports' / 'phase2c' / 'training_curves.png')))\n"
+            "display(Markdown((ROOT / 'reports' / 'phase2c' / 'PHASE2C_SUMMARY.md').read_text(encoding='utf-8')))"
         ),
         markdown_cell("## Test-set governance"),
         code_cell(

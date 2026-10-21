@@ -1,0 +1,7 @@
+model,display_variant,mean_absolute_probability_change,decision_flips_at_95_policy,decision_flip_percent_at_95_policy
+Frozen mean embedding,padding_midgray,0.0560757406055927,58,8.393632416787264
+Partial fine-tuned mean embedding,padding_midgray,0.0342992283403873,39,5.643994211287988
+Frozen mean embedding,outer_border_black_5pct,0.0227610245347023,19,2.7496382054992763
+Partial fine-tuned mean embedding,outer_border_black_5pct,0.0230319276452064,17,2.460202604920405
+Frozen mean embedding,direct_resize,0.0761962234973907,62,8.972503617945007
+Partial fine-tuned mean embedding,direct_resize,0.0780621469020843,74,10.709117221418236
