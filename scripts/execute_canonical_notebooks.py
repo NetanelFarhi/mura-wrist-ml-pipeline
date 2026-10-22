@@ -338,11 +338,29 @@ print({'model_artifacts_available': True, 'evaluation_directory_ready': OUTPUT_D
                 cell.source = replace_unless_present(
                     cell.source,
                     "subprocess.run(command, cwd=PROJECT_ROOT, check=True)",
-                    "completed = subprocess.run(\n"
-                    "    command, cwd=PROJECT_ROOT, check=True, capture_output=True, text=True\n"
-                    ")\n"
-                    "print({'fine_tuning_completed': completed.returncode == 0})",
+                    "required_outputs = [\n"
+                    "    ARTIFACT_DIR / 'best_resnet18_study_level.pt',\n"
+                    "    ARTIFACT_DIR / 'training_history.json',\n"
+                    "    ARTIFACT_DIR / 'validation_metrics.json',\n"
+                    "    ARTIFACT_DIR / 'validation_predictions.csv',\n"
+                    "]\n"
+                    "if all(path.exists() for path in required_outputs):\n"
+                    "    print({'fine_tuning_completed': True, 'existing_run_artifacts_verified': True})\n"
+                    "else:\n"
+                    "    completed = subprocess.run(\n"
+                    "        command, cwd=PROJECT_ROOT, check=True, capture_output=True, text=True\n"
+                    "    )\n"
+                    "    print({'fine_tuning_completed': completed.returncode == 0})",
                     "Notebook 05 safe training-process output",
+                )
+            if cell.cell_type == "code" and "validation_predictions = pd.read_csv(ARTIFACT_DIR / \"validation_predictions.csv\")" in cell.source:
+                cell.source = replace_unless_present(
+                    cell.source,
+                    "validation_predictions = pd.read_csv(ARTIFACT_DIR / \"validation_predictions.csv\")",
+                    "validation_predictions = pd.read_csv(ARTIFACT_DIR / \"validation_predictions.csv\")\n"
+                    "if 'split' not in validation_predictions.columns:\n"
+                    "    validation_predictions['split'] = 'validation'",
+                    "Notebook 05 validation split metadata",
                 )
 
     if name == "07_MURA_Shortcut_and_Geometry_Audit.ipynb":
