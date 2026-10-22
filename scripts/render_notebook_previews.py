@@ -195,8 +195,12 @@ def add_preview(notebook_path: Path, markdown: str, cells: list[dict]) -> None:
     remove_previous_preview(notebook)
     header = new_markdown_cell(markdown)
     header["metadata"] = {"tags": [PREVIEW_TAG]}
-    notebook["cells"].append(header)
-    notebook["cells"].extend(cells)
+
+    # Put the reviewed output near the start, not at the bottom.  A GitHub
+    # visitor should immediately see a safe table/figure before the
+    # environment-specific Colab code that produces it locally.
+    insert_at = min(2, len(notebook["cells"]))
+    notebook["cells"][insert_at:insert_at] = [header, *cells]
     nbformat.validate(notebook)
     nbformat.write(notebook, notebook_path)
 
