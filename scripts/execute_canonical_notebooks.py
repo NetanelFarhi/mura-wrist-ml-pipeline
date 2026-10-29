@@ -38,6 +38,7 @@ NOTEBOOK_NAMES = [
     "05_MURA_FineTuned_ResNet18.ipynb",
     "06_MURA_ModelB_Evaluation_and_Comparison.ipynb",
     "07_MURA_Shortcut_and_Geometry_Audit.ipynb",
+    "09_MURA_Deterministic_Safety_Tools.ipynb",
 ]
 
 
@@ -50,7 +51,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--raw-zip", type=Path, required=True)
     parser.add_argument("--artifacts-root", type=Path, required=True)
     parser.add_argument("--start-at", choices=[name[:2] for name in NOTEBOOK_NAMES], default="01")
-    parser.add_argument("--stop-after", choices=[name[:2] for name in NOTEBOOK_NAMES], default="07")
+    parser.add_argument("--stop-after", choices=[name[:2] for name in NOTEBOOK_NAMES], default="09")
     parser.add_argument("--timeout-seconds", type=int, default=14400)
     return parser.parse_args()
 
@@ -320,12 +321,19 @@ print({'model_artifacts_available': True, 'evaluation_directory_ready': OUTPUT_D
 
     if name == "05_MURA_FineTuned_ResNet18.ipynb":
         cell = cell_with_prefix(notebook, "try:")
-        cell.source = replace_unless_present(
-            cell.source,
-            'print({"project_root": str(PROJECT_ROOT), "data_root": str(DATA_ROOT), "artifact_dir": str(ARTIFACT_DIR)})',
-            'print({"project_root_available": PROJECT_ROOT.exists(), "data_root_available": DATA_ROOT.exists(), "artifact_directory_ready": ARTIFACT_DIR.exists()})',
-            "Notebook 05 safe setup output",
+        legacy_setup_output = (
+            'print({"project_root": str(PROJECT_ROOT), "data_root": str(DATA_ROOT), '
+            '"artifact_dir": str(ARTIFACT_DIR)})'
         )
+        if legacy_setup_output in cell.source:
+            cell.source = replace_once(
+                cell.source,
+                legacy_setup_output,
+                'print({"project_root_available": PROJECT_ROOT.exists(), '
+                '"data_root_available": DATA_ROOT.exists(), '
+                '"artifact_directory_ready": ARTIFACT_DIR.exists()})',
+                "Notebook 05 legacy setup output",
+            )
         for cell in notebook.cells:
             if cell.cell_type == "code" and 'print(" ".join(command))' in cell.source:
                 cell.source = replace_unless_present(

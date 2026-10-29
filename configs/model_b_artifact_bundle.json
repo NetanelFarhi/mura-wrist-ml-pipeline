@@ -1,0 +1,33 @@
+{
+  "bundle_id": "checkpoint1-model-b-mean-probability-95-sensitivity",
+  "purpose": "Canonical local/Drive artifact bundle for the current Checkpoint 1 Model B notebook flow.",
+  "task": "MURA XR_WRIST study-level NORMAL/ABNORMAL classification",
+  "selection_population": "internal patient-level validation only",
+  "official_mura_valid_used_for_selection": false,
+  "model": {
+    "architecture": "ImageNet ResNet-18, one logit per view",
+    "study_aggregation": "mean probability",
+    "operating_policy": "highest validation threshold with sensitivity >= 0.95",
+    "threshold": 0.263567715883255,
+    "validation_sensitivity": 0.9516728624535316,
+    "validation_specificity": 0.5829383886255924
+  },
+  "required_files": {
+    "best_resnet18_study_level.pt": {
+      "sha256": "63AEDC6BEC1534BDED7C3CA4D0DAF03AFC17BF92166CB7848506A6F3A82DE5B6"
+    },
+    "run_config.json": {},
+    "selection.json": {},
+    "training_history.json": {},
+    "validation_metrics.json": {},
+    "validation_predictions.csv": {},
+    "validation_predictions_mean.csv": {},
+    "validation_predictions_max.csv": {},
+    "frozen_primary_operating_policy.json": {}
+  },
+  "not_this_bundle": {
+    "filename": "resnet18_model_b_best.pt",
+    "description": "The 2026-10-19 layer3/layer4/fc partial-fine-tuning experiment is separate exploratory work and must not replace this bundle."
+  },
+  "governance": "Do not commit model weights or per-study predictions to Git. Do not use official MURA valid data for later selection."
+}
