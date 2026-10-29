@@ -19,6 +19,18 @@ SHA-256 is recorded there. Verify a local bundle before using it:
 python scripts/verify_model_artifact_bundle.py --artifact-dir <authorised-local-or-Drive-bundle>
 ```
 
+If shared Drive stores the checkpoint as verified files in
+`checkpoint_parts/` because of an upload-size limit, rebuild it once in the
+same authorised artifact directory before running the notebooks:
+
+```text
+python scripts/reassemble_model_b_checkpoint.py --parts-dir <bundle>/checkpoint_parts --output-dir <bundle>
+```
+
+The utility validates every part and the final SHA-256, and refuses to replace
+a different checkpoint. The parts and reconstructed checkpoint remain outside
+Git.
+
 The similarly named `resnet18_model_b_best.pt` run dated 2026-10-19 is a
 separate partial-fine-tuning experiment (layer3/layer4/fc; different results
 and no frozen 95%-sensitivity policy). Store it under a clearly named

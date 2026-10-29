@@ -29,9 +29,10 @@ canonical metadata, policy, history, and internal-validation prediction files
 were then restored to `DATA/MODEL_B_FINE_TUNING/`.
 
 The canonical checkpoint is 134 MB, larger than the connected Drive upload
-limit. Therefore that one file must be uploaded separately from the verified
-local bundle before a shared Drive/Colab runtime can load Model B. Its required
-name and SHA-256 are `best_resnet18_study_level.pt` and
+limit. It is therefore stored as verified parts in `checkpoint_parts/`, with a
+small standalone reassembly utility. Rebuild it once in the artifact directory
+before a shared Drive/Colab runtime loads Model B. Its required name and
+SHA-256 are `best_resnet18_study_level.pt` and
 `63AEDC6BEC1534BDED7C3CA4D0DAF03AFC17BF92166CB7848506A6F3A82DE5B6`.
 Notebooks 05–06 now fail closed until the complete bundle verifies.
 
