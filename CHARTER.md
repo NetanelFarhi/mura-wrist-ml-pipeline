@@ -70,8 +70,23 @@ On timeout, malformed output, or unresolved conflict, the deterministic route re
 
 | Checkpoint | Deliverable | Owner / hat |
 |---|---|---|
-| Checkpoint 1 | Thin end-to-end baseline; patient-safe split, aggregation, validation-only threshold, baseline comparison | Hagit — Data; Hodaya — Model |
-| Checkpoint 2 | Agent integration and dedicated safety/evaluation suite; deterministic workflow remains operational | Netanel — Agent |
-| Final | Error/shortcut analysis, governance, rule-vs-agent comparison, demo/docs, future-cost estimate | Artium — Product |
+| Checkpoint 1 | Thin end-to-end baseline; patient-safe split, aggregation, validation-only threshold, baseline comparison | Hagit — Data; Hodaya — Core Model; Netanel — model-runtime integration, results interface, and separately labelled all-anatomy experimental extension |
+| Checkpoint 2 | Agent integration and dedicated safety/evaluation suite; deterministic workflow remains operational | Netanel — Agent, deterministic safety, and local application integration |
+| Final | Error/shortcut analysis, governance, rule-vs-agent comparison, demo/docs, future-cost estimate | Artium — Product; Netanel — application/demo integration; Hagit — data/scope review; Hodaya — model review |
 
-Named hats describe project ownership, not evidence that the future components have already been implemented. Source/citation items that require verification are tracked in [`reports/SOURCE_VERIFICATION.md`](reports/SOURCE_VERIFICATION.md).
+### Current workstream ownership
+
+| Workstream | Owner(s) | Scope of responsibility |
+|---|---|---|
+| Data | Hagit | Dataset access, patient/study/view structure, split and preprocessing governance. |
+| Core ML | Hodaya | Fine-tuned model workflow and model-training evidence. |
+| Model integration and experimental extension | Netanel | Canonical runtime/model-bundle integration, study-level result presentation, model-artifact governance, and coordination of the separately labelled experimental all-anatomy extension. |
+| Agent and deterministic safety | Netanel | Bounded-agent integration, deterministic routing/safety policy, independent agent evaluation, and hostile-input safeguards. |
+| Application and demo | Netanel | Wrist Review local interface, safe model-to-UI integration, reviewer flow, and final demo integration. |
+| Product | Artium | Product framing, workflow/reproducibility review, and contribution to final presentation readiness. |
+
+Named hats describe current ownership and coordination, not a claim that one
+person individually implemented every historical notebook or future component.
+The all-anatomy workstream remains experimental and is not part of the
+validated XR_WRIST MVP claim. Source/citation items that require verification
+are tracked in [`reports/SOURCE_VERIFICATION.md`](reports/SOURCE_VERIFICATION.md).

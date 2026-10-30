@@ -4,6 +4,23 @@
 
 **Team:** Netanel, Hagit, Hodaya, Artium
 
+## Current team workstreams
+
+This table records the team's current ownership and coordination areas. It
+does not rewrite historical notebook authorship or claim that planned work is
+already complete.
+
+| Team member | Current ownership |
+|---|---|
+| **Netanel** | Wrist Review application and demo integration; canonical model-runtime/artifact integration; study-level result presentation; deterministic safety and bounded-agent integration/evaluation; coordination of the separately labelled experimental all-anatomy extension. |
+| **Hagit** | Data access and governance; patient/study/view organisation; preprocessing and data-scope review. |
+| **Hodaya** | Core fine-tuned model workflow and model-training evidence. |
+| **Artium** | Product framing, reproducibility review, and final-presentation readiness. |
+
+The all-anatomy extension remains **experimental** and is not a validated
+replacement for the XR_WRIST MVP. The adaptive agent remains **planned** until
+it is implemented and independently evaluated.
+
 Course project for study-level **NORMAL / ABNORMAL** classification of wrist
 radiograph studies from Stanford MURA v1.1. This is a research prototype for
 decision support before specialist review. It predicts the MURA study label;
