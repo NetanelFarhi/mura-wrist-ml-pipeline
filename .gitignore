@@ -41,6 +41,7 @@ reports/metrics/*
 reports/errors/*
 !reports/errors/.gitkeep
 artifacts/
+local_artifacts/
 
 # Local diagnostic outputs may contain identifiers, paths, or per-study scores.
 # Publish only reviewed aggregate summaries under docs/results/.

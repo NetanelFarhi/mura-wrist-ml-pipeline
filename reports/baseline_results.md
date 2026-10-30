@@ -1,5 +1,7 @@
 # Phase 1 baseline evaluation results
 
+> **Historical official-valid reference only.** The official MURA `valid` split was opened once for the frozen Phase 1 baseline evaluation reported below. These values must not be used to choose or re-choose a later model, threshold, calibration method, architecture, or agent policy. See [TEST_SET_GOVERNANCE.md](TEST_SET_GOVERNANCE.md) for what later phases may and may not use.
+
 All values are study-level results. Operating thresholds in the primary table were selected from validation predictions only; the final test data were used only to calculate the reported metrics.
 
 ## Validation-selected operating threshold

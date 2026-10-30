@@ -1,9 +1,21 @@
 # Wrist Review app — local research prototype
 
-![Wrist Review app flow](wrist_review_app_flow.png)
+## Actual interface capture
 
-> The visual above is a product-flow illustration only. It contains no MURA
-> radiographs, patient data, model output from a real case, or clinical claim.
+![Actual Add Study screen](screenshots/01_add_study_actual_ui.png)
+
+> This is a local browser capture of the running application before a study is
+> selected. It contains no MURA radiograph, patient data, local data path, or
+> model output from a real case. The browser frame and taskbar are not part of
+> the product UI.
+
+## Conceptual product flow
+
+![Conceptual Wrist Review app flow](concepts/wrist_review_concept_storyboard.png)
+
+> This three-phone image is conceptual product-flow artwork, **not a screenshot
+> of the running application**. The actual local interface is implemented in
+> [`apps/wrist_review`](../../apps/wrist_review/).
 
 ## Purpose
 
@@ -18,7 +30,9 @@ or clear a case from standard human review.
 ## User flow
 
 1. **Add study** — select 1–8 local image files or one local folder, enter a
-   non-identifying case alias, and declare the anatomy.
+   non-identifying case alias, and declare the anatomy. A selection with more
+   than eight files is rejected; the user must re-select rather than having
+   files discarded silently.
 2. **Inspect views** — choose any selected file from the study list; view its
    local preview, file details, image dimensions, and technical-QC status.
 3. **Review study** — only real selected views are passed to the verified
@@ -27,10 +41,32 @@ or clear a case from standard human review.
 4. **Receive a safe route** — `RAISE_PRIORITY`, `STANDARD_HUMAN_REVIEW`,
    `NEEDS_HUMAN_REVIEW`, or `UNSUPPORTED`.
 
+Do not enter patient identifiers in the alias, folder name, or file name.
+Those values can be visible in the local interface even though the server does
+not persist uploads, image bytes, or request logs.
+
+## Deterministic route summary
+
+| Condition | Result | Model inference |
+| --- | --- | --- |
+| Empty/duplicate input or more than 8 views | Selection/API request rejected | No |
+| Unsupported declared anatomy | `UNSUPPORTED` | No |
+| Missing/unknown declared anatomy or failed QC | `NEEDS_HUMAN_REVIEW` | No |
+| Missing/invalid canonical bundle, policy, or checkpoint hash | Fail closed — no review result | No |
+| Verified study mean reaches the frozen threshold, or view scores disagree across it | `RAISE_PRIORITY` | Yes |
+| Verified study mean remains below threshold and views do not disagree across it | `STANDARD_HUMAN_REVIEW` | Yes |
+
+If the canonical model bundle, frozen policy, or expected checkpoint hash is
+missing or invalid, the app fails closed: it returns no model review result.
+The local Model screen shows the artifact issue and the bundle must be fixed
+before a review can proceed.
+
 ## Safety policy built into the interface
 
-- It accepts only declared `XR_WRIST` studies; unsupported anatomy does not
-  reach the classifier.
+- It accepts only **declared** `XR_WRIST` studies; unsupported declared anatomy
+  does not reach the classifier. This is not automatic body-part recognition:
+  the current selector is a user-provided routing input. An automatic
+  body-part/support checker is planned before any broader workflow claim.
 - Technical QC runs before model inference. Corrupt, tiny, or near-uniform
   inputs are routed to `NEEDS_HUMAN_REVIEW`.
 - The frozen Model B checkpoint and threshold are checksum/policy verified

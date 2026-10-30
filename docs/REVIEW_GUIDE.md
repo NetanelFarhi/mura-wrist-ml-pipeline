@@ -9,15 +9,20 @@ localization system, autonomous diagnosis, or clinical deployment.
 ## Start here
 
 1. Read the root [README](../README.md) for the notebook sequence.
-2. Read [Checkpoint 1 results](results/checkpoint1/README.md) for the current
+2. Read [result lineage](RESULT_LINEAGE.md) before comparing any historical
+   2,768/692 result with the current 2,769/691 development protocol.
+3. Read [Checkpoint 1 results](results/checkpoint1/README.md) for the current
    internal-validation comparison and bootstrap intervals.
-3. Read [test-set governance](../reports/TEST_SET_GOVERNANCE.md) before
+4. Read [test-set governance](../reports/TEST_SET_GOVERNANCE.md) before
    interpreting any historical official-MURA-`valid` result.
-4. Read the [charter](../CHARTER.md), [agent design](../agents/AGENT_DESIGN.md),
+5. Read the [charter](../CHARTER.md), [agent design](../agents/AGENT_DESIGN.md),
    and [agent-evaluation plan](../evaluation/AGENT_EVAL_PLAN.md) for the
    intended final workflow and its safety boundaries.
-5. See the dated [repository review](../reports/REPOSITORY_REVIEW_20261030.md)
+6. See the dated [repository review](../reports/REPOSITORY_REVIEW_20261030.md)
    for the evidence and checks performed for this update.
+7. See the concise [Checkpoint 2 status](../reports/CHECKPOINT2_STATUS.md)
+   and [presentation/demo preparation](../presentation/README.md) for what
+   is ready now and what must still be completed.
 
 ## What is currently supported by measured evidence
 
@@ -55,12 +60,19 @@ calibration, architecture, or agent selection. See
 - **Phase 2A:** changing the operating threshold can increase sensitivity, but
   requires a substantial specificity/workload trade-off; calibration gains
   from temperature scaling were limited/inconsistent.
-- **Phase 2B:** gated attention did not show a consistent advantage over
-  simpler embedding pooling on the internal-validation development set.
+- **Phase 2B — PARTIAL:** gated attention did not show a consistent advantage
+  over simpler embedding pooling on the internal-validation development set.
+  Completed: mean/max/attention comparison and a 2,000-replicate paired
+  bootstrap, with all requested paired confidence intervals crossing zero.
+  Remaining: the attention-specific regression assertions and comprehensive
+  view-count reporting requested by the protocol. It must not be presented as
+  a completed superior multi-view result.
 - **Phase 2C:** partial study-level fine-tuning did not justify its extra
   complexity. Frozen mean embedding remained slightly stronger at the >=95%
   policy (specificity 0.585 vs 0.571); paired bootstrap intervals included
-  zero. The ML core is therefore frozen rather than further tuned.
+  zero. The ML core is therefore frozen rather than further tuned. This is a
+  separate mean-embedding research comparison; it does not replace the
+  Checkpoint 1 Model B mean-probability runtime or borrow its threshold.
 
 The detailed conclusion is in
 [PHASE2C_SUMMARY.md](../reports/phase2c/PHASE2C_SUMMARY.md).
@@ -98,7 +110,7 @@ python -m pytest tests -q
 python scripts/check_repo_data_governance.py
 ```
 
-On 2026-10-30, these completed with **72 tests passing** and with the
+On 2026-10-30, these completed with **74 tests passing** and with the
 data-governance check reporting no unsafe tracked paths. Raw MURA images,
 checkpoints, local manifests, per-study predictions, and credentials remain
 outside Git by design.

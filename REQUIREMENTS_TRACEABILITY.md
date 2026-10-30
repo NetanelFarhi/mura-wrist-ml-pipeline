@@ -30,7 +30,7 @@ Status meanings: **DONE** = an auditable artifact exists; **IN PROGRESS** = work
 | Plan B explicitly changes task, QC, anatomy, and evaluation assumptions | `CHARTER.md` §3 | DONE | Charter |
 | Research/non-commercial data handling; no raw images in Git | `data/README.md`; `.gitignore`; governance checks | DONE for this branch; re-verify before every future push | Charter / every push |
 | Named Data, Model, Agent, Product hats | `CHARTER.md` §7 | DONE | Charter |
-| Product value/workflow and future operating cost | `reports/PRODUCT_AND_COST_PLAN.md`; `docs/app/Wrist_Review_App.md` | DONE (design/prototype documentation) | Final |
+| Product value/workflow and transparent future monthly cost scenario | `reports/PRODUCT_AND_COST_PLAN.md`; `docs/app/Wrist_Review_App.md` | DONE (illustrative pilot scenario; not a production quotation) | Final |
 | Hostile metadata / prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | DONE (design; execution tests planned) | Checkpoint 2 |
 
 ## Lecturer Part C: analysis and safety

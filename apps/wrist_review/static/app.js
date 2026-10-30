@@ -5,6 +5,8 @@ const appState = {
   toastTimer: null,
 };
 
+const MAX_STUDY_VIEWS = 8;
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -57,11 +59,12 @@ async function imageDimensions(blobUrl) {
 }
 
 async function normaliseFiles(fileList) {
-  let files = [...fileList].filter((file) => file.size > 0);
+  const files = [...fileList].filter((file) => file.size > 0);
   if (!files.length) throw new Error("No readable image files were selected.");
-  if (files.length > 8) {
-    files = files.slice(0, 8);
-    showToast("Only the first 8 images were kept for this study.");
+  if (files.length > MAX_STUDY_VIEWS) {
+    throw new Error(
+      `This selection contains ${files.length} files. Select 1–${MAX_STUDY_VIEWS} views from one study and try again.`,
+    );
   }
   const names = new Set();
   const views = [];
@@ -83,7 +86,7 @@ async function normaliseFiles(fileList) {
   return views;
 }
 
-async function selectFiles(fileList) {
+async function selectFiles(fileList, sourceInput = null) {
   try {
     const views = await normaliseFiles(fileList);
     appState.views.forEach((view) => URL.revokeObjectURL(view.blobUrl));
@@ -99,6 +102,9 @@ async function selectFiles(fileList) {
     workspace.classList.remove("hidden");
     updateProgress(1);
   } catch (error) {
+    // Reset the picker after a rejected selection so the same files can be
+    // chosen again after the user corrects the selection.
+    if (sourceInput) sourceInput.value = "";
     showToast(error instanceof Error ? error.message : "Could not add those files.");
   }
 }
@@ -292,8 +298,8 @@ async function loadModelStatus() {
   }
 }
 
-filePicker.addEventListener("change", (event) => selectFiles(event.target.files));
-folderPicker.addEventListener("change", (event) => selectFiles(event.target.files));
+filePicker.addEventListener("change", (event) => selectFiles(event.target.files, event.target));
+folderPicker.addEventListener("change", (event) => selectFiles(event.target.files, event.target));
 $("#changeFiles").addEventListener("click", () => filePicker.click());
 $("#removeSelected").addEventListener("click", removeSelected);
 $("#reviewButton").addEventListener("click", runReview);

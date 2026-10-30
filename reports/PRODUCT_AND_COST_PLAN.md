@@ -25,3 +25,35 @@ No production price is claimed because study volume, storage retention, runtime,
 | Operations | monitoring, human review, support, model/agent evaluation and incident response |
 
 The future cost report must disclose its assumptions, distinguish one-time implementation from recurring cost, and compare agent-enabled versus deterministic-only workflows.
+
+## Illustrative future research-pilot scenario
+
+This is a transparent **illustrative monthly scenario in USD**, not a vendor
+quotation, clinical-deployment estimate, or current project bill. It assumes
+40 GPU inference/QC hours per month, 100 GB of object storage, and (only if a
+future bounded text-summary agent is enabled) 1,000 text-only summaries per
+month. It assumes that no radiograph or patient identifier is sent to an LLM.
+
+| Component | Assumption and arithmetic | Illustrative monthly amount |
+|---|---|---:|
+| GPU compute | 40 hours × $0.7364/hour | $29.46 |
+| Object storage | 100 GB × $0.023/GB-month | $2.30 |
+| Optional text-only LLM summaries | 1,000 calls × (3,000 input + 750 output tokens), using an example $1/M-input and $5/M-output token rate | $6.75 |
+| **Illustrative subtotal with optional LLM** | compute + storage + optional summaries | **$38.51/month** |
+| **Illustrative subtotal without LLM** | compute + storage only | **$31.76/month** |
+
+The compute example uses the published AWS SageMaker `ml.g4dn.xlarge`
+illustration, and the storage example uses the published S3 Standard rate;
+the optional LLM line is a token-based example that must be refreshed against
+the selected provider before procurement. Prices vary by region, usage,
+discounts, taxes, service requests, and date. This scenario excludes data
+transfer, disks, logging, backups, monitoring, security/compliance,
+integration, and human-review costs. The current repository has no deployed
+LLM, cloud service, or actual cloud bill.
+
+Sources checked 2026-10-30:
+
+- [AWS SageMaker pricing](https://aws.amazon.com/sagemaker/ai/pricing/)
+- [AWS S3 Standard pricing example](https://docs.aws.amazon.com/pdfs/solutions/latest/live-streaming-on-aws-with-amazon-s3/live-streaming-on-aws-with-amazon-s3.pdf)
+- [AWS pricing-calculator assumptions](https://aws.amazon.com/calculator/calculator-assumptions/)
+- [OpenAI API pricing](https://developers.openai.com/api/docs/pricing)

@@ -1,5 +1,9 @@
 # MURA XR_WRIST Research Project
 
+**BIU DS23 final project**
+
+**Team:** Netanel, Hagit, Hodaya, Artium
+
 Course project for study-level **NORMAL / ABNORMAL** classification of wrist
 radiograph studies from Stanford MURA v1.1. This is a research prototype for
 decision support before specialist review. It predicts the MURA study label;
@@ -10,6 +14,18 @@ clinical decision tool.
 > It distinguishes the current internal-validation evidence, the historical
 > once-opened official MURA `valid` reference, experimental extensions, and
 > planned Agentic-AI work.
+> [Result lineage](docs/RESULT_LINEAGE.md) explains why historical 2,768/692
+> and current 2,769/691 internal split results must not be mixed.
+
+## Problem, user, and scope
+
+The intended user is an **Emergency Department physician** reviewing a wrist
+radiograph study before specialist review is available. The project studies
+whether a study-level model can flag **MURA-defined musculoskeletal
+abnormality** for priority human review. MURA `ABNORMAL` is not synonymous
+with acute fracture; the project does not measure diagnosis time, return
+visits, treatment benefit, lesion location, or clinical deployment readiness.
+Every case remains in human review.
 
 ## Current notebook workflow
 
@@ -63,12 +79,23 @@ claim or an untouched-test result.
   study-level probabilities. The threshold is frozen from that validation
   analysis; it is not transferred from one model to another.
 
+| Same 691-study internal-validation cohort | AUROC | AUPRC | Threshold | Sensitivity | Specificity | FP / FN | Flagged |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Frozen ResNet-18 embeddings + Logistic Regression | 0.880 | 0.852 | 0.063774 | 95.2% | 39.3% | 256 / 13 | 74.1% |
+| Fine-tuned ResNet-18, mean probability pooling | 0.913 | 0.878 | 0.263568 | 95.2% | 58.3% | 176 / 13 | 62.5% |
+
+This is the mandatory cheap-baseline comparison on the same development
+population and operating target. Comparable training/inference time and cost
+were not saved for these two runs, so no speed or cost superiority is claimed.
+Fine-tuned max pooling is secondary diagnostic evidence: it reached 62.1%
+specificity at 95.2% sensitivity but lower AUROC/AUPRC (0.883 / 0.806).
+
 The generated [current Checkpoint 1 results page](docs/results/checkpoint1/README.md)
 contains the exact AUROC, AUPRC, threshold, sensitivity, specificity, review
 workload, false-positive/false-negative counts, and patient-cluster bootstrap
 intervals. It is the source of the currently reported numbers rather than this
-README, so the visible summary cannot become stale after a protocol-preserving
-rerun.
+README. If an approved protocol-preserving rerun updates that result page, the
+summary table in this README must be updated in the same reviewed change.
 
 The prior >=90% development-policy outputs are preserved as historical,
 pre-feedback material under
@@ -91,6 +118,27 @@ diagnostic checks are in [reports/phase2c/PHASE2C_SUMMARY.md](reports/phase2c/PH
 The rendered [results viewer](notebooks/06_results_viewer.ipynb) contains those
 safe aggregate outputs for GitHub. It contains no raw radiographs or per-study
 predictions.
+
+**Important model boundary:** the Phase 2C frozen mean-embedding reference is
+a separate research comparison. The current Checkpoint 1 reporting and local
+deterministic app retain the fine-tuned Model B **mean-probability** policy and
+its model-specific threshold. The two models and thresholds must never be
+interchanged; see [result lineage](docs/RESULT_LINEAGE.md).
+
+## Agent and safety status
+
+The **deterministic safety layer is implemented and tested**: input QC,
+supported-anatomy checks, view-evidence routing, and non-overridable human
+review. It works without an agent and may raise priority, never reduce a case
+below standard human review.
+
+The adaptive Agentic-AI layer is **designed, not implemented or evaluated**.
+It is proposed only when a supported case has genuinely conflicting or missing
+evidence and the next approved evidence-gathering step is case-specific; known
+rules remain deterministic. The planned agent may use only approved tools and
+may return `NEEDS_HUMAN_REVIEW` or `UNSUPPORTED`; it cannot diagnose, treat,
+change thresholds, or bypass guardrails. See [agent design](agents/AGENT_DESIGN.md)
+and the independent [agent evaluation plan](evaluation/AGENT_EVAL_PLAN.md).
 
 ## Data and evaluation governance
 
@@ -117,9 +165,69 @@ Checkpoint 1 model/threshold-selection workflow. See
   anatomical reasoning or lesion localization.
 - No model in this repository is ready for clinical use.
 
+## Repository map
+
+| Location | Purpose |
+|---|---|
+| `data/` | Local-access instructions, schemas, and data dictionary; never raw MURA images. |
+| `notebooks/` | Ordered wrist workflow; `legacy/` and `experimental_all_anatomies/` are explicitly non-canonical. |
+| `src/`, `configs/`, `models/` | Reusable code, versioned settings, and safe model metadata; weights/predictions remain local. |
+| `agents/`, `evaluation/` | Agent design, guardrails, and independent evaluation plans. |
+| `docs/`, `reports/` | Current results, lineage, governance, product plans, and reviewer material. |
+| `apps/wrist_review/` | Local research-interface source only; no model bundle or patient data. |
+| `tests/` | Software, integrity, and safety tests; not ML-performance evidence. |
+
+## Local quick start
+
+### Safe repository checks (no MURA data required)
+
+Use Python 3.10 or 3.11 from the repository root:
+
+```powershell
+git clone https://github.com/NetanelFarhi/mura-wrist-ml-pipeline.git
+cd mura-wrist-ml-pipeline
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pytest tests -q
+python scripts/check_repo_data_governance.py
+```
+
+### Authorized local-data reproduction
+
+Raw MURA data, manifests, checkpoints, embeddings, and detailed predictions
+are deliberately outside Git. First read [data/README.md](data/README.md) and
+obtain MURA through its authorized research/non-commercial route. The
+development-only runner accepts local artifacts outside the repository and is
+configured to avoid official MURA `valid`:
+
+```powershell
+python scripts/execute_canonical_notebooks.py `
+  --kernel <registered-jupyter-kernel> `
+  --jupyter-path <path-to-jupyter-kernel-resources> `
+  --source-csv-root <authorized-MURA-root> `
+  --mura-data-root <authorized-MURA-root> `
+  --raw-zip <authorized-path-to-MURA-v1.1_files.zip> `
+  --artifacts-root <outside-repository-artifact-directory>
+```
+
+This runner is a development reproduction tool, not a way to create a new
+untouched test result. For the optional local Wrist Review interface, see
+[apps/wrist_review/README.md](apps/wrist_review/README.md).
+
+## Product and future-cost status
+
+No production monthly price is claimed because volume, infrastructure, data
+retention, integration, and any future API/model choice are unknown. The
+[product and cost plan](reports/PRODUCT_AND_COST_PLAN.md) records the required
+assumptions and cost categories: compute, storage, integration/security,
+optional LLM/API, monitoring, and human operations.
+
 ## Project documentation
 
 - [Reviewer guide / current project state](docs/REVIEW_GUIDE.md)
+- [Checkpoint 2 status](reports/CHECKPOINT2_STATUS.md)
 - [Repository review — 2026-10-30](reports/REPOSITORY_REVIEW_20261030.md)
 - [CHARTER.md](CHARTER.md)
 - [Requirements traceability](REQUIREMENTS_TRACEABILITY.md)
@@ -128,4 +236,5 @@ Checkpoint 1 model/threshold-selection workflow. See
 - [Agent design](agents/AGENT_DESIGN.md)
 - [Agent evaluation plan](evaluation/AGENT_EVAL_PLAN.md)
 - [Wrist Review app overview](docs/app/Wrist_Review_App.md)
+- [Presentation and demo preparation](presentation/README.md)
 - [Historical Phase 1 summary](reports/PHASE1_SUMMARY.md)

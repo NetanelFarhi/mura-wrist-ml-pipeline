@@ -34,7 +34,7 @@ python -m pytest tests -q
 python scripts/check_repo_data_governance.py
 ```
 
-Result: **72 tests passed** (14 third-party matplotlib deprecation warnings)
+Result: **74 tests passed** (14 third-party matplotlib deprecation warnings)
 and the data-governance check passed with no unsafe tracked paths. The app was
 also smoke-tested locally: its home route returned HTTP 200 and, without a local model bundle, its status
 endpoint returned `ready: false` with `model_bundle_missing`. This is the

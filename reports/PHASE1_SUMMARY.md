@@ -43,7 +43,7 @@ All metrics below are study-level on the same 237-study sealed test set. AUROC c
 | Frozen ResNet-18 embeddings + Logistic Regression | 0.8756 | 0.8596 | 0.7320 | 0.9143 | 0.7889 | 0.2680 | 128 / 12 / 26 / 71 |
 | Fine-tuned ResNet-18 | 0.8970 | 0.8937 | 0.7010 | 0.9786 | 0.8095 | 0.2990 | 137 / 3 / 29 / 68 |
 
-The authoritative machine-readable artifacts are [the comparison CSV](metrics/model_comparison.csv), [Model A evaluation JSON](metrics/Frozen_ResNet-18_embeddings_plus_Logistic_Regression_evaluation.json), and [Model B evaluation JSON](metrics/Fine-tuned_ResNet-18_evaluation.json).
+The original machine-readable Phase 1 metric files were local-only run artifacts and are intentionally excluded from this repository by data-governance rules; they are therefore not linked here. The durable repository record of these historical study-level values is [baseline_results.md](baseline_results.md), together with the descriptive [error-analysis report](error_analysis.md) and this summary. No new evaluation was run to create this documentation clarification.
 
 ## Model A — frozen embeddings + Logistic Regression
 
@@ -63,8 +63,8 @@ Thus, fine-tuning improved the discrimination, specificity, and F1 point estimat
 
 The generated [error-analysis report](error_analysis.md) indexes prediction outcomes, probabilities, and view counts only; it makes no clinical-causal claim.
 
-- Model A: 17 false negatives and 27 false positives at its frozen threshold. The index contains 13 high-confidence false negatives and 6 high-confidence false positives; 2 false negatives and 3 false positives came from single-view studies.
-- Model B: 26 false negatives and 7 false positives at its frozen threshold. The index contains 18 high-confidence false negatives and 3 high-confidence false positives; 2 false negatives and 1 false positive came from single-view studies.
+- Model A: 17 false negatives and 27 false positives at its frozen threshold. The index contains 13 high predicted-class-score false negatives and 6 high predicted-class-score false positives; 2 false negatives and 3 false positives came from single-view studies.
+- Model B: 26 false negatives and 7 false positives at its frozen threshold. The index contains 18 high predicted-class-score false negatives and 3 high predicted-class-score false positives; 2 false negatives and 1 false positive came from single-view studies.
 
 These counts describe this test set and operating thresholds only. They do not establish why an abnormality was missed or whether either model would improve clinical outcomes.
 

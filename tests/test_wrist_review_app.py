@@ -53,3 +53,33 @@ def test_local_app_fails_closed_without_model_bundle(monkeypatch, tmp_path):
 
     assert status["ready"] is False
     assert status["issues"] == ["model_bundle_missing"]
+
+
+def test_local_app_rejects_more_than_eight_views_before_inference():
+    app_core = load_app_core()
+
+    class RuntimeThatMustNotRun:
+        def predict_view_probabilities(self, _images):  # pragma: no cover - must not be called
+            raise AssertionError("The model must not run for an over-limit study.")
+
+    result = app_core.run_guarded_review(
+        RuntimeThatMustNotRun(),
+        case_alias="LOCAL-CASE",
+        declared_anatomy="XR_WRIST",
+        images=[object()] * (app_core.MAX_STUDY_VIEWS + 1),
+    )
+
+    assert result["deterministic_outcome"] == "NEEDS_HUMAN_REVIEW"
+    assert result["classification_performed"] is False
+    assert result["reason"] == "too_many_views_maximum_8"
+
+
+def test_browser_ui_does_not_silently_truncate_over_limit_selection():
+    source = (REPOSITORY_ROOT / "apps" / "wrist_review" / "static" / "app.js").read_text(
+        encoding="utf-8"
+    )
+
+    assert "const MAX_STUDY_VIEWS = 8;" in source
+    assert "files.length > MAX_STUDY_VIEWS" in source
+    assert "Select 1–${MAX_STUDY_VIEWS} views from one study and try again." in source
+    assert "files.slice(0, 8)" not in source

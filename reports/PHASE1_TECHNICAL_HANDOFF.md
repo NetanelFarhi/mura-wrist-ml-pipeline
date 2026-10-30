@@ -1,5 +1,14 @@
 # Phase 1 technical handoff — MURA XR_WRIST
 
+> **Historical local-artifact handoff:** this document records what was found
+> during the original Phase 1 handoff. Several paths named below were local
+> run artifacts at that time and are now deliberately excluded from Git under
+> the project's data-governance rules. Their absence from the public repository
+> does not change the historical values; it means they cannot be re-opened from
+> Git. Read this together with [result lineage](../docs/RESULT_LINEAGE.md) and
+> [test-set governance](TEST_SET_GOVERNANCE.md). It is not the current
+> Checkpoint 1 result source.
+
 ## Audit boundary
 
 This is a read-only handoff of artifacts already present in this repository. No model was retrained, no new experiment or threshold search was run, and no Phase 2 component was started while preparing this document. “NOT VERIFIED” means no persisted artifact establishes the requested fact.
@@ -129,9 +138,9 @@ The descriptive error report uses probability distance/confidence labels, but ex
 
 ## 8. Error analysis already performed
 
-Phase 1 created descriptive study-level error reports for each model. They index labels, probabilities, view counts, false negatives/positives, high-confidence error categories, low-confidence predictions, and representative single-/multi-view studies. They do not infer medical causes.
+Phase 1 created descriptive study-level error reports for each model. They index labels, probabilities, view counts, false negatives/positives, high predicted-class-score error categories, low-score predictions, and representative single-/multi-view studies. These raw scores are not calibrated confidence or uncertainty estimates, and the reports do not infer medical causes.
 
-At frozen Phase 1 test thresholds, Model A had 17 FN and 27 FP; Model B had 26 FN and 7 FP. The reports’ representative index is capped in some categories, so the authoritative total counts are the final evaluation JSONs above.
+At frozen Phase 1 test thresholds, Model A had 17 FN and 27 FP; Model B had 26 FN and 7 FP. The reports’ representative index is capped in some categories. The original evaluation JSONs were historical local artifacts and are not retained in Git; use the aggregate counts in [baseline_results.md](baseline_results.md) and [error_analysis.md](error_analysis.md) for the durable repository record.
 
 Existing post-Phase-1 analysis (`reports/PHASE1_5_DECISION.md`, based only on saved predictions) additionally records 14 shared FNs, 4 shared FPs, 3 Model-A-only FNs, 12 Model-B-only FNs, 23 Model-A-only FPs, and 3 Model-B-only FPs. It also stratifies the frozen test predictions by views:
 
@@ -183,7 +192,7 @@ All paths below are relative to the repository root unless absolute path is show
 | Split manifests | `data/manifests/wrist_manifest.csv`; `data/manifests/split_manifest.csv` |
 | Configs | `configs/data.yaml`; `configs/frozen_logistic.yaml`; `configs/resnet18_finetune.yaml`; `configs/evaluation_models.json` |
 | Model selections/provenance | `models/frozen_logistic/selection.json`; `models/frozen_logistic/test_prediction_metadata.json`; `models/frozen_logistic/validation_metrics.json`; `models/resnet18/selection.json`; `models/resnet18/run_config.json`; `models/resnet18/training_history.json`; `models/resnet18/test_prediction_metadata.json`; `models/resnet18/validation_metrics.json` |
-| Final metrics | `reports/metrics/evaluation_run_metadata.json`; `reports/metrics/model_comparison.csv`; both `*_evaluation.json`; both `*_operating_points.csv` |
+| Final metrics | Historical local-only `reports/metrics/` JSON/CSV artifacts; **NOT SAVED in Git** under current governance. Aggregate historical values are retained in `reports/baseline_results.md`, `reports/error_analysis.md`, and `reports/PHASE1_SUMMARY.md`. |
 | Error artifacts | `reports/error_analysis.md`; all CSV/Markdown files under `reports/errors/` |
 | Executed notebook evidence | Notebooks exist under `notebooks/`, but all six have zero saved outputs and zero execution counts: execution is **NOT VERIFIED** from notebook metadata. |
 | Figures | No Phase 1 figure was saved (`reports/figures/.gitkeep` only). A later Phase 1.5 figure exists at `reports/team_share/PHASE1_5_KEY_FIGURE.png`. |
