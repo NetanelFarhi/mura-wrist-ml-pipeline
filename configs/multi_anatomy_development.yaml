@@ -1,0 +1,45 @@
+# Development-only extension from the original XR_WRIST MVP.
+# Official MURA valid is deliberately excluded from all values below.
+
+dataset:
+  source_population: official_mura_train_only
+  anatomies:
+    - XR_ELBOW
+    - XR_FINGER
+    - XR_FOREARM
+    - XR_HAND
+    - XR_HUMERUS
+    - XR_SHOULDER
+    - XR_WRIST
+  prediction_unit: study
+  patient_split: global_patient_level_internal_train_validation
+  split_seed: 42
+  split_folds: 5
+  validation_fold: 0
+  official_valid_allowed: false
+
+preprocessing:
+  input_size: 224
+  grayscale_to_rgb: true
+  resize: aspect_preserving_square_pad_then_resize
+  normalization: imagenet
+
+baseline:
+  encoder: resnet18_imagenet_frozen
+  embedding_dimension: 512
+  aggregation: mean_embedding_by_study
+  classifier: logistic_regression
+  C_candidates: [0.1, 1.0, 10.0]
+  C_selection: patient_grouped_cv_within_internal_train
+  C_group_folds: 5
+  class_weight: null
+
+operating_policy:
+  target_sensitivity: 0.95
+  threshold_selection: highest_internal_validation_threshold_meeting_target
+  one_threshold_per_anatomy: true
+
+reporting:
+  metrics: [AUROC, AUPRC, sensitivity, specificity, precision, F1, false_negative_rate]
+  uncertainty: patient_cluster_bootstrap_95_CI
+  claim_scope: development_internal_validation_only

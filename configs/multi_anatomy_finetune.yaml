@@ -1,0 +1,34 @@
+# One controlled Model B run per anatomy. No hyperparameter search.
+dataset:
+  source_population: official_mura_train_only
+  split: global_patient_level_internal_train_validation
+  official_valid_allowed: false
+  test_allowed: false
+  study_aggregation: mean_probability
+
+model:
+  architecture: resnet18
+  initialization: imagenet
+  one_model_per_anatomy: true
+
+training:
+  optimizer: AdamW
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  class_weighting: auto
+  batch_size: 4
+  workers: 0
+  maximum_epochs: 15
+  early_stopping_metric: validation_auroc
+  early_stopping_patience: 4
+  scheduler: reduce_lr_on_plateau
+  seed: 42
+
+operating_policy:
+  target_sensitivity: 0.95
+  threshold_selection: highest_internal_validation_threshold_meeting_target
+
+reporting:
+  bootstrap_unit: patient
+  bootstrap_replicates: 2000
+  claim_scope: development_internal_validation_only
