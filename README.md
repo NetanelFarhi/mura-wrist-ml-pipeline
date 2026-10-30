@@ -6,6 +6,11 @@ decision support before specialist review. It predicts the MURA study label;
 it is **not** a fracture diagnosis, fracture-localization system, or autonomous
 clinical decision tool.
 
+> **Reviewer start here:** [Current project state and navigation guide](docs/REVIEW_GUIDE.md).
+> It distinguishes the current internal-validation evidence, the historical
+> once-opened official MURA `valid` reference, experimental extensions, and
+> planned Agentic-AI work.
+
 ## Current notebook workflow
 
 The numbered notebooks below are the current Checkpoint 1 workflow. Run them
@@ -21,10 +26,17 @@ in order, using the same patient-safe internal train/validation split.
 | 06 | [Model B evaluation and comparison](notebooks/06_MURA_ModelB_Evaluation_and_Comparison.ipynb) | Compares Model A and Model B on the same internal validation studies and reports a validation-only operating policy. | Completed on internal validation |
 | 07 | [Shortcut and geometry audit](notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb) | Tests geometry/padding sensitivity and records diagnostic evidence about possible shortcut learning. | Completed diagnostic audit |
 | 08 | [Local runtime study viewer](notebooks/08_MURA_Runtime_Study_Viewer.ipynb) | Displays the separate views of one authorised local internal-train study for visual QC. It is code-only in Git and defaults to no displayed image output. | Optional local/Colab utility |
+| 09a | [Deterministic safety tools](notebooks/09_MURA_Deterministic_Safety_Tools.ipynb) | Implements and tests input-QC, scope validation, disagreement evidence, and non-overridable safe routing. | Current deterministic safety baseline |
+| 09b | [Agentic-AI contributor notebook](notebooks/09_MURA_Agentic_AI.ipynb) | Preserved contributor implementation draft with its original narrative and legacy local artifact layout. | Historical/integration draft — not canonical runtime |
 
 Earlier notebooks are preserved under [notebooks/legacy](notebooks/legacy/)
 for traceability. They are not the canonical workflow and must not be used to
 make new selection decisions without protocol review.
+
+The [experimental all-anatomy extension](notebooks/experimental_all_anatomies/)
+contains separately labelled development notebooks for MURA's seven anatomy
+categories. It is not part of the XR_WRIST MVP claim and has not been promoted
+to a final multi-anatomy result.
 
 The canonical notebooks retain reviewed aggregate tables and figures so their
 results render directly on GitHub. Radiographs, study IDs, Drive paths,
@@ -107,10 +119,13 @@ Checkpoint 1 model/threshold-selection workflow. See
 
 ## Project documentation
 
+- [Reviewer guide / current project state](docs/REVIEW_GUIDE.md)
+- [Repository review — 2026-10-30](reports/REPOSITORY_REVIEW_20261030.md)
 - [CHARTER.md](CHARTER.md)
 - [Requirements traceability](REQUIREMENTS_TRACEABILITY.md)
 - [Product and cost plan](reports/PRODUCT_AND_COST_PLAN.md)
 - [Shortcut-analysis plan](evaluation/SHORTCUT_ANALYSIS_PLAN.md)
 - [Agent design](agents/AGENT_DESIGN.md)
 - [Agent evaluation plan](evaluation/AGENT_EVAL_PLAN.md)
+- [Wrist Review app overview](docs/app/Wrist_Review_App.md)
 - [Historical Phase 1 summary](reports/PHASE1_SUMMARY.md)

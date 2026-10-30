@@ -30,16 +30,16 @@ Status meanings: **DONE** = an auditable artifact exists; **IN PROGRESS** = work
 | Plan B explicitly changes task, QC, anatomy, and evaluation assumptions | `CHARTER.md` §3 | DONE | Charter |
 | Research/non-commercial data handling; no raw images in Git | `data/README.md`; `.gitignore`; governance checks | DONE for this branch; re-verify before every future push | Charter / every push |
 | Named Data, Model, Agent, Product hats | `CHARTER.md` §7 | DONE | Charter |
-| Product value/workflow and future operating cost | `reports/PRODUCT_AND_COST_PLAN.md` | PLANNED | Final |
-| Hostile metadata / prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
+| Product value/workflow and future operating cost | `reports/PRODUCT_AND_COST_PLAN.md`; `docs/app/Wrist_Review_App.md` | DONE (design/prototype documentation) | Final |
+| Hostile metadata / prompt-injection guardrails | `agents/AGENT_DESIGN.md`; `evaluation/AGENT_EVAL_PLAN.md` | DONE (design; execution tests planned) | Checkpoint 2 |
 
 ## Lecturer Part C: analysis and safety
 
 | Requirement | Repository evidence | Status | Checkpoint |
 |---|---|---:|---|
 | Do not equate MURA abnormality with acute fracture | `CHARTER.md` §1; `data/README.md` | DONE | Charter |
-| Error / shortcut plan without fabricated subtypes | `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | Final |
-| Grad-CAM is diagnostic only, never lesion-localization evidence | `CHARTER.md` §6; `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | PLANNED | Final |
+| Error / shortcut plan without fabricated subtypes | `evaluation/SHORTCUT_ANALYSIS_PLAN.md`; Notebook 07 diagnostic audit | DONE (plan plus diagnostic evidence) | Final |
+| Grad-CAM is diagnostic only, never lesion-localization evidence | `CHARTER.md` §6; `evaluation/SHORTCUT_ANALYSIS_PLAN.md` | DONE (scope boundary; tool remains optional) | Final |
 | Safety asymmetry: can raise priority, never reduce standard review | `CHARTER.md` §§4–5; `agents/AGENT_DESIGN.md` | DONE (design) | Charter |
 | Independent agent safety evaluation; no circular threshold ground truth | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
 | Published MURA wrist-performance context with non-identical-protocol caveat | `reports/SOURCE_VERIFICATION.md` | NEEDS DECISION | Final |
