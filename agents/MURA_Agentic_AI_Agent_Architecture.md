@@ -1,5 +1,10 @@
-# MURA Agentic AI — Agent Architecture and Execution Summary
+# MURA Agentic AI — Agent Architecture and Workflow
 
+**Associated Notebook:** `09_MURA_Agentic_AI_semi_final(2).ipynb`
+
+**Project:** MURA XR_WRIST — Machine Learning and Agentic AI for X-ray Abnormality Detection
+
+**Architecture:** Single CrewAI Agent with Policy-Gated Tools (TTA and Grad-CAM)
 ## Purpose
 
 This project combines a **frozen ResNet18 classifier** for MURA XR_WRIST radiographs with a **deterministic safety and tool-selection policy** and a **CrewAI research explanation agent**. The agent summarizes verified evidence; it is not permitted to modify the model's prediction, probability, threshold, or workflow decision. Outputs are for research use only and require human review.
