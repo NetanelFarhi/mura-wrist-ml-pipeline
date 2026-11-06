@@ -13,7 +13,7 @@ already complete.
 | Team member | Current ownership |
 |---|---|
 | **Netanel** | Wrist Review application and demo integration; canonical model-runtime/artifact integration; study-level result presentation; deterministic safety and bounded-agent integration/evaluation; coordination of the separately labelled experimental all-anatomy extension. |
-| **Hagit** | Data access and governance; patient/study/view organisation; preprocessing and data-scope review. |
+| **Hagit** | Data access and governance; patient/study/view organisation; preprocessing and data-scope review. Agent design |
 | **Hodaya** | Core fine-tuned model workflow and model-training evidence. |
 | **Artium** | Product framing, reproducibility review, and final-presentation readiness. |
 
@@ -60,7 +60,7 @@ in order, using the same patient-safe internal train/validation split.
 | 07 | [Shortcut and geometry audit](notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb) | Tests geometry/padding sensitivity and records diagnostic evidence about possible shortcut learning. | Completed diagnostic audit |
 | 08 | [Local runtime study viewer](notebooks/08_MURA_Runtime_Study_Viewer.ipynb) | Displays the separate views of one authorised local internal-train study for visual QC. It is code-only in Git and defaults to no displayed image output. | Optional local/Colab utility |
 | 09a | [Deterministic safety tools](notebooks/09_MURA_Deterministic_Safety_Tools.ipynb) | Implements and tests input-QC, scope validation, disagreement evidence, and non-overridable safe routing. | Current deterministic safety baseline |
-| 09b | [Agentic-AI contributor notebook](notebooks/09_MURA_Agentic_AI.ipynb) | Preserved contributor implementation draft with its original narrative and legacy local artifact layout. | Historical/integration draft — not canonical runtime |
+| 09b | Agentic AI — CrewAI Research Explanation Agent | Implements an experimental single-agent CrewAI workflow using Gemini 3.1 Flash-Lite, deterministic policy-gated tool selection, TTA and Grad-CAM explanations, and execution cost reporting. | Implemented and successfully demonstrated — experimental contributor workflow; not yet integrated into the canonical application |
 
 Earlier notebooks are preserved under [notebooks/legacy](notebooks/legacy/)
 for traceability. They are not the canonical workflow and must not be used to
@@ -142,20 +142,58 @@ deterministic app retain the fine-tuned Model B **mean-probability** policy and
 its model-specific threshold. The two models and thresholds must never be
 interchanged; see [result lineage](docs/RESULT_LINEAGE.md).
 
-## Agent and safety status
+## Agentic AI and Safety Status
 
-The **deterministic safety layer is implemented and tested**: input QC,
-supported-anatomy checks, view-evidence routing, and non-overridable human
-review. It works without an agent and may raise priority, never reduce a case
-below standard human review.
+The MURA XR_WRIST project combines a deterministic safety framework with an experimental Agentic AI workflow designed to support research-level interpretation of model predictions.
 
-The adaptive Agentic-AI layer is **designed, not implemented or evaluated**.
-It is proposed only when a supported case has genuinely conflicting or missing
-evidence and the next approved evidence-gathering step is case-specific; known
-rules remain deterministic. The planned agent may use only approved tools and
-may return `NEEDS_HUMAN_REVIEW` or `UNSUPPORTED`; it cannot diagnose, treat,
-change thresholds, or bypass guardrails. See [agent design](agents/AGENT_DESIGN.md)
-and the independent [agent evaluation plan](evaluation/AGENT_EVAL_PLAN.md).
+### 1. Deterministic Safety Layer — Implemented
+
+The deterministic safety layer performs input quality control, anatomical scope validation, view-consistency checks, and controlled routing to human review.
+
+The system preserves the frozen ML classification and its selected threshold. The safety policy cannot be overridden by the language model.
+
+All cases remain subject to human review.
+
+### 2. Agentic AI — Experimental Implementation
+
+An experimental Agentic AI workflow has been implemented in the contributor notebook `09_MURA_Agentic_AI_semi_final(2).ipynb`.
+
+The implementation uses **CrewAI with Gemini 3.1 Flash-Lite** and follows a single-agent architecture.
+
+**Agent: MURA Research Explanation Analyst**
+
+The agent is responsible for interpreting validated research evidence, invoking approved explanation tools, and generating a structured research report.
+
+Two supplementary explanation tools are available:
+
+- **Test-Time Augmentation (TTA):** Provides evidence about prediction stability under image transformations.
+- **Grad-CAM:** Provides spatial explanation evidence to support interpretation of the model's behavior.
+
+Tool selection is controlled by a deterministic policy (`tools/agent_policy.py`, version 1.1). The policy validates workflow consistency and determines which optional research tools are permitted.
+
+The agent cannot modify model predictions, classification thresholds, or mandatory human-review requirements.
+
+### 3. Experimental Execution — Completed
+
+A documented experimental execution was successfully completed using a selected XR_WRIST study.
+
+During this execution:
+
+- The CrewAI agent invoked both approved explanation tools.
+- The tools returned successful results.
+- The agent generated a research explanation report.
+- The original ML classification remained unchanged.
+- LLM usage, execution time, and estimated API costs were recorded.
+
+The execution demonstrated technical feasibility of the policy-gated explanation workflow.
+
+### 4. Current Limitations and Next Steps
+
+The Agentic AI implementation remains an **experimental contributor workflow** and has not yet been integrated into the canonical Wrist Review application.
+
+Independent agent evaluation, systematic testing across prediction categories, reproducibility checks, and cost-control mechanisms remain future work.
+
+The system is intended exclusively for research and educational purposes. It is not validated for autonomous clinical decision-making, fracture diagnosis, or clinical deployment.
 
 ## Data and evaluation governance
 
