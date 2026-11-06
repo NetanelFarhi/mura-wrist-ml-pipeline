@@ -231,6 +231,7 @@ Checkpoint 1 model/threshold-selection workflow. See
 | `docs/`, `reports/` | Current results, lineage, governance, product plans, and reviewer material. |
 | `apps/wrist_review/` | Local research-interface source only; no model bundle or patient data. |
 | `tests/` | Software, integrity, and safety tests; not ML-performance evidence. |
+| `tools/` | Deterministic Agentic AI policy (`agent_policy.py`): validates workflow safety, preserves frozen ML decisions, and controls access to optional TTA and Grad-CAM explanation tools. |
 
 ## Local quick start
 
