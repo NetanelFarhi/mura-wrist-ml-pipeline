@@ -1,0 +1,184 @@
+{
+  "stage1": {
+    "delta": 0.0008779811718553354,
+    "ci95_lower": -0.00912587744452333,
+    "ci95_upper": 0.011651278683263362,
+    "resamples": 2000,
+    "decision": "inconclusive"
+  },
+  "final_stage2": {
+    "delta": 0.0011117179654329679,
+    "ci95_lower": -0.007167653281311861,
+    "ci95_upper": 0.008946028127711262,
+    "resamples": 2000,
+    "decision": "no practically relevant difference"
+  },
+  "seed_matched": {
+    "23": 0.0022375306118853633,
+    "42": 0.0030655931217956622,
+    "7": -0.0026691802181152413,
+    "101": -0.0028629820821366447,
+    "202": 0.005787628393734923
+  },
+  "bootstrap": {
+    "resamples": 2000,
+    "seed": 2026,
+    "margin": 0.01
+  },
+  "inputs": [
+    {
+      "name": "A (C=0.1)",
+      "run_id": "BASELINE_MODEL_A copy",
+      "sha256": "03e93f6e54aa80cb",
+      "metadata_checked": NaN,
+      "training_log": NaN
+    },
+    {
+      "name": "S4_seed23",
+      "run_id": "run_20261017T095546Z",
+      "sha256": "7f4f49dfa329bf4c",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S4_seed42",
+      "run_id": "run_20261016T121029Z",
+      "sha256": "b650ed04c977a2fa",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S4_seed7",
+      "run_id": "run_20261016T123127Z",
+      "sha256": "049d844def78fcf5",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S4_seed101",
+      "run_id": "run_20261020T211047Z",
+      "sha256": "17b4136e1af90477",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S4_seed202",
+      "run_id": "run_20261020T213617Z",
+      "sha256": "bd9cb5b6f7003f37",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S3_seed23",
+      "run_id": "run_20261020T170941Z",
+      "sha256": "1ccc63b634e0ea8e",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S3_seed42",
+      "run_id": "run_20261020T173835Z",
+      "sha256": "c2c0bbb8e176e54b",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S3_seed7",
+      "run_id": "run_20261020T191814Z",
+      "sha256": "13fdafdf57fac8d5",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S3_seed101",
+      "run_id": "run_20261020T205951Z",
+      "sha256": "2e11f6e1fddf193e",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S3_seed202",
+      "run_id": "run_20261020T212344Z",
+      "sha256": "79155caa22c9975d",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S2_seed23",
+      "run_id": "run_20261020T192952Z",
+      "sha256": "2b849fff72f549bd",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S2_seed42",
+      "run_id": "run_20261020T194601Z",
+      "sha256": "dba4f4a6acb04ddc",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S2_seed7",
+      "run_id": "run_20261020T200020Z",
+      "sha256": "02dea11073bcaef9",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S2_seed101",
+      "run_id": "run_20261020T214625Z",
+      "sha256": "29590223d7420a88",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S2_seed202",
+      "run_id": "run_20261020T215534Z",
+      "sha256": "337430eb7fb09f3c",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S1_seed23",
+      "run_id": "run_20261020T200935Z",
+      "sha256": "bb82de95caae0c41",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S1_seed42",
+      "run_id": "run_20261020T202457Z",
+      "sha256": "06f783859cdc781d",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S1_seed7",
+      "run_id": "run_20261020T204155Z",
+      "sha256": "49f378972b76ef06",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S1_seed101",
+      "run_id": "run_20261020T220811Z",
+      "sha256": "c5c27bc42720271c",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "S1_seed202",
+      "run_id": "run_20261020T222524Z",
+      "sha256": "b1146ddb4549f2c4",
+      "metadata_checked": true,
+      "training_log": true
+    },
+    {
+      "name": "R0b_seed23",
+      "run_id": "run_20261020T172538Z",
+      "sha256": "7f4f49dfa329bf4c",
+      "metadata_checked": true,
+      "training_log": true
+    }
+  ]
+}
