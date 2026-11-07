@@ -33,7 +33,7 @@ for this reporting update.
 
 The following 95% intervals resample patients rather than individual views.
 Sensitivity and specificity treat the displayed sensitivity-constrained
-threshold as fixed within each resample.
+threshold as fixed within each resample. These fixed-threshold intervals understate uncertainty because the threshold itself was selected on the same cohort; do not use them to claim a difference between models. Use the paired table below.
 
 | model                                                   | AUROC 95% CI   | AUPRC 95% CI   | Sensitivity 95% CI   | Specificity 95% CI   |
 |:--------------------------------------------------------|:---------------|:---------------|:---------------------|:---------------------|
@@ -64,3 +64,28 @@ not a second performance evaluation or localization result.
   flagged for human review.
 - Patient-cluster bootstrap intervals quantify sampling uncertainty but do not
   turn this split into a final test set.
+
+
+## Paired Model B minus Model A (threshold re-derived per replicate)
+
+Model B (fine-tuned ResNet-18, mean pooling) minus Model A (frozen ResNet-18 + logistic regression) on the same 691 internal-validation studies (653 patients). 2000 paired patient-cluster bootstrap replicates, seed 42; the sensitivity ≥ 95% threshold is re-derived inside every replicate for each model (`src.evaluation.paired_bootstrap.paired_patient_bootstrap`, default parameters).
+
+| Metric | B − A | 95% CI | Interpretation |
+|---|---:|---|---|
+| AUROC | +0.032 | +0.012 to +0.052 | significant |
+| AUPRC | +0.027 | −0.006 to +0.057 | not significant |
+| Specificity at 95% sensitivity | +0.190 | −0.105 to +0.289 | not significant |
+
+Model B ranks studies better (AUROC). Its specificity advantage at the 95%-sensitivity operating point (176 vs 256 false positives) is not statistically supported on this cohort.
+
+Full values: [paired_b_minus_a.csv](paired_b_minus_a.csv). Reproduce:
+
+```bash
+python scripts/build_paired_b_minus_a.py --model-a-csv <A> --model-b-csv <B> --output-csv docs/results/checkpoint1/paired_b_minus_a.csv
+```
+
+Inputs (per-study predictions stay in authorised Drive storage, not in Git):
+- Model A: `DATA/RUNS_ARTEM/ABLATION_FINETUNE_DEPTH/model_a_C0.1_validation_predictions.csv` (C = 0.1 selected by patient-grouped CV on internal train; 06a run_20261017T105209Z), SHA-256 `03e93f6e54aa80cb15c0b8445392224b060e843c87e4d243ab59017fd4a91455`.
+- Model B: `DATA/MODEL_B_FINE_TUNING/validation_predictions_mean.csv`, SHA-256 `29fe06b39d9e82021c16eba4903541b0e0ed79d2956985d1df5f1260d06cfaf2`.
+
+Note: `DATA/BASELINE_MODEL_A/validation_predictions.csv` is an older Model A (C = 0.01 chosen on internal validation, AUROC 0.888) and must not be used for this comparison.

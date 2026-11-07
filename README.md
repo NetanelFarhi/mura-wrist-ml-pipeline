@@ -107,6 +107,8 @@ were not saved for these two runs, so no speed or cost superiority is claimed.
 Fine-tuned max pooling is secondary diagnostic evidence: it reached 62.1%
 specificity at 95.2% sensitivity but lower AUROC/AUPRC (0.883 / 0.806).
 
+Paired comparison (B − A, 2000 patient-cluster bootstrap replicates, threshold re-derived in each replicate): AUROC +0.032 (95% CI +0.012 to +0.052) — Model B ranks studies significantly better; specificity at 95% sensitivity +0.190 (95% CI −0.105 to +0.289) — the reduction in false positives (256 → 176) is not statistically supported. Details: [docs/results/checkpoint1/README.md](docs/results/checkpoint1/README.md#paired-model-b-minus-model-a-threshold-re-derived-per-replicate).
+
 The generated [current Checkpoint 1 results page](docs/results/checkpoint1/README.md)
 contains the exact AUROC, AUPRC, threshold, sensitivity, specificity, review
 workload, false-positive/false-negative counts, and patient-cluster bootstrap

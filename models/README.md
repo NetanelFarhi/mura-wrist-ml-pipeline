@@ -40,3 +40,6 @@ Model selection and threshold selection use internal train/validation only.
 Official MURA `valid` is not permitted for later selection; see
 [`reports/TEST_SET_GOVERNANCE.md`](../reports/TEST_SET_GOVERNANCE.md).
 
+## Model A (Checkpoint 1)
+
+No canonical weights bundle is recorded for Model A (frozen ResNet-18 embeddings + logistic regression, C = 0.1 selected by patient-grouped CV on internal train). Its internal-validation predictions are stored on shared Drive at `DATA/BASELINE_MODEL_A/model_a_C0.1_validation_predictions.csv` (SHA-256 `03e93f6e54aa80cb15c0b8445392224b060e843c87e4d243ab59017fd4a91455`; AUROC 0.880, matches the README). In the same folder, `validation_predictions.csv` is the superseded Phase 1 model (C = 0.01) and must not be used; see `DATA/BASELINE_MODEL_A/README_MODEL_A.md`.
