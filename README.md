@@ -10,7 +10,7 @@ The project brings together data preparation, a frozen-feature baseline, a fine-
 | --- | --- |
 | **Netanel** | Model-bundle and runtime integration, study-level results, deterministic safety, local application/demo, bounded-agent workstream, and coordination of the experimental all-anatomy extension. |
 | **Hagit** | Data access and governance, patient/study/view organization, preprocessing, and data-scope review. |
-| **Hodaya** | Core fine-tuned model workflow, model-training evidence, and model review. |
+| **Hodaya** | Core fine-tuned model workflow, model-training evidence, model review, and the project presentation (upload pending). |
 | **Artium** | Product framing, reproducibility review, and final-presentation readiness. |
 
 These workstreams follow the [project charter](CHARTER.md); ownership does not imply sole authorship of every notebook. The proposed adaptive agent is a separate workstream from the implemented deterministic policy.
