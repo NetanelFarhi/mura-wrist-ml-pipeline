@@ -20,7 +20,7 @@ Intermediate artifacts must be persisted in the configured Drive/data folders; J
 - [09 — Deterministic Agent Policy](09_MURA_Deterministic_Agent_Policy.ipynb): new active policy demonstration. Uses synthetic inputs, the current deterministic safety module and `tools/agent_policy.py` v1.1; it does not load a checkpoint or run TTA/Grad-CAM.
 - [09 — Deterministic safety tools](09_MURA_Deterministic_Safety_Tools.ipynb): existing supporting smoke-test notebook, retained unchanged.
 - [Saved results viewer](06_results_viewer.ipynb): read-only presentation, separate from the execution sequence.
-
+- [09 - MURA Agentic AI](09_MURA_Agentic_AI-funal.ipynb): Completed and successfully executed end-to-end. Integrates frozen Model B, deterministic policy, authorized TTA and Grad-CAM tools, CrewAI-based research explanations, and safety controls. Three structured research artifacts were validated. Final notebook uploaded to GitHub; research use only, with mandatory human review.
 ## Preserved contributor and experimental notebooks
 
 - [Legacy notebooks](legacy/README.md) are kept for provenance. Hagit's Agentic AI draft is archived there unchanged and is not part of the active runtime.
