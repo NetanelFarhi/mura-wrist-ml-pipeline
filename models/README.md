@@ -3,6 +3,10 @@
 This directory is intentionally empty in Git. Raw weights, per-study
 predictions, and derived artifacts stay in authorised local/Drive storage.
 
+## Historical paths
+
+`models/resnet18/` is not part of the current Git tree and is **historical only** if encountered in an older local or Drive workspace. Do not use it as a source for current Model B. The canonical bundle is `DATA/MODEL_B_FINE_TUNING/` and is verified against `configs/model_b_artifact_bundle.json`.
+
 ## Canonical Checkpoint 1 Model B bundle
 
 Notebooks 05 and 06 expect one explicit local/Drive bundle at

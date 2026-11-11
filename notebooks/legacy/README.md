@@ -15,7 +15,7 @@ notebooks must not be used to make new model-, threshold-, or test-set
 selection decisions without first reconciling their split and evaluation
 protocol with the current workflow.
 
-Their execution outputs have been cleared before publication so that raw
-radiographs, identifiers, Drive paths, widgets, and stale result tables are
-not redistributed through Git. The original historical result summaries are
-preserved separately under `reports/`.
+Earlier legacy notebooks have their execution outputs cleared before publication
+so raw radiographs, identifiers, Drive paths, widgets, and stale result tables
+are not redistributed. Hagit's contributor draft is preserved byte-for-byte
+as requested. Historical result summaries remain under `reports/`.

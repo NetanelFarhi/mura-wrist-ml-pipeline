@@ -2,9 +2,10 @@
 
 ## Source reviewed
 
-`09_MURA_Agentic_AI.ipynb` supplied by Hagit was reviewed as an incoming
-working notebook. Its useful ideas are preserved in the canonical project
-runtime and Notebook 09.
+Hagit's supplied draft is preserved unchanged at
+`notebooks/legacy/09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb` and is
+excluded from the active runtime. This organization does not integrate or
+rewrite that notebook.
 
 ## What was retained
 

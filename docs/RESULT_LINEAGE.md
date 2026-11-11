@@ -34,9 +34,10 @@ two split versions as if they came from the same validation cohort.
 
 ### Current Checkpoint 1 protocol
 
-The current canonical workflow is [Notebook 01](../notebooks/01_MURA_Data_Preparation_and_EDA.ipynb)
-through [Notebook 07](../notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb),
-using the 2,769/691 split above. The current results are in
+The canonical model workflow is [Notebook 01](../notebooks/01_MURA_Data_Preparation_and_EDA.ipynb)
+through [Notebook 06](../notebooks/06_MURA_ModelB_Evaluation_and_Comparison.ipynb),
+using the 2,769/691 split above. [Notebook 07](../notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb)
+is a diagnostic that reads the frozen artifacts and does not select a model or threshold. The current results are in
 [Checkpoint 1 results](results/checkpoint1/README.md) and the machine-readable
 [comparison table](results/checkpoint1/model_comparison.csv).
 
