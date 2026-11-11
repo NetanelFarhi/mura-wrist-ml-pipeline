@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/01_eda.ipynb)
 
-**Classification:** Legacy EDA  
+**Classification:** Legacy EDA
 **Purpose:** Older exploratory plots using the legacy manifest.
 
 ## Execution and prerequisites

@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/04_MURA_Model_Evaluation.ipynb)
 
-**Classification:** Legacy Model A evaluation  
+**Classification:** Legacy Model A evaluation
 **Purpose:** Earlier evaluation copy using a superseded operating policy.
 
 ## Execution and prerequisites

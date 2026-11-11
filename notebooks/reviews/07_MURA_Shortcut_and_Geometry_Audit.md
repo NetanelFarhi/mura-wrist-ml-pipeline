@@ -2,7 +2,7 @@
 
 [Open notebook source](../07_MURA_Shortcut_and_Geometry_Audit.ipynb)
 
-**Classification:** Diagnostic 07  
+**Classification:** Diagnostic 07
 **Purpose:** Runs a fixed-model geometry/shortcut robustness audit on internal data only.
 
 ## Execution and prerequisites

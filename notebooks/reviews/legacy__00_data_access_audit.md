@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/00_data_access_audit.ipynb)
 
-**Classification:** Legacy data-access audit  
+**Classification:** Legacy data-access audit
 **Purpose:** Older local data audit scaffold; not part of current workflow.
 
 ## Execution and prerequisites

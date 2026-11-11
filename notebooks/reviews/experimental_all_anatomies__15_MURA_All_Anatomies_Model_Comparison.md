@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/15_MURA_All_Anatomies_Model_Comparison.ipynb)
 
-**Classification:** Experimental all-anatomy 15  
+**Classification:** Experimental all-anatomy 15
 **Purpose:** Displays paired comparison of baseline and fine-tuned results per anatomy.
 
 ## Execution and prerequisites

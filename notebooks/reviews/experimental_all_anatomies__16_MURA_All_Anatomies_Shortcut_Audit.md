@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/16_MURA_All_Anatomies_Shortcut_Audit.ipynb)
 
-**Classification:** Experimental all-anatomy 16  
+**Classification:** Experimental all-anatomy 16
 **Purpose:** Displays bounded peripheral-pixel sensitivity audit results for saved models.
 
 ## Execution and prerequisites

@@ -2,7 +2,7 @@
 
 [Open notebook source](../04_MURA_Baseline_Evaluation.ipynb)
 
-**Classification:** Canonical 04/06  
+**Classification:** Canonical 04/06
 **Purpose:** Evaluates saved Model A predictions on internal validation.
 
 ## Execution and prerequisites

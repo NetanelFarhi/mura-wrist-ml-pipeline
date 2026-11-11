@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/10_MURA_All_Anatomies_Data_Preparation.ipynb)
 
-**Classification:** Experimental all-anatomy 10  
+**Classification:** Experimental all-anatomy 10
 **Purpose:** Reports the all-anatomy development split/manifests; separate from XR_WRIST MVP.
 
 ## Execution and prerequisites

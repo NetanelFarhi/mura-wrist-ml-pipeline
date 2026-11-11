@@ -2,7 +2,7 @@
 
 [Open notebook source](../08_MURA_Runtime_Study_Viewer.ipynb)
 
-**Classification:** Local utility 08  
+**Classification:** Local utility 08
 **Purpose:** Displays views from one authorized internal-train study for local QC only.
 
 ## Execution and prerequisites

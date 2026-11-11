@@ -2,7 +2,7 @@
 
 [Open notebook source](../02_MURA_Preprocessing.ipynb)
 
-**Classification:** Canonical 02/06  
+**Classification:** Canonical 02/06
 **Purpose:** Cleans manifests, audits decoding, and records deterministic preprocessing.
 
 ## Execution and prerequisites

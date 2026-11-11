@@ -10,8 +10,8 @@ The project brings together data preparation, a frozen-feature baseline, a fine-
 | --- | --- |
 | **Netanel** | Model-bundle and runtime integration, study-level results, deterministic safety, local application/demo, bounded-agent workstream, and coordination of the experimental all-anatomy extension. |
 | **Hagit** | Data access and governance, patient/study/view organization, preprocessing, and data-scope review. |
-| **Hodaya** | Core fine-tuned model workflow, model-training evidence, model review, and the project presentation (upload pending). |
-| **Artium** | Product framing, reproducibility review, and final-presentation readiness. |
+| **Hodaya** | Core fine-tuned model workflow, model-training evidence, model review, and the project presentation. |
+| **Artem** | Product framing, reproducibility review, and final-presentation readiness. |
 
 These workstreams follow the [project charter](CHARTER.md); ownership does not imply sole authorship of every notebook. The proposed adaptive agent is a separate workstream from the implemented deterministic policy.
 
@@ -55,7 +55,7 @@ See the [full Checkpoint 1 results](docs/results/checkpoint1/README.md) for unce
 | **08** | Local study viewer | Optional utility |
 | [**09 — Deterministic Agent Policy**](notebooks/09_MURA_Deterministic_Agent_Policy.ipynb) | Demonstrate policy v1.1 and safety checks with synthetic inputs | Current policy demonstration; execution verification pending |
 | [**09 — Deterministic Safety Tools**](notebooks/09_MURA_Deterministic_Safety_Tools.ipynb) | Existing deterministic safety smoke checks | Supporting notebook |
-| [Legacy notebooks](notebooks/legacy/README.md) | Preserve earlier and contributor work, including Hagit's Agentic AI draft | Historical; outside the active runtime |
+| [Legacy notebooks](notebooks/legacy/README.md) | Preserve earlier and contributor work, including Hagit's Agentic AI draft | Historical source material; not executed directly in the active runtime |
 | [All-anatomy notebooks](notebooks/experimental_all_anatomies/README.md) | Explore extension beyond XR_WRIST | Experimental; outside the wrist MVP claim |
 
 The [notebook guide](notebooks/README.md) links every canonical step and explains required artifacts and configuration. The [per-notebook reviews](notebooks/reviews/README.md) list dependencies and findings. These reviews are static: notebook execution and a complete sequential run have not been verified as part of this documentation work.

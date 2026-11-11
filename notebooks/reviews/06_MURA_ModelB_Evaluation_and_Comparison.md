@@ -2,7 +2,7 @@
 
 [Open notebook source](../06_MURA_ModelB_Evaluation_and_Comparison.ipynb)
 
-**Classification:** Canonical 06/06  
+**Classification:** Canonical 06/06
 **Purpose:** Compares Model A and Model B on the same current internal-validation cohort.
 
 ## Execution and prerequisites

@@ -2,7 +2,7 @@
 
 [Open notebook source](../01_MURA_Data_Preparation_and_EDA.ipynb)
 
-**Classification:** Canonical 01/06  
+**Classification:** Canonical 01/06
 **Purpose:** Creates the current XR_WRIST internal patient-level split from official MURA train.
 
 ## Execution and prerequisites

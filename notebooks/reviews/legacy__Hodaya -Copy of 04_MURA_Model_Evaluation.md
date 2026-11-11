@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/Hodaya%20-Copy%20of%2004_MURA_Model_Evaluation.ipynb)
 
-**Classification:** Legacy Hodaya evaluation copy  
+**Classification:** Legacy Hodaya evaluation copy
 **Purpose:** Preserved teammate evaluation variation.
 
 ## Execution and prerequisites

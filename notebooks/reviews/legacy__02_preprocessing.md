@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/02_preprocessing.ipynb)
 
-**Classification:** Legacy preprocessing  
+**Classification:** Legacy preprocessing
 **Purpose:** Earlier preprocessing implementation retained for provenance.
 
 ## Execution and prerequisites

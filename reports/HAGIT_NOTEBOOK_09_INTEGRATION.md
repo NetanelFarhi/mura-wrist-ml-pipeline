@@ -1,11 +1,12 @@
 # Notebook 09 integration note
 
-## Source reviewed
+## Source preserved
 
 Hagit's supplied draft is preserved unchanged at
 `notebooks/legacy/09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb` and is
-excluded from the active runtime. This organization does not integrate or
-rewrite that notebook.
+not executed directly as the active runtime. This organization does not
+rewrite the notebook; the safety-oriented components listed below were adapted
+into the canonical deterministic path.
 
 ## What was retained
 

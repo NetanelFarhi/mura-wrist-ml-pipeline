@@ -2,7 +2,7 @@
 
 [Open notebook source](../09_MURA_Deterministic_Safety_Tools.ipynb)
 
-**Classification:** Supporting deterministic-safety notebook  
+**Classification:** Supporting deterministic-safety notebook
 **Purpose:** Existing synthetic QC/anatomy/view-route demonstration retained unchanged.
 
 ## Execution and prerequisites

@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/11_MURA_All_Anatomies_Preprocessing.ipynb)
 
-**Classification:** Experimental all-anatomy 11  
+**Classification:** Experimental all-anatomy 11
 **Purpose:** Reports all-anatomy image QC and geometry summaries.
 
 ## Execution and prerequisites

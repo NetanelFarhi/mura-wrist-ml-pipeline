@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/Hodaya_05_MURA_End_to_End__Fine_Tuning%28Model_B%29.ipynb)
 
-**Classification:** Legacy Hodaya Model B pilot  
+**Classification:** Legacy Hodaya Model B pilot
 **Purpose:** Preserved historical end-to-end fine-tuning work.
 
 ## Execution and prerequisites

@@ -2,7 +2,7 @@
 
 [Open notebook source](../03_MURA_Baseline_ResNet18_LogReg.ipynb)
 
-**Classification:** Canonical 03/06  
+**Classification:** Canonical 03/06
 **Purpose:** Fits the frozen-image-embedding Model A baseline; this is not Model B fine-tuning.
 
 ## Execution and prerequisites

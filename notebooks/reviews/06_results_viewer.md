@@ -2,7 +2,7 @@
 
 [Open notebook source](../06_results_viewer.ipynb)
 
-**Classification:** Supplementary read-only viewer  
+**Classification:** Supplementary read-only viewer
 **Purpose:** Displays committed historical and development results; not a pipeline step.
 
 ## Execution and prerequisites

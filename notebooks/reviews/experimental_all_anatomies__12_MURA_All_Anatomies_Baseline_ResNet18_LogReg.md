@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/12_MURA_All_Anatomies_Baseline_ResNet18_LogReg.ipynb)
 
-**Classification:** Experimental all-anatomy 12  
+**Classification:** Experimental all-anatomy 12
 **Purpose:** Displays the separately trained frozen-embedding baseline results per anatomy.
 
 ## Execution and prerequisites

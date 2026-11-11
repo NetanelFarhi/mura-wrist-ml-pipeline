@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/13_MURA_All_Anatomies_Development_Evaluation.ipynb)
 
-**Classification:** Experimental all-anatomy 13  
+**Classification:** Experimental all-anatomy 13
 **Purpose:** Evaluates development baseline metrics per anatomy.
 
 ## Execution and prerequisites

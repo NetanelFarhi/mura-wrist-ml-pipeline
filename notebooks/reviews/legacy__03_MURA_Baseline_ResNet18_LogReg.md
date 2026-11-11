@@ -2,7 +2,7 @@
 
 [Open notebook source](../legacy/03_MURA_Baseline_ResNet18_LogReg.ipynb)
 
-**Classification:** Legacy Model A baseline  
+**Classification:** Legacy Model A baseline
 **Purpose:** Earlier frozen ResNet/Logistic Regression workflow.
 
 ## Execution and prerequisites

@@ -98,7 +98,7 @@ does not implement the planned adaptive agent.
 | `notebooks/08` | Local study-view utility | No model selection |
 | `notebooks/09_MURA_Deterministic_Safety_Tools.ipynb` | Supporting synthetic safety smoke tests, retained unchanged | No model selection |
 | `notebooks/09_MURA_Deterministic_Agent_Policy.ipynb` | Active deterministic policy demonstration using synthetic inputs and policy v1.1 | No model selection; not an adaptive agent |
-| `notebooks/legacy/09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb` | Hagit's preserved contributor draft; excluded from active runtime | No |
+| `notebooks/legacy/09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb` | Hagit's preserved contributor draft; safety-oriented components were adapted into the deterministic path, while the notebook itself is not executed directly | No |
 | `notebooks/experimental_all_anatomies/` | Seven-anatomy development extension | Experimental only; not the XR_WRIST MVP claim |
 | `notebooks/legacy/` | Traceability archive | No |
 

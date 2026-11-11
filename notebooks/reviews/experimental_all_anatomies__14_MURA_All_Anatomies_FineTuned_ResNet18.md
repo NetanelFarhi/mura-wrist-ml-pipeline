@@ -2,7 +2,7 @@
 
 [Open notebook source](../experimental_all_anatomies/14_MURA_All_Anatomies_FineTuned_ResNet18.ipynb)
 
-**Classification:** Experimental all-anatomy 14 report  
+**Classification:** Experimental all-anatomy 14 report
 **Purpose:** Displays results from a prior controlled all-anatomy fine-tuning experiment; the notebook source reads saved artifacts rather than launching training.
 
 ## Execution and prerequisites

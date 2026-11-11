@@ -2,7 +2,7 @@
 
 [Open notebook source](../05_MURA_FineTuned_ResNet18.ipynb)
 
-**Classification:** Canonical 05/06; verification-only in this task  
+**Classification:** Canonical 05/06; verification-only in this task
 **Purpose:** Validates the existing canonical Model B bundle; do not rerun fine-tuning.
 
 ## Execution and prerequisites
