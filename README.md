@@ -260,7 +260,7 @@ Directory: [`reports/agentic_ai/research_reports/`](reports/agentic_ai/research_
 | --- | --- |
 | [`MURA_WRIST_RANDOM_001_research_report_with_metrics.pdf`](reports/agentic_ai/research_reports/MURA_WRIST_RANDOM_001_research_report_with_metrics.pdf) | Included — final metrics version |
 | [`MURA_WRIST_RANDOM_002_research_report.pdf`](reports/agentic_ai/research_reports/MURA_WRIST_RANDOM_002_research_report.pdf) | Included |
-| `MURA_WRIST_NO_TOOLS_001_research_report.pdf` | Pending — not yet included |
+| `MURA_WRIST_NO_TOOLS_001_research_report.pdf` (MURA_WRIST_NO_TOOLS_001_research_report.pdf) |Included |
 
 The research artifacts and the two available PDF reports have been uploaded to GitHub.
 
