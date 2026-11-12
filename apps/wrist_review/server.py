@@ -8,14 +8,16 @@ training, threshold editing, or result persistence.
 from __future__ import annotations
 
 import base64
+import io
 import json
 import mimetypes
 import os
 import sys
 import threading
+import zipfile
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
 
@@ -25,12 +27,18 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import core
+from PIL import Image, UnidentifiedImageError
 from src.runtime.deterministic_safety import StudyImage
 
 
 STATIC_ROOT = APP_ROOT / "static"
 MAX_REQUEST_BYTES = 40 * 1024 * 1024
 MAX_VIEWS = 8
+MAX_WORKLIST_ZIP_BYTES = 100 * 1024 * 1024
+MAX_WORKLIST_ZIP_FILES = 400
+MAX_WORKLIST_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
+MAX_IMAGE_BYTES = 15 * 1024 * 1024
+IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"})
 
 _runtime: core.ModelRuntime | None = None
 _runtime_lock = threading.Lock()
@@ -79,6 +87,66 @@ def decode_view(item: Any, index: int) -> StudyImage:
     return StudyImage(image_id=name, image_bytes=image_bytes)
 
 
+def extract_worklist_archive(archive_bytes: bytes) -> dict[str, Any]:
+    """Read an image-only patient worklist ZIP entirely in process memory.
+
+    The archive is never extracted to disk.  Strict compressed, uncompressed,
+    file-count, path, and per-image limits protect this local prototype from
+    malformed or unexpectedly large archives.
+    """
+
+    if not archive_bytes:
+        raise ValueError("The ZIP archive is empty.")
+    if len(archive_bytes) > MAX_WORKLIST_ZIP_BYTES:
+        raise ValueError("The ZIP archive exceeds the 100 MB local limit.")
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(archive_bytes))
+    except zipfile.BadZipFile as exc:
+        raise ValueError("The selected file is not a readable ZIP archive.") from exc
+
+    with archive:
+        infos = [info for info in archive.infolist() if not info.is_dir()]
+        if len(infos) > MAX_WORKLIST_ZIP_FILES:
+            raise ValueError("The ZIP archive contains more than 400 files.")
+        uncompressed_size = sum(info.file_size for info in infos)
+        if uncompressed_size > MAX_WORKLIST_UNCOMPRESSED_BYTES:
+            raise ValueError("The ZIP archive expands beyond the 50 MB local limit.")
+
+        files: list[dict[str, str]] = []
+        for info in infos:
+            raw_name = info.filename.replace("\\", "/")
+            path = PurePosixPath(raw_name)
+            if path.is_absolute() or not path.parts or any(part in {"", ".", ".."} for part in path.parts):
+                raise ValueError("The ZIP archive contains an unsafe file path.")
+            if path.parts[0] == "__MACOSX" or path.name.startswith("."):
+                continue
+            if path.suffix.lower() not in IMAGE_SUFFIXES:
+                continue
+            if info.flag_bits & 0x1:
+                raise ValueError("Password-protected ZIP archives are not supported.")
+            if info.file_size > MAX_IMAGE_BYTES:
+                raise ValueError(f"{path.name}: image exceeds the 15 MB local limit.")
+            image_bytes = archive.read(info)
+            try:
+                with Image.open(io.BytesIO(image_bytes)) as image:
+                    image.verify()
+            except (UnidentifiedImageError, OSError, SyntaxError, ValueError) as exc:
+                raise ValueError(f"{path.name}: archive entry is not a readable image.") from exc
+            mime_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+            files.append(
+                {
+                    "name": path.name,
+                    "relative_path": path.as_posix(),
+                    "mime_type": mime_type,
+                    "data_url": f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode('ascii')}",
+                }
+            )
+
+    if not files:
+        raise ValueError("No supported image files were found in the ZIP archive.")
+    return {"files": files, "image_count": len(files), "storage": "in_memory_only"}
+
+
 class WristReviewHandler(BaseHTTPRequestHandler):
     """Serve static UI assets and the narrowly-scoped local review API."""
 
@@ -118,14 +186,22 @@ class WristReviewHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         route = urlparse(self.path).path
-        if route != "/api/review":
+        if route not in {"/api/review", "/api/worklist-zip"}:
             return self.send_json(HTTPStatus.NOT_FOUND, {"error": "Unknown endpoint."})
         try:
             content_length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             content_length = 0
-        if not 0 < content_length <= MAX_REQUEST_BYTES:
-            return self.send_json(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, {"error": "Study payload is too large."})
+        max_size = MAX_WORKLIST_ZIP_BYTES if route == "/api/worklist-zip" else MAX_REQUEST_BYTES
+        if not 0 < content_length <= max_size:
+            label = "ZIP archive" if route == "/api/worklist-zip" else "Study payload"
+            return self.send_json(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, {"error": f"{label} is too large."})
+        if route == "/api/worklist-zip":
+            try:
+                archive_result = extract_worklist_archive(self.rfile.read(content_length))
+                return self.send_json(HTTPStatus.OK, archive_result)
+            except (RuntimeError, ValueError, OSError, zipfile.BadZipFile) as exc:
+                return self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
         try:
             payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):

@@ -4,191 +4,85 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#102746" />
-    <meta name="description" content="Local-only MURA wrist study review research prototype." />
-    <title>Wrist Review</title>
+    <meta name="description" content="Local-only wrist worklist research prototype." />
+    <title>Wrist Review Worklist</title>
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <main class="app-frame" aria-label="Wrist Review local research interface">
+    <main class="app-frame" aria-label="Wrist Review local worklist interface">
       <header class="topbar">
         <div class="brand-lockup">
-          <div class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg>
-          </div>
-          <div>
-            <p class="eyebrow">LOCAL RESEARCH TOOL</p>
-            <h1>Wrist Review</h1>
-          </div>
+          <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>
+          <div><p class="eyebrow">LOCAL RESEARCH TOOL</p><h1>Wrist Review</h1></div>
         </div>
-        <button class="icon-button" id="resetButton" type="button" title="Start a new local review" aria-label="Start a new local review">
-          <svg viewBox="0 0 24 24"><path d="M12 5V2L7 7l5 5V9c3.31 0 6 2.69 6 6a6 6 0 0 1-6 6c-2.11 0-3.96-1.09-5.03-2.74l-1.71 1.03A7.96 7.96 0 0 0 12 23a8 8 0 0 0 0-16V5z"/></svg>
-        </button>
+        <button class="icon-button" id="resetButton" type="button" title="Start a new worklist" aria-label="Start a new worklist"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 7l5 5V9c3.31 0 6 2.69 6 6a6 6 0 0 1-6 6c-2.11 0-3.96-1.09-5.03-2.74l-1.71 1.03A7.96 7.96 0 0 0 12 23a8 8 0 0 0 0-16V5z"/></svg></button>
       </header>
 
-      <section class="research-banner" role="note">
-        <span class="banner-icon" aria-hidden="true">i</span>
-        <p>Research prototype. Every case stays in human review.</p>
-      </section>
+      <section class="research-banner" role="note"><span class="banner-icon" aria-hidden="true">i</span><p>Research prototype. It prioritizes a human-review queue; it never clears a case.</p></section>
 
-      <section id="reviewScreen" class="screen active" aria-label="Study review">
-        <div class="progress-steps" aria-label="Review workflow">
-          <div class="progress-step current"><span>1</span><p>Add study</p></div>
-          <div class="progress-line"></div>
-          <div class="progress-step"><span>2</span><p>Inspect</p></div>
-          <div class="progress-line"></div>
-          <div class="progress-step"><span>3</span><p>Review</p></div>
+      <section id="queueScreen" class="screen active" aria-label="Worklist review">
+        <div class="progress-steps" aria-label="Worklist workflow">
+          <div class="progress-step current"><span>1</span><p>Add queue</p></div><div class="progress-line"></div>
+          <div class="progress-step"><span>2</span><p>Inspect</p></div><div class="progress-line"></div>
+          <div class="progress-step"><span>3</span><p>Prioritize</p></div>
         </div>
 
-        <section class="intro-row">
-          <div>
-            <p class="section-overline">STUDY WORKSPACE</p>
-            <h2>Start a wrist study</h2>
-            <p>Choose up to 8 images from one study. You can inspect every view before review.</p>
-          </div>
-          <div class="wrist-orb" aria-hidden="true">
-            <svg viewBox="0 0 80 80"><path d="M35 8c4 1 7 4 8 9l3 20 7-19c1-4 5-6 8-5 4 1 5 5 4 8l-7 22 8-13c2-3 6-4 9-2 3 2 3 6 1 9L58 62c-4 6-10 10-18 10h-4c-11 0-19-8-20-18l-2-23c0-4 2-7 6-7 3 0 5 2 6 5l3 12 0-25c0-5 2-8 6-8z"/></svg>
-          </div>
+        <section class="hero-row">
+          <div><p class="section-overline">WORKLIST TRIAGE</p><h2>Review the wrist queue</h2><p>Add one or more de-identified patient folders. The app keeps each study together, scores it separately, and returns a human-review order.</p></div>
+          <div class="queue-orb" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H5.17L4 17.17V4zm2 2v8h12V6H6zm2 2h8v2H8V8zm0 3h5v2H8v-2z"/></svg></div>
         </section>
 
-        <section class="case-card">
-          <div class="field-grid">
-            <label>
-              <span>Case alias</span>
-              <input id="caseAlias" maxlength="48" value="LOCAL-CASE" autocomplete="off" />
-            </label>
-            <label>
-              <span>Declared anatomy</span>
-              <select id="anatomy">
-                <option value="XR_WRIST">Wrist · XR_WRIST</option>
-                <option value="XR_HAND">Hand · unsupported</option>
-                <option value="XR_FOREARM">Forearm · unsupported</option>
-                <option value="UNKNOWN">Unknown anatomy</option>
-              </select>
-            </label>
-          </div>
-          <p class="field-note">Use a local alias only. Do not enter patient details in the alias, folder, or file names. Anatomy is declared here; automatic body-part verification is planned.</p>
+        <section class="settings-card">
+          <label><span>Declared anatomy for this worklist</span><select id="anatomy"><option value="XR_WRIST">Wrist · XR_WRIST</option><option value="XR_HAND">Hand · unsupported</option><option value="XR_FOREARM">Forearm · unsupported</option><option value="UNKNOWN">Unknown anatomy</option></select></label>
+          <p>Use aliases only in folder and file names. The selection is a routing input; automatic anatomy recognition is not implemented.</p>
         </section>
 
-        <section id="uploadState" class="upload-card">
-          <div class="upload-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M19 18H6a4 4 0 0 1-.6-7.96A6 6 0 0 1 17 8a5 5 0 0 1 2 10zm-6-3 4-4h-3V5h-2v6H9l4 4z"/></svg>
-          </div>
-          <h3>Add study images</h3>
-          <p>Choose individual images or a folder containing one wrist study.</p>
+        <section id="queueEmpty" class="upload-card">
+          <div class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 18H6a4 4 0 0 1-.6-7.96A6 6 0 0 1 17 8a5 5 0 0 1 2 10zm-6-3 4-4h-3V5h-2v6H9l4 4z"/></svg></div>
+          <h3>Add patient folders</h3>
+          <p>Choose one patient folder at a time, or add one ZIP containing several patient folders. Each selected folder may contain one or more study folders.</p>
           <div class="upload-actions">
-            <label class="primary-action" for="filePicker">
-              <svg viewBox="0 0 24 24"><path d="M5 20a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5zm7-11-4 4h3v3h2v-3h3l-4-4z"/></svg>
-              Choose images
-            </label>
-            <label class="secondary-action" for="folderPicker">
-              <svg viewBox="0 0 24 24"><path d="M10 4l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6zm2 6-4 4h3v3h2v-3h3l-4-4z"/></svg>
-              Choose folder
-            </label>
+            <label class="primary-action" for="worklistPicker"><svg viewBox="0 0 24 24"><path d="M5 20a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5zm7-11-4 4h3v3h2v-3h3l-4-4z"/></svg>Choose first patient folder</label>
+            <label class="secondary-action" for="zipWorklistPicker">Add ZIP worklist</label>
           </div>
-          <input id="filePicker" type="file" accept="image/*" multiple hidden />
-          <input id="folderPicker" type="file" accept="image/*" webkitdirectory multiple hidden />
-          <p class="upload-footnote">PNG, JPG, JPEG, BMP, or other browser-readable image files · up to 8 views</p>
+          <input id="worklistPicker" type="file" accept="image/*" webkitdirectory multiple hidden />
+          <input id="zipWorklistPicker" type="file" accept=".zip,application/zip" hidden />
+          <p class="upload-footnote">ZIP stays in this local session and is read in memory only · maximum 100 MB compressed / 50 MB expanded · 1–8 views per study</p>
         </section>
 
-        <section id="workspace" class="workspace hidden" aria-live="polite">
-          <div class="workspace-heading">
-            <div>
-              <p class="section-overline">STUDY FILES</p>
-              <h3><span id="viewCount">0</span> selected views</h3>
-            </div>
-            <button class="text-button" id="changeFiles" type="button">Change</button>
-          </div>
-          <div class="folder-pill" id="folderPill">
-            <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v2H3V6zm0 6h18v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/></svg>
-            <span id="folderName">Uploaded study</span>
-          </div>
-
-          <div class="study-viewer">
-            <div class="file-rail-wrap">
-              <p class="rail-label">VIEWS</p>
-              <div id="fileRail" class="file-rail" aria-label="Selected image files"></div>
-            </div>
-            <article class="image-panel">
-              <div class="image-frame">
-                <img id="imagePreview" alt="Selected study view preview" />
-                <span id="imageIndex" class="image-index">View 1</span>
-              </div>
-              <div class="image-title-row">
-                <div>
-                  <h4 id="selectedFileName">—</h4>
-                  <p id="selectedPath">Local upload · not stored</p>
-                </div>
-                <button id="removeSelected" class="round-action danger" type="button" title="Remove selected view" aria-label="Remove selected view">
-                  <svg viewBox="0 0 24 24"><path d="M7 19c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V7H7v12zM9 9h6v10H9V9zm5.5-5-1-1h-3l-1 1H6v2h12V4z"/></svg>
-                </button>
-              </div>
-              <div class="image-details">
-                <div><span>Format</span><strong id="detailFormat">—</strong></div>
-                <div><span>Size</span><strong id="detailSize">—</strong></div>
-                <div><span>Dimensions</span><strong id="detailDimensions">—</strong></div>
-              </div>
-            </article>
-          </div>
-
-          <div class="review-action-wrap">
-            <button id="reviewButton" class="review-button" type="button">
-              <span class="button-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg></span>
-              <span><strong>Review this study</strong><small>Run the verified deterministic model</small></span>
-              <svg class="button-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <p>Model review uses real views only; no padding or images are saved.</p>
-          </div>
+        <section id="worklistWorkspace" class="hidden" aria-live="polite">
+          <section class="queue-summary-card"><div><p class="section-overline">LOCAL PATIENT QUEUE</p><h3 id="queueName">Worklist</h3><p id="queueSummary">0 studies ready</p></div><div class="queue-actions"><button class="text-button" id="addPatientFolder" type="button">Add folder</button><button class="text-button" id="addZipWorklist" type="button">Add ZIP</button></div></section>
+          <section class="worklist-layout">
+            <aside class="study-list-panel" aria-label="Studies in selected worklist"><div class="panel-heading"><p>STUDIES</p><span id="studyCountBadge">0</span></div><div id="studyList" class="study-list"></div></aside>
+            <section id="studyInspector" class="study-inspector" aria-label="Selected study details"></section>
+          </section>
+          <section class="run-card"><div><p class="section-overline">QUEUE REVIEW</p><h3>Prioritize the worklist</h3><p>Each study runs separately through verified Model B and deterministic safety checks. Every case remains in human review.</p></div><button class="run-button" id="runWorklistButton" type="button"><span class="button-icon"><svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5z"/></svg></span><span><strong>Review worklist</strong><small id="runButtonNote">Run the fixed local model study by study</small></span></button></section>
+          <section id="resultsPanel" class="results-panel hidden" aria-live="polite"></section>
         </section>
-
-        <section id="reviewResult" class="result-area hidden" aria-live="polite"></section>
       </section>
 
       <section id="modelScreen" class="screen" aria-label="Model information">
-        <section class="intro-row compact">
-          <div>
-            <p class="section-overline">MODEL CARD</p>
-            <h2>What powers the review</h2>
-            <p>Only the verified, frozen Model B workflow is available here.</p>
-          </div>
-          <div class="wrist-orb neutral" aria-hidden="true"><span>MB</span></div>
-        </section>
-        <div id="modelStatus" class="model-status-card"><div class="loading-dot"></div><p>Checking local model bundle…</p></div>
-        <section class="info-card">
-          <div class="info-icon teal"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H5.17L4 17.17V4zm2 2v8h12V6H6zm2 2h8v2H8V8zm0 3h5v2H8v-2z"/></svg></div>
-          <div><h3>Study-level decision</h3><p>Each real view is scored separately. The mean of those probabilities is compared with the frozen threshold.</p></div>
-        </section>
-        <section class="info-card">
-          <div class="info-icon blue"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
-          <div><h3>Research boundary</h3><p>This is not a diagnosis, a fracture detector, or a tool for clearing a patient from normal clinical review.</p></div>
-        </section>
+        <section class="hero-row compact"><div><p class="section-overline">VERIFIED MODEL</p><h2>One frozen model</h2><p>The worklist uses the same verified Model B for every supported study.</p></div><div class="queue-orb neutral" aria-hidden="true">B</div></section>
+        <section id="modelStatus" class="model-status-card"><div class="loading-dot"></div><p>Checking the local model bundle…</p></section>
+        <section class="info-card"><div class="info-icon teal">✓</div><div><h3>Study-level score</h3><p>Each real view receives a probability. The mean view probability is compared with the frozen threshold.</p></div></section>
+        <section class="info-card"><div class="info-icon blue">i</div><div><h3>Worklist value</h3><p>A model flag can raise review priority. It is not a diagnosis and cannot remove a case from human review.</p></div></section>
+        <section class="info-card"><div class="info-icon teal">↗</div><div><h3>Bounded ambiguity check</h3><p>Only conflicting view scores can start the local evidence check. It may collect TTA stability evidence, but it cannot change the fixed model decision.</p></div></section>
       </section>
 
       <section id="safetyScreen" class="screen" aria-label="Safety policy">
-        <section class="intro-row compact">
-          <div>
-            <p class="section-overline">SAFETY POLICY</p>
-            <h2>Rules come first</h2>
-            <p>The model cannot override these deterministic safeguards.</p>
-          </div>
-          <div class="wrist-orb safety" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm0 4 5 1.88V11c0 3.68-2.2 7.37-5 8.73C9.2 18.37 7 14.68 7 11V7.88L12 6zm-1 10 5-5-1.41-1.41L11 13.17l-1.59-1.58L8 13l3 3z"/></svg></div>
-        </section>
+        <section class="hero-row compact"><div><p class="section-overline">SAFETY POLICY</p><h2>Rules before ranking</h2><p>Known safety rules are deterministic. A bounded local ambiguity check may add evidence, but cannot override these rules.</p></div><div class="queue-orb safety" aria-hidden="true">✓</div></section>
         <ol class="policy-list">
-          <li><span class="policy-number">01</span><div><h3>Support declared wrist studies</h3><p>Routing uses the declared anatomy field; automatic body-part verification is not yet implemented. Other declared MURA anatomies return <b>UNSUPPORTED</b>.</p></div></li>
-          <li><span class="policy-number">02</span><div><h3>Check image usability first</h3><p>Unreadable, tiny, or near-uniform images return <b>NEEDS_HUMAN_REVIEW</b>.</p></div></li>
-          <li><span class="policy-number">03</span><div><h3>Raise priority, never clear</h3><p>A model flag or view disagreement may raise priority. Human review remains required.</p></div></li>
+          <li><span class="policy-number">01</span><div><h3>Keep each study together</h3><p>Images are grouped by their local study folder. No image from one study is mixed with another.</p></div></li>
+          <li><span class="policy-number">02</span><div><h3>Check before inference</h3><p>Unsupported anatomy, corrupt input, tiny images, and near-uniform images route safely without a model result.</p></div></li>
+          <li><span class="policy-number">03</span><div><h3>Raise priority, never clear</h3><p>Model evidence can reorder the queue only. A clinician reviews every study.</p></div></li>
+          <li><span class="policy-number">04</span><div><h3>Bounded ambiguity check</h3><p>Only conflicting view evidence can trigger one local TTA check. It cannot change the model score, threshold, safety outcome, or human-review requirement.</p></div></li>
         </ol>
       </section>
 
       <nav class="bottom-nav" aria-label="Application navigation">
-        <button class="nav-item active" data-target="reviewScreen" type="button">
-          <svg viewBox="0 0 24 24"><path d="M20 20H4V4h16v16zM6 6v12h12V6H6zm2 2h3v3H8V8zm0 5h8v3H8v-3z"/></svg><span>Review</span>
-        </button>
-        <button class="nav-item" data-target="modelScreen" type="button">
-          <svg viewBox="0 0 24 24"><path d="M4 5h16v12H4V5zm2 2v8h12V7H6zm1 12h10v2H7v-2z"/></svg><span>Model</span>
-        </button>
-        <button class="nav-item" data-target="safetyScreen" type="button">
-          <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm0 4 5 1.88V11c0 3.68-2.2 7.37-5 8.73C9.2 18.37 7 14.68 7 11V7.88L12 6z"/></svg><span>Safety</span>
-        </button>
+        <button class="nav-item active" data-target="queueScreen" type="button"><svg viewBox="0 0 24 24"><path d="M20 20H4V4h16v16zM6 6v12h12V6H6zm2 2h3v3H8V8zm0 5h8v3H8v-3z"/></svg><span>Worklist</span></button>
+        <button class="nav-item" data-target="modelScreen" type="button"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H4V5zm2 2v8h12V7H6zm1 12h10v2H7v-2z"/></svg><span>Model</span></button>
+        <button class="nav-item" data-target="safetyScreen" type="button"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm0 4 5 1.88V11c0 3.68-2.2 7.37-5 8.73C9.2 18.37 7 14.68 7 11V7.88L12 6z"/></svg><span>Safety</span></button>
       </nav>
     </main>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

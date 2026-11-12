@@ -20,26 +20,29 @@
 ## Purpose
 
 Wrist Review is a **local-only research interface** for the verified
-Checkpoint 1 Model B workflow. It makes the study-level process visible to a
-reviewer: choose the views belonging to one wrist study, inspect the selected
-file, apply deterministic input checks, and receive a safe workflow outcome.
+Checkpoint 1 Model B workflow. It makes the worklist process visible to a
+reviewer: choose a local folder containing one or more wrist studies, inspect
+the selected file, apply deterministic input checks, and receive a safe
+priority ordering for human review.
 
 It does not diagnose fracture, localize an abnormality, prescribe treatment,
 or clear a case from standard human review.
 
 ## User flow
 
-1. **Add study** — select 1–8 local image files or one local folder, enter a
-   non-identifying case alias, and declare the anatomy. A selection with more
-   than eight files is rejected; the user must re-select rather than having
-   files discarded silently.
-2. **Inspect views** — choose any selected file from the study list; view its
+1. **Add worklist** — select a local patient folder, append further patient
+   folders, or select one ZIP containing several patient/study folder trees. The
+   ZIP is read in memory only and is limited to 100 MB compressed, 50 MB
+   expanded, 400 files, and 15 MB per image. A study with more than eight files
+   is rejected; the app never silently discards views.
+2. **Inspect views** — choose a study and any selected file from its study list; view its
    local preview, file details, image dimensions, and technical-QC status.
-3. **Review study** — only real selected views are passed to the verified
+3. **Review worklist** — only real selected views are passed study-by-study to the verified
    Model B runtime. The app mean-pools the view probabilities at study level
    and applies the frozen internal-validation threshold.
-4. **Receive a safe route** — `RAISE_PRIORITY`, `STANDARD_HUMAN_REVIEW`,
-   `NEEDS_HUMAN_REVIEW`, or `UNSUPPORTED`.
+4. **Receive a safe route and order** — `RAISE_PRIORITY`,
+   `STANDARD_HUMAN_REVIEW`, `NEEDS_HUMAN_REVIEW`, or `UNSUPPORTED`; every
+   case remains in the human-review queue.
 
 Do not enter patient identifiers in the alias, folder name, or file name.
 Those values can be visible in the local interface even though the server does
@@ -78,12 +81,17 @@ before a review can proceed.
 
 ## Relationship to the Agentic-AI plan
 
-This is the deterministic baseline required before an adaptive agent is
-considered. It does **not** implement the planned adaptive Agentic AI layer.
-That later layer must remain bounded by the same safety policy and be evaluated
-against deterministic routing and a fixed tool workflow on an independent
-case suite. See [AGENT_DESIGN.md](../../agents/AGENT_DESIGN.md) and
-[AGENT_EVAL_PLAN.md](../../evaluation/AGENT_EVAL_PLAN.md).
+The app first runs the deterministic baseline.  In the narrow case where valid
+wrist views disagree across the frozen threshold, it calls a bounded local TTA
+stability check and attaches the typed result to the evidence record. This is
+not an adaptive LLM/LangGraph agent: it has no external data access, cannot
+choose unapproved tools, and cannot change the score, threshold, or route.
+
+The planned adaptive layer must remain bounded by the same safety policy and
+be evaluated against deterministic routing and a fixed tool workflow on an
+independent case suite. See [AGENT_DESIGN.md](../../agents/AGENT_DESIGN.md),
+[AGENT_IMPLEMENTATION_STATUS.md](../../agents/AGENT_IMPLEMENTATION_STATUS.md),
+and [AGENT_EVAL_PLAN.md](../../evaluation/AGENT_EVAL_PLAN.md).
 
 ## Local run requirements
 
@@ -101,7 +109,8 @@ bundle before it permits model inference.
 
 ## Current status
 
-The interface and deterministic runtime are implemented as a local research
-prototype. It has not undergone clinical usability validation, deployment
-security review, or the planned independent agent evaluation. It must be shown
-as a workflow prototype rather than evidence of clinical readiness.
+The interface, deterministic runtime, and bounded TTA investigation are
+implemented as a local research prototype. It has not undergone clinical
+usability validation, deployment security review, or the planned independent
+adaptive-agent evaluation. It must be shown as a workflow prototype rather
+than evidence of clinical readiness.

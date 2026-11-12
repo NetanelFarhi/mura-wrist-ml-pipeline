@@ -19,10 +19,51 @@ import warnings
 from typing import Any, Sequence
 
 import torch
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 
 MAX_STUDY_VIEWS = 8
+
+
+def worklist_metadata(result: dict[str, Any]) -> dict[str, Any]:
+    """Describe one completed study for the local human-review worklist.
+
+    The worklist is an ordering aid only.  It never converts a study into a
+    diagnosis or removes it from human review.  The bounded ambiguity
+    investigation is reported explicitly; it cannot change the model score,
+    threshold, or human-review requirement.
+    """
+
+    outcome = str(result.get("deterministic_outcome", "NEEDS_HUMAN_REVIEW"))
+    evidence = result.get("view_evidence")
+    evidence = evidence if isinstance(evidence, dict) else {}
+    raw_score = evidence.get("mean_probability")
+    score = float(raw_score) if isinstance(raw_score, (int, float)) else None
+    disagreement = bool(evidence.get("threshold_disagreement", False))
+    agent_report = result.get("agent_report")
+    agent_report = agent_report if isinstance(agent_report, dict) else {}
+
+    if outcome == "RAISE_PRIORITY":
+        bucket, rank = "priority", 0
+    elif outcome in {"UNSUPPORTED", "NEEDS_HUMAN_REVIEW"}:
+        bucket, rank = "input_attention", 1
+    else:
+        bucket, rank = "routine", 2
+
+    return {
+        "bucket": bucket,
+        "rank": rank,
+        "study_score": score,
+        "ambiguous_view_evidence": disagreement,
+        "human_review_required": True,
+        "agent_status": str(agent_report.get("agent_status", "not_run")),
+        "agent_note": str(
+            agent_report.get(
+                "reason_for_escalation_or_rejection",
+                "Bounded agent report was unavailable; deterministic routing was retained.",
+            )
+        ),
+    }
 
 
 @dataclass(frozen=True)
@@ -252,7 +293,113 @@ def run_guarded_review(
     }
     if captured_probabilities:
         result["per_view_probabilities"] = [round(value, 6) for value in captured_probabilities]
+    result["agent_report"] = _run_bounded_ambiguity_investigation(
+        runtime=runtime,
+        images=images,
+        deterministic_result=result,
+        base_probabilities=captured_probabilities,
+    )
+    result["worklist"] = worklist_metadata(result)
     return result
+
+
+def _encode_png(image: Image.Image) -> bytes:
+    """Encode a transient augmentation without writing image pixels to disk."""
+
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+def _tta_uncertainty_check(
+    runtime: ModelRuntime,
+    *,
+    image: Any,
+    original_probability: float,
+) -> dict[str, Any]:
+    """Measure small brightness/contrast perturbations for one ambiguous view.
+
+    This is evidence only.  It does not replace the original score, threshold,
+    deterministic route, or required human review.
+    """
+
+    from src.runtime.deterministic_safety import StudyImage
+
+    image_bytes = getattr(image, "image_bytes", None)
+    image_id = str(getattr(image, "image_id", "ambiguous_view"))
+    if not isinstance(image_bytes, bytes):
+        raise TypeError("Ambiguity check requires image bytes.")
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as source:
+            source_image = source.convert("RGB").copy()
+    except (OSError, ValueError) as exc:
+        raise ValueError("Ambiguity check could not decode the selected view.") from exc
+
+    augmentations = {
+        "brightness_minus_5pct": ImageEnhance.Brightness(source_image).enhance(0.95),
+        "brightness_plus_5pct": ImageEnhance.Brightness(source_image).enhance(1.05),
+        "contrast_minus_5pct": ImageEnhance.Contrast(source_image).enhance(0.95),
+        "contrast_plus_5pct": ImageEnhance.Contrast(source_image).enhance(1.05),
+    }
+    augmented_views = [
+        StudyImage(image_id=f"{image_id}__{name}", image_bytes=_encode_png(variant))
+        for name, variant in augmentations.items()
+    ]
+    variant_probabilities = runtime.predict_view_probabilities(augmented_views)
+    all_probabilities = [float(original_probability), *[float(value) for value in variant_probabilities]]
+    threshold = float(runtime.threshold)
+    variant_scores = {
+        name: round(float(score), 6)
+        for name, score in zip(augmentations, variant_probabilities, strict=True)
+    }
+    threshold_disagreement = len({value >= threshold for value in all_probabilities}) > 1
+    return {
+        "status": "SUCCESS",
+        "selected_view_id": image_id,
+        "original_probability": round(float(original_probability), 6),
+        "augmentation_probabilities": variant_scores,
+        "tta_mean_probability": round(sum(all_probabilities) / len(all_probabilities), 6),
+        "tta_std": round(float(torch.tensor(all_probabilities).std(unbiased=False).item()), 6),
+        "tta_range": round(max(all_probabilities) - min(all_probabilities), 6),
+        "threshold_disagreement": bool(threshold_disagreement),
+        "threshold": threshold,
+        "augmentation_count": len(variant_probabilities),
+        "scope": "local_evidence_only",
+    }
+
+
+def _run_bounded_ambiguity_investigation(
+    *,
+    runtime: ModelRuntime,
+    images: Sequence[Any],
+    deterministic_result: dict[str, Any],
+    base_probabilities: Sequence[float],
+) -> dict[str, Any]:
+    """Run the approved local agent path, only if its ambiguity trigger fires."""
+
+    from src.runtime.bounded_agent import run_bounded_agent
+
+    if len(images) != len(base_probabilities):
+        return run_bounded_agent(deterministic_result, tta_runner=None)
+
+    evidence = deterministic_result.get("view_evidence")
+    evidence = evidence if isinstance(evidence, dict) else {}
+    if not bool(evidence.get("threshold_disagreement", False)):
+        return run_bounded_agent(deterministic_result, tta_runner=None)
+
+    closest_index = min(
+        range(len(base_probabilities)),
+        key=lambda index: abs(float(base_probabilities[index]) - runtime.threshold),
+    )
+
+    return run_bounded_agent(
+        deterministic_result,
+        tta_runner=lambda: _tta_uncertainty_check(
+            runtime,
+            image=images[closest_index],
+            original_probability=float(base_probabilities[closest_index]),
+        ),
+    )
 
 
 def deidentified_evidence_record(result: dict[str, Any]) -> str:
@@ -271,6 +418,8 @@ def deidentified_evidence_record(result: dict[str, Any]) -> str:
         "human_review_required",
         "runtime_seconds",
         "model_metadata",
+        "agent_report",
+        "worklist",
     }
     safe = {key: value for key, value in result.items() if key in allowed}
     return json.dumps(safe, indent=2, ensure_ascii=False)
