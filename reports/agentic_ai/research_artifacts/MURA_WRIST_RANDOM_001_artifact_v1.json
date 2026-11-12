@@ -1,0 +1,46 @@
+{
+  "artifact_type": "MURA_CREWAI_RESEARCH_ARTIFACT",
+  "schema_version": "1.0",
+  "study_id": "MURA_WRIST_RANDOM_001",
+  "model_b": {
+    "predicted_class": 1,
+    "study_probability": 0.40549811720848083,
+    "threshold": 0.263567715883255,
+    "image_threshold_disagreement": true
+  },
+  "policy": {
+    "action": "priority_human_review",
+    "reason": "Valid abnormal study prediction.",
+    "classification_modified": false
+  },
+  "crew_execution": {
+    "status": "COMPLETED",
+    "explanation": "### MURA Research Explanation Report\n\n**Study Alias:** MURA_WRIST_RANDOM_001\n\n**Original Frozen Classification:**\n*   **Predicted Class:** 1\n*   **Study Probability:** 0.40549811720848083\n*   **Classification Threshold:** 0.263567715883255\n*   **Image Threshold Disagreement:** True\n\n**Deterministic Workflow Action:**\n*   **Action:** priority_human_review\n\n---\n\n**Explanation Tool Execution Summary:**\n\n*   **TTA (Test-Time Augmentation) Summary:**\n    *   Status: SUCCESS\n    *   TTA Mean Probability: 0.4098\n    *   TTA Range: 0.0066\n    *   TTA Standard Deviation: 0.0023\n    *   The TTA analysis indicates low variance across augmented versions of the study images, suggesting the model's probability estimate is relatively stable under minor input perturbations.\n\n*   **Grad-CAM (Gradient-weighted Class Activation Mapping) Summary:**\n    *   Status: SUCCESS\n    *   Target Layer: backbone.layer4[-1].conv2\n    *   Heatmaps were generated for all 3 images in the study. These heatmaps highlight the regions of the input images that most influenced the model's classification decision.\n\n---\n\n**Scientific Limitations:**\n*   **Research-Only Designation:** This report is for research purposes only. It does not constitute a clinical diagnosis, medical advice, or a recommendation for treatment.\n*   **Model Interpretation:** Grad-CAM heatmaps provide a visual representation of model attention but do not establish diagnostic correctness or clinical relevance. They should not be interpreted as a definitive localization of pathology.\n*   **Threshold Disagreement:** The presence of \"Image Threshold Disagreement\" indicates that individual images within the study may have yielded conflicting classification results relative to the study-level threshold, necessitating careful human review.\n\n**Mandatory Human Review:**\nThis study has been flagged for **priority_human_review**. A qualified radiologist must review the original radiographs and this explanation report to determine clinical significance. All model outputs must be validated by a human expert before any clinical consideration.",
+    "logging_status": null
+  },
+  "tools": [
+    {
+      "tool_name": "tta_uncertainty",
+      "execution_status": "SUCCESS",
+      "artifact_paths": []
+    },
+    {
+      "tool_name": "gradcam_explainer",
+      "execution_status": "SUCCESS",
+      "artifact_paths": []
+    }
+  ],
+  "json_report_path": null,
+  "pdf_report_path": "/content/drive/MyDrive/MURA_Project/research_reports/MURA_WRIST_RANDOM_001_research_report.pdf",
+  "research_use_only": true,
+  "requires_human_review": true,
+  "limitations": [
+    "Research prototype; not validated for clinical use.",
+    "Model predictions are not radiologist diagnoses.",
+    "Anatomical scope validation relies on supplied metadata.",
+    "Technical QC does not establish diagnostic adequacy.",
+    "Image-level threshold agreement does not establish diagnostic correctness.",
+    "The prespecified 95% sensitivity target was not met on official held-out validation.",
+    "Agent workflow actions are experimental and are not clinically validated triage recommendations."
+  ]
+}
