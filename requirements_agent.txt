@@ -1,10 +1,17 @@
-torch==2.11.0
-torchvision==0.26.0
-crewai==1.15.36
-google-genai==2.12.1
-numpy==2.4.6
-pandas==2.2.3
-scikit-learn==1.6.1
-Pillow==13.0.0
-matplotlib==3.10.0
-opencv-python==5.0.0.93
+# Draft dependencies extracted from 09_MURA_Agentic_AI-final.ipynb
+# CrewAI version confirmed in saved execution output (Steps 56C, 61A).
+# Other package versions NOT established from saved outputs; validate before final release.
+crewai==1.15.39
+torch
+torchvision
+numpy
+pandas
+Pillow
+matplotlib
+pydantic
+psutil
+reportlab
+pypdf
+# google.colab is provided by Google Colab, not installed via this file.
+# google-genai is not explicitly required by the notebook's direct imports;
+# Gemini is configured through CrewAI's LLM interface.
