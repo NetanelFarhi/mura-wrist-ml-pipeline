@@ -1,0 +1,46 @@
+{
+  "artifact_type": "MURA_CREWAI_RESEARCH_ARTIFACT",
+  "schema_version": "1.0",
+  "study_id": "MURA_WRIST_RANDOM_002",
+  "model_b": {
+    "predicted_class": 1,
+    "study_probability": 0.9960786898930868,
+    "threshold": 0.263567715883255,
+    "image_threshold_disagreement": false
+  },
+  "policy": {
+    "action": "priority_human_review",
+    "reason": "Valid abnormal study prediction.",
+    "classification_modified": false
+  },
+  "crew_execution": {
+    "status": "COMPLETED",
+    "explanation": "### MURA Research Explanation Report\n\n**Study Alias:** MURA_WRIST_RANDOM_002\n\n**Original Frozen Classification:**\n*   **Predicted Class:** 1\n*   **Study Probability:** 0.9960786898930868\n*   **Classification Threshold:** 0.263567715883255\n*   **Image Threshold Disagreement:** False\n\n**Deterministic Workflow Action:**\n*   **Action:** priority_human_review\n\n**TTA Execution Summary:**\n*   **Status:** SUCCESS\n*   **Augmentations Performed:** 5\n*   **TTA Mean Probability:** 0.996009743213654\n*   **TTA Standard Deviation:** 0.000182286098263525\n*   **TTA Range:** 0.000512997309366825\n*   **Interpretation:** The model demonstrates high stability across the performed augmentations, with minimal variance in probability scores.\n\n**Grad-CAM Execution Summary:**\n*   **Status:** SUCCESS\n*   **Target Layer:** backbone.layer4[-1].conv2\n*   **Images Analyzed:** 3\n*   **Interpretation:** Heatmaps were successfully generated for all images in the study. These visualizations highlight the regions of the radiographs that most influenced the model's classification.\n\n**Scientific Limitations:**\n*   **Research-Only:** This report is generated for research purposes only and does not constitute a clinical diagnosis or medical advice.\n*   **Attribution Constraints:** Grad-CAM visualizations indicate areas of high model activation but do not establish diagnostic correctness or identify specific anatomical pathologies.\n*   **Model Scope:** The model's performance is limited to the training data distribution and may not generalize to all clinical scenarios or patient demographics.\n\n**Mandatory Human Review:**\n*   This study has been flagged for **priority_human_review**. All findings, including model classifications and explanation visualizations, must be reviewed and validated by a qualified radiologist before any clinical consideration.",
+    "logging_status": null
+  },
+  "tools": [
+    {
+      "tool_name": "tta_uncertainty",
+      "execution_status": "SUCCESS",
+      "artifact_paths": []
+    },
+    {
+      "tool_name": "gradcam_explainer",
+      "execution_status": "SUCCESS",
+      "artifact_paths": []
+    }
+  ],
+  "json_report_path": null,
+  "pdf_report_path": "/content/drive/MyDrive/MURA_Project/research_reports/MURA_WRIST_RANDOM_002_research_report.pdf",
+  "research_use_only": true,
+  "requires_human_review": true,
+  "limitations": [
+    "Research prototype; not validated for clinical use.",
+    "Model predictions are not radiologist diagnoses.",
+    "Anatomical scope validation relies on supplied metadata.",
+    "Technical QC does not establish diagnostic adequacy.",
+    "Image-level threshold agreement does not establish diagnostic correctness.",
+    "The prespecified 95% sensitivity target was not met on official held-out validation.",
+    "Agent workflow actions are experimental and are not clinically validated triage recommendations."
+  ]
+}
