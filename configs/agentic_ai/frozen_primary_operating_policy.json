@@ -1,0 +1,16 @@
+{
+  "model": "Model B: fine-tuned ResNet-18",
+  "study_aggregation": "mean_probability",
+  "source_split": "internal_validation",
+  "selection_rule": "highest threshold with sensitivity >= target",
+  "target_sensitivity": 0.95,
+  "test_used_for_selection": false,
+  "threshold": 0.263567715883255,
+  "sensitivity": 0.9516728624535316,
+  "specificity": 0.5829383886255924,
+  "precision": 0.5925925925925926,
+  "f1": 0.7303851640513552,
+  "false_negative": 13,
+  "false_positive": 176,
+  "flagged_percent": 62.51808972503618
+}

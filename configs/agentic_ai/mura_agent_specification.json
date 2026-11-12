@@ -1,0 +1,95 @@
+{
+    "agent_name": "MURA Wrist Decision-Support Agent",
+    "version": "1.2",
+    "framework": "CrewAI",
+    "llm_provider": "Google Gemini",
+    "purpose": "Research-oriented orchestration of wrist radiograph classification, technical QC, anatomical scope validation, uncertainty analysis, explainability, and reporting.",
+    "model": {
+        "model_id": "canonical_model_b",
+        "architecture": "ResNet18",
+        "checkpoint": "/content/drive/MyDrive/Final Project DS23/Agentic AI-Assisted Detection of Musculoskeletal Abnormalities in Emergency X-rays/DATA/MODEL_B_FINE_TUNING/best_resnet18_study_level.pt",
+        "selected_epoch": 9,
+        "threshold": 0.263567715883255,
+        "threshold_source": "internal_validation",
+        "operating_policy": "/content/drive/MyDrive/Final Project DS23/Agentic AI-Assisted Detection of Musculoskeletal Abnormalities in Emergency X-rays/DATA/MODEL_B_FINE_TUNING/frozen_primary_operating_policy.json",
+        "aggregation": "mean_probability",
+        "input_resolution": [
+            224,
+            224
+        ],
+        "preprocessing": "Grayscale decoding, aspect-preserving black padding, bilinear resizing, RGB replication, ImageNet normalization",
+        "frozen": true,
+        "task": "normal_vs_abnormal"
+    },
+    "tools": {
+        "technical_qc": {
+            "execution": "mandatory",
+            "description": "Technical image validation"
+        },
+        "anatomical_scope_validator": {
+            "execution": "mandatory",
+            "description": "Wrist anatomical scope verification using available study metadata; not image-based anatomical recognition"
+        },
+        "classify_study": {
+            "execution": "mandatory_after_validation",
+            "description": "Frozen canonical Model B inference using mean study-level probability and fixed threshold"
+        },
+        "view_consistency": {
+            "execution": "mandatory_after_classification",
+            "description": "Cross-view probability comparison"
+        },
+        "tta_uncertainty": {
+            "execution": "agent_selected",
+            "description": "Exploratory prediction stability assessment"
+        },
+        "gradcam_explainer": {
+            "execution": "agent_selected",
+            "description": "Model activation visualization; not validated lesion localization"
+        },
+        "study_metadata": {
+            "execution": "agent_selected",
+            "description": "De-identified study information"
+        },
+        "report_generator": {
+            "execution": "mandatory",
+            "description": "Structured evidence-grounded report"
+        }
+    },
+    "allowed_actions": [
+        "routine_workflow",
+        "priority_human_review",
+        "human_escalation",
+        "unsupported_input"
+    ],
+    "safety_constraints": {
+        "model_weights_immutable": true,
+        "threshold_immutable": true,
+        "study_aggregation_immutable": true,
+        "no_specific_diagnosis": true,
+        "no_unverified_clinical_claims": true,
+        "no_patient_identifiers": true,
+        "human_final_decision": true,
+        "mandatory_technical_qc": true,
+        "mandatory_anatomical_scope_validation": true,
+        "no_forced_classification_on_invalid_input": true,
+        "no_agent_override_of_model_predictions": true,
+        "gradcam_not_validated_localization": true,
+        "tta_not_calibrated_clinical_confidence": true,
+        "official_validation_not_used_for_selection": true
+    },
+    "evaluation": {
+        "baseline": "deterministic_rule_based_policy",
+        "metrics": [
+            "tool_selection_accuracy",
+            "view_disagreement_detection",
+            "uncertainty_handling",
+            "anatomical_scope_enforcement",
+            "report_groundedness",
+            "escalation_accuracy",
+            "safety_violations",
+            "unnecessary_tool_calls",
+            "execution_time"
+        ]
+    },
+    "created_at": "2026-11-08T21:19:33.073079+00:00"
+}
