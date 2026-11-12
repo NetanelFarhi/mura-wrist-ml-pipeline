@@ -58,7 +58,7 @@ These files document integrated agent research outputs for a selected wrist stud
 |---|---|
 | `MURA_WRIST_RANDOM_001_research_report_with_metrics.pdf` | Included; metrics version retained |
 | `MURA_WRIST_RANDOM_002_research_report.pdf` | Included |
-| `MURA_WRIST_NO_TOOLS_001_research_report.pdf` | Pending generation; not included |
+| `MURA_WRIST_NO_TOOLS_001_research_report.pdf` | Included |
 
 ## 7. Dependencies
 
