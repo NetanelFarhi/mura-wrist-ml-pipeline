@@ -1,0 +1,229 @@
+{
+  "report_type": "MURA Agent Research Report",
+  "research_use_only": true,
+  "study_information": {
+    "study_id": "valid/XR_WRIST/patient11185/study1_positive",
+    "image_count": 4
+  },
+  "workflow": {
+    "status": "COMPLETED",
+    "reason": "Mandatory checks passed",
+    "issues": []
+  },
+  "technical_qc": {
+    "status": "PASS",
+    "results": [
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image1.png",
+        "status": "PASS",
+        "width": 268,
+        "height": 512,
+        "mean_brightness": 51.67970275878906,
+        "contrast_std": 23.95720672607422,
+        "issues": [],
+        "blocking_failure": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image2.png",
+        "status": "PASS",
+        "width": 268,
+        "height": 512,
+        "mean_brightness": 51.93709182739258,
+        "contrast_std": 25.077058792114258,
+        "issues": [],
+        "blocking_failure": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image3.png",
+        "status": "PASS",
+        "width": 512,
+        "height": 499,
+        "mean_brightness": 45.3488655090332,
+        "contrast_std": 22.576311111450195,
+        "issues": [],
+        "blocking_failure": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image4.png",
+        "status": "PASS",
+        "width": 261,
+        "height": 512,
+        "mean_brightness": 49.31747817993164,
+        "contrast_std": 26.457515716552734,
+        "issues": [],
+        "blocking_failure": false
+      }
+    ]
+  },
+  "anatomical_scope": {
+    "status": "SUPPORTED_WRIST",
+    "metadata_source": "MURA_LOOKUP",
+    "anatomy_image_verified": false,
+    "issues": []
+  },
+  "classification": {
+    "status": "COMPLETED",
+    "performed": true,
+    "valid": true,
+    "predicted_class": 1,
+    "interpretation": "Abnormality predicted",
+    "study_probability": 0.9800305664539337,
+    "threshold": 0.263567715883255,
+    "image_threshold_disagreement": false
+  },
+  "agent_decision": {
+    "action": "priority_human_review",
+    "reason": "Valid abnormal study prediction.",
+    "classification_modified": false
+  },
+  "limitations": [
+    "Research prototype; not validated for clinical use.",
+    "Model predictions are not radiologist diagnoses.",
+    "Anatomical scope validation relies on supplied metadata.",
+    "Technical QC does not establish diagnostic adequacy.",
+    "Image-level threshold agreement does not establish diagnostic correctness.",
+    "The prespecified 95% sensitivity target was not met on official held-out validation.",
+    "Agent workflow actions are experimental and are not clinically validated triage recommendations."
+  ],
+  "study_tta_explanation": {
+    "status": "SUCCESS",
+    "image_count": 4,
+    "augmentation_count": 5,
+    "study_tta_probabilities": {
+      "original": 0.9800305664539337,
+      "brightness_plus_5": 0.982087105512619,
+      "brightness_minus_5": 0.983837366104126,
+      "contrast_plus_5": 0.98909492790699,
+      "contrast_minus_5": 0.9679374247789383
+    },
+    "original_study_probability": 0.9800305664539337,
+    "frozen_study_probability": 0.9800305664539337,
+    "tta_mean_probability": 0.9805974781513214,
+    "tta_std": 0.0070074368528955265,
+    "tta_min_probability": 0.9679374247789383,
+    "tta_max_probability": 0.98909492790699,
+    "tta_range": 0.021157503128051758,
+    "threshold_disagreement": false,
+    "threshold": 0.263567715883255,
+    "image_level_summaries": [
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image1.png",
+        "original_probability": 0.9957946538925171,
+        "tta_std": 0.000293974404079328,
+        "tta_range": 0.0008994936943054199,
+        "threshold_disagreement": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image2.png",
+        "original_probability": 0.9952220320701599,
+        "tta_std": 0.0008756009994727446,
+        "tta_range": 0.0019991397857666016,
+        "threshold_disagreement": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image3.png",
+        "original_probability": 0.9318945407867432,
+        "tta_std": 0.027155684981037397,
+        "tta_range": 0.0818636417388916,
+        "threshold_disagreement": false
+      },
+      {
+        "image_id": "valid/XR_WRIST/patient11185/study1_positive/image4.png",
+        "original_probability": 0.9972110390663147,
+        "tta_std": 0.0002968273258348335,
+        "tta_range": 0.0008679628372192383,
+        "threshold_disagreement": false
+      }
+    ],
+    "interpretation": "Supplementary sensitivity analysis across five predefined image conditions. Threshold stability does not establish diagnostic correctness or calibrated uncertainty. The frozen classification and Agent action remain unchanged."
+  },
+  "gradcam_explanations": [
+    {
+      "image_id": "valid/XR_WRIST/patient11185/study1_positive/image1.png",
+      "explanation_method": "Grad-CAM",
+      "research_use_only": true,
+      "original_probability": 0.9957946538925171,
+      "gradcam_probability": 0.9957946538925171,
+      "absolute_probability_difference": 0.0,
+      "heatmap_path": "explanations/valid_XR_WRIST_patient11185_study1_positive/image1_ffe9b1be693b1105_gradcam.png",
+      "heatmap_shape": [
+        224,
+        224
+      ],
+      "heatmap_format": "PNG",
+      "heatmap_type": "normalized_grayscale_uint8",
+      "heatmap_sha256": "0cc57f35d0e232a6185283ff7e63556afba6518f80927773b32204b939942807",
+      "interpretation": "Grad-CAM provides a qualitative visualization of regions influencing the frozen model output. It does not establish lesion localization, clinical validity, or diagnostic correctness."
+    },
+    {
+      "image_id": "valid/XR_WRIST/patient11185/study1_positive/image2.png",
+      "explanation_method": "Grad-CAM",
+      "research_use_only": true,
+      "original_probability": 0.9952220320701599,
+      "gradcam_probability": 0.9952220320701599,
+      "absolute_probability_difference": 0.0,
+      "heatmap_path": "explanations/valid_XR_WRIST_patient11185_study1_positive/image2_437572aca1b3986d_gradcam.png",
+      "heatmap_shape": [
+        224,
+        224
+      ],
+      "heatmap_format": "PNG",
+      "heatmap_type": "normalized_grayscale_uint8",
+      "heatmap_sha256": "3159cbebb7cddc78bf5aba89d21d5eee01ddfea9a961f342c3cc9390c8ec008c",
+      "interpretation": "Grad-CAM provides a qualitative visualization of regions influencing the frozen model output. It does not establish lesion localization, clinical validity, or diagnostic correctness."
+    },
+    {
+      "image_id": "valid/XR_WRIST/patient11185/study1_positive/image3.png",
+      "explanation_method": "Grad-CAM",
+      "research_use_only": true,
+      "original_probability": 0.9318945407867432,
+      "gradcam_probability": 0.9318945407867432,
+      "absolute_probability_difference": 0.0,
+      "heatmap_path": "explanations/valid_XR_WRIST_patient11185_study1_positive/image3_d3c1a09c8264b075_gradcam.png",
+      "heatmap_shape": [
+        224,
+        224
+      ],
+      "heatmap_format": "PNG",
+      "heatmap_type": "normalized_grayscale_uint8",
+      "heatmap_sha256": "8cc5e13ac9d9e9c4404303fc8df8bb9c8ba12ae230bee7cc1cbda2317da860e8",
+      "interpretation": "Grad-CAM provides a qualitative visualization of regions influencing the frozen model output. It does not establish lesion localization, clinical validity, or diagnostic correctness."
+    },
+    {
+      "image_id": "valid/XR_WRIST/patient11185/study1_positive/image4.png",
+      "explanation_method": "Grad-CAM",
+      "research_use_only": true,
+      "original_probability": 0.9972110390663147,
+      "gradcam_probability": 0.9972110390663147,
+      "absolute_probability_difference": 0.0,
+      "heatmap_path": "explanations/valid_XR_WRIST_patient11185_study1_positive/image4_b753d6d36f23861a_gradcam.png",
+      "heatmap_shape": [
+        224,
+        224
+      ],
+      "heatmap_format": "PNG",
+      "heatmap_type": "normalized_grayscale_uint8",
+      "heatmap_sha256": "76da5e5642b10946ec7a050c6a6bd0843f583fc6ddbbdf8cdbc848965c438004",
+      "interpretation": "Grad-CAM provides a qualitative visualization of regions influencing the frozen model output. It does not establish lesion localization, clinical validity, or diagnostic correctness."
+    }
+  ],
+  "agent_policy": {
+    "study_id": "valid/XR_WRIST/patient11185/study1_positive",
+    "policy_version": "1.1.0",
+    "policy_status": "VALID",
+    "mandatory_safety_passed": true,
+    "original_agent_action": "priority_human_review",
+    "selected_tools": [
+      "tta_uncertainty",
+      "gradcam_explainer"
+    ],
+    "tta_decision": "REQUEST",
+    "gradcam_decision": "REQUEST",
+    "tta_reason": "Validated priority-review study.",
+    "gradcam_reason": "Validated priority-review study.",
+    "validation_issues": [],
+    "requires_human_review": true,
+    "tools_executed": false,
+    "research_use_only": true
+  }
+}
