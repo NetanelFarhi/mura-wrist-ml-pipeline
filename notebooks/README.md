@@ -21,6 +21,8 @@ Intermediate artifacts must be persisted in the configured Drive/data folders; J
 - [09 — Deterministic safety tools](09_MURA_Deterministic_Safety_Tools.ipynb): existing supporting smoke-test notebook, retained unchanged.
 - [Saved results viewer](06_results_viewer.ipynb): read-only presentation, separate from the execution sequence.
 - [09 - MURA Agentic AI](09_MURA_Agentic_AI-final.ipynb): Completed and successfully executed end-to-end. Integrates frozen Model B, deterministic policy, authorized TTA and Grad-CAM tools, CrewAI-based research explanations, and safety controls. Three structured research artifacts were validated. Final notebook uploaded to GitHub; research use only, with mandatory human review.
+- [09A — Independent Model B Verification](09A_MURA_Ground_True_Independent_Model_B_Validation.ipynb): Independently verifies frozen Model B predictions across three XR_WRIST studies (False Positive, True Positive, and True Negative). Reproduces all eight image-level predictions, verifies original MURA image identity, analyzes image-level disagreement, and documents Grad-CAM visualization and previously recorded agentic tool execution. Successfully rerun in a fresh Colab runtime without retraining or executing CrewAI; research use only.
+
 ## Preserved contributor and experimental notebooks
 
 - [Legacy notebooks](legacy/README.md) are kept for provenance. Hagit's Agentic AI draft is archived there unchanged and is not part of the active runtime.
