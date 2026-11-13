@@ -170,6 +170,9 @@ class WristReviewHandler(BaseHTTPRequestHandler):
         route = urlparse(self.path).path
         if route == "/api/status":
             status = verified_status()
+            from src.runtime.crewai_research import research_agent_status
+
+            research = research_agent_status(core.resolve_configuration().project_root)
             safe = {
                 "ready": bool(status.get("ready")),
                 "model": status.get("model"),
@@ -179,7 +182,18 @@ class WristReviewHandler(BaseHTTPRequestHandler):
                 "validation_specificity": status.get("validation_specificity"),
                 "study_aggregation": status.get("study_aggregation"),
                 "selection_split": status.get("selection_split"),
+                "optional_tool_policy": status.get("optional_tool_policy", {}),
                 "issues": status.get("issues", []),
+                "research_agent": {
+                    "enabled": bool(research.get("enabled")),
+                    "ready": bool(research.get("ready")),
+                    "agent_version": research.get("agent_version"),
+                    "mode": research.get("mode"),
+                    "max_iterations": research.get("max_iterations"),
+                    "max_llm_calls": research.get("max_llm_calls"),
+                    "raw_images_shared": bool(research.get("raw_images_shared")),
+                    "reason": research.get("reason"),
+                },
             }
             return self.send_json(HTTPStatus.OK, safe)
         return self.serve_static(route)

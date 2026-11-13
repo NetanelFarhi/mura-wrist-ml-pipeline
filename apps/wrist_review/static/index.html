@@ -66,16 +66,16 @@
         <section id="modelStatus" class="model-status-card"><div class="loading-dot"></div><p>Checking the local model bundle…</p></section>
         <section class="info-card"><div class="info-icon teal">✓</div><div><h3>Study-level score</h3><p>Each real view receives a probability. The mean view probability is compared with the frozen threshold.</p></div></section>
         <section class="info-card"><div class="info-icon blue">i</div><div><h3>Worklist value</h3><p>A model flag can raise review priority. It is not a diagnosis and cannot remove a case from human review.</p></div></section>
-        <section class="info-card"><div class="info-icon teal">↗</div><div><h3>Bounded ambiguity check</h3><p>Only conflicting view scores can start the local evidence check. It may collect TTA stability evidence, but it cannot change the fixed model decision.</p></div></section>
+        <section class="info-card"><div class="info-icon teal">↗</div><div><h3>Bounded evidence and research explanation</h3><p>The fixed policy authorizes local TTA and Grad-CAM summaries only for an abnormal mean, conflicting views, or a score inside the displayed borderline band. An optional CrewAI explanation can summarize every valid supported study; a consistent normal case receives no optional tool. Neither layer can change the score, threshold, priority, or human-review requirement.</p></div></section>
       </section>
 
       <section id="safetyScreen" class="screen" aria-label="Safety policy">
-        <section class="hero-row compact"><div><p class="section-overline">SAFETY POLICY</p><h2>Rules before ranking</h2><p>Known safety rules are deterministic. A bounded local ambiguity check may add evidence, but cannot override these rules.</p></div><div class="queue-orb safety" aria-hidden="true">✓</div></section>
+        <section class="hero-row compact"><div><p class="section-overline">SAFETY POLICY</p><h2>Rules before ranking</h2><p>Known safety rules are deterministic. Bounded optional evidence may add context, but cannot override these rules.</p></div><div class="queue-orb safety" aria-hidden="true">✓</div></section>
         <ol class="policy-list">
           <li><span class="policy-number">01</span><div><h3>Keep each study together</h3><p>Images are grouped by their local study folder. No image from one study is mixed with another.</p></div></li>
           <li><span class="policy-number">02</span><div><h3>Check before inference</h3><p>Unsupported anatomy, corrupt input, tiny images, and near-uniform images route safely without a model result.</p></div></li>
           <li><span class="policy-number">03</span><div><h3>Raise priority, never clear</h3><p>Model evidence can reorder the queue only. A clinician reviews every study.</p></div></li>
-          <li><span class="policy-number">04</span><div><h3>Bounded ambiguity check</h3><p>Only conflicting view evidence can trigger one local TTA check. It cannot change the model score, threshold, safety outcome, or human-review requirement.</p></div></li>
+          <li><span class="policy-number">04</span><div><h3>Bounded optional evidence</h3><p>An abnormal mean, conflicting views, or a configurable borderline score can trigger local TTA and Grad-CAM summaries. An optional CrewAI explanation can summarize a valid supported study without a tool, or read de-identified evidence when both tools are authorized; it cannot change the model score, threshold, safety outcome, or human-review requirement.</p></div></li>
         </ol>
       </section>
 

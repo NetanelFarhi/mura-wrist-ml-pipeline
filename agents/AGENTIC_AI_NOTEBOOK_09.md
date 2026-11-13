@@ -2,7 +2,11 @@
 
 **Source of truth:** `09_MURA_Agentic_AI(4).ipynb` (421 cells, supplied 12 November 2026).  
 **Supporting configuration:** `mura_agent_specification.json` (v1.2), `frozen_primary_operating_policy.json`.  
-**Scope:** Research-only workflow, separate from the local Wrist Review application's `src/runtime/bounded_agent.py`.
+**Scope:** Research-only workflow. The local Wrist Review app has a separate
+deterministic optional-evidence layer (TTA and in-memory Grad-CAM summaries)
+and an optional `src/runtime/crewai_research.py` bridge that reuses this
+notebook's bounded explanation principles; it is not a claim
+that every historical notebook path is a production app path.
 
 > **Traceability convention:** Cell numbers below are **1-based positions including Markdown cells** in the supplied notebook snapshot. STEP labels are more stable than cell positions. A *runtime gate* prevents downstream work in a particular code path; a *test/assertion* proves a property only when that test cell runs; a *configuration requirement* is not automatically enforced simply because it is declared in JSON.
 
@@ -189,7 +193,9 @@ An independent verification notebook evaluated the **frozen Model B** checkpoint
 2. Record the notebook version and STEP/cell identifiers for every reported test.
 3. Keep original radiographs, private paths, credentials, and model weights outside the public repository.
 4. Use de-identified study aliases and verify saved reports for sensitive content.
-5. Keep the local Wrist Review bounded-agent design/status documents unchanged; this document describes the **separate Notebook 09 research workflow**.
+5. Keep the local Wrist Review deterministic route independent from this notebook.
+   The optional app bridge may reuse only the bounded explanation contract, not
+   notebook data, labels, artifacts, or historical execution state.
 
 ## Evidence still worth verifying before treating this as a formal safety specification
 

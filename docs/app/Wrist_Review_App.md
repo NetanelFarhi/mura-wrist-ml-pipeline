@@ -79,17 +79,31 @@ before a review can proceed.
 - The app keeps uploads in process memory for the local request only; it does
   not persist image bytes, file paths, or patient identifiers.
 
-## Relationship to the Agentic-AI plan
+## Relationship to the Agentic-AI workflow
 
-The app first runs the deterministic baseline.  In the narrow case where valid
-wrist views disagree across the frozen threshold, it calls a bounded local TTA
-stability check and attaches the typed result to the evidence record. This is
-not an adaptive LLM/LangGraph agent: it has no external data access, cannot
-choose unapproved tools, and cannot change the score, threshold, or route.
+The app first runs the deterministic baseline. Optional local evidence is authorized
+only by the explicit policy file: the mean study prediction is abnormal, valid wrist
+views disagree across the frozen threshold, or the mean is inside the configured
+borderline band around that threshold. When authorized, the local layer runs one TTA
+stability check and one in-memory Grad-CAM summary. It has no external access and
+cannot choose unapproved tools, change the score, threshold, or route.
 
-The planned adaptive layer must remain bounded by the same safety policy and
-be evaluated against deterministic routing and a fixed tool workflow on an
-independent case suite. See [AGENT_DESIGN.md](../../agents/AGENT_DESIGN.md),
+The app also contains an **optional, opt-in CrewAI bridge** aligned with the
+Notebook 09 research contract. For every valid supported study, it creates a fresh
+single-agent CrewAI run with `max_iter=3` and at most three LLM-call reservations.
+The agent receives no optional tool for a consistent normal study. For an authorized
+study, it can retrieve precomputed TTA and Grad-CAM **summaries** only; Grad-CAM maps
+remain local and are not persisted. It receives a generated study alias plus structured
+QC/model/evidence values — never raw pixels, file names, local paths, labels, or patient
+identifiers. Its JSON response is
+schema-validated before display; any configuration, provider, budget, or schema
+failure retains the deterministic route and mandatory human review.
+
+CrewAI is disabled by default, so the normal local app makes no external provider
+call. The bridge is a research explanation layer, not an adaptive classifier or a
+clinical decision-maker. It still requires the planned comparison against
+deterministic routing and a fixed-tool workflow on an independent case suite. See
+[AGENT_DESIGN.md](../../agents/AGENT_DESIGN.md),
 [AGENT_IMPLEMENTATION_STATUS.md](../../agents/AGENT_IMPLEMENTATION_STATUS.md),
 and [AGENT_EVAL_PLAN.md](../../evaluation/AGENT_EVAL_PLAN.md).
 
@@ -109,8 +123,9 @@ bundle before it permits model inference.
 
 ## Current status
 
-The interface, deterministic runtime, and bounded TTA investigation are
-implemented as a local research prototype. It has not undergone clinical
-usability validation, deployment security review, or the planned independent
-adaptive-agent evaluation. It must be shown as a workflow prototype rather
-than evidence of clinical readiness.
+The interface, deterministic runtime, bounded TTA/Grad-CAM investigation, and optional
+CrewAI explanation bridge are implemented as a local research prototype. It has
+not undergone clinical usability validation, deployment security review, live
+provider budget validation, or the planned independent adaptive-agent evaluation.
+It must be shown as a workflow prototype rather than evidence of clinical
+readiness.

@@ -143,7 +143,7 @@ def test_browser_worklist_groups_folder_studies_and_does_not_truncate_views():
     assert 'fetch("/api/worklist-zip"' in script
     assert "function agentEvidencePanel" in script
     assert "Evidence only — it cannot change the model score" in script
-    assert "Bounded ambiguity check" in page
+    assert "Bounded optional evidence" in page
 
 
 def test_zip_worklist_is_read_in_memory_and_preserves_patient_study_paths():
@@ -190,11 +190,24 @@ def valid_synthetic_view(image_id: str) -> StudyImage:
     return StudyImage(image_id=image_id, image_bytes=buffer.getvalue())
 
 
-def test_app_connects_bounded_agent_only_for_view_disagreement():
+def test_app_connects_bounded_agent_for_priority_review(monkeypatch):
+    monkeypatch.delenv("MURA_CREWAI_ENABLED", raising=False)
     app_core = load_app_core()
+    monkeypatch.setattr(
+        app_core,
+        "_gradcam_explanation_check",
+        lambda _runtime, *, images, base_probabilities: {
+            "status": "SUCCESS",
+            "method": "synthetic_gradcam",
+            "views_processed": len(images),
+            "view_summaries": [{"view_index": index} for index, _ in enumerate(base_probabilities)],
+            "maps_persisted": False,
+            "maps_shared_with_crewai": False,
+        },
+    )
 
     class RuntimeWithTta:
-        threshold = 0.25
+        threshold = 0.263567715883255
         model_name = "Synthetic test runtime"
         checkpoint_sha256 = "a" * 64
 
@@ -217,14 +230,63 @@ def test_app_connects_bounded_agent_only_for_view_disagreement():
     assert result["deterministic_outcome"] == "RAISE_PRIORITY"
     assert result["agent_report"]["agent_status"] == "completed_bounded_investigation"
     assert result["agent_report"]["final_outcome"] == "RAISE_PRIORITY"
+    assert result["optional_tool_policy"]["status"] == "AUTHORIZED"
+    assert result["agent_report"]["allowed_tools_called"][-1]["tool"] == "gradcam_explainer"
+    assert result["research_agent_report"]["agent_status"] == "not_configured"
     assert result["worklist"]["agent_status"] == "completed_bounded_investigation"
 
 
-def test_app_does_not_execute_tta_for_non_ambiguous_study():
+def test_app_collects_tta_for_abnormal_priority_without_view_disagreement(monkeypatch):
+    monkeypatch.delenv("MURA_CREWAI_ENABLED", raising=False)
+    app_core = load_app_core()
+    monkeypatch.setattr(
+        app_core,
+        "_gradcam_explanation_check",
+        lambda _runtime, *, images, base_probabilities: {
+            "status": "SUCCESS",
+            "method": "synthetic_gradcam",
+            "views_processed": len(images),
+            "view_summaries": [{"view_index": index} for index, _ in enumerate(base_probabilities)],
+            "maps_persisted": False,
+            "maps_shared_with_crewai": False,
+        },
+    )
+
+    class RuntimeWithAbnormalMean:
+        threshold = 0.263567715883255
+        model_name = "Synthetic test runtime"
+        checkpoint_sha256 = "c" * 64
+
+        def __init__(self):
+            self.calls: list[int] = []
+
+        def predict_view_probabilities(self, images):
+            self.calls.append(len(images))
+            return [0.30 for _ in images]
+
+    runtime = RuntimeWithAbnormalMean()
+    result = app_core.run_guarded_review(
+        runtime,
+        case_alias="SYNTHETIC-CASE",
+        declared_anatomy="XR_WRIST",
+        images=[valid_synthetic_view("view_1.png")],
+    )
+
+    assert runtime.calls == [1, 4]
+    assert result["deterministic_outcome"] == "RAISE_PRIORITY"
+    assert result["agent_report"]["agent_status"] == "completed_bounded_investigation"
+    assert result["agent_report"]["triggers_fired"] == [
+        "abnormal_mean_prediction",
+        "borderline_mean_probability",
+    ]
+
+
+def test_app_does_not_execute_tta_for_non_ambiguous_study(monkeypatch):
+    monkeypatch.delenv("MURA_CREWAI_ENABLED", raising=False)
     app_core = load_app_core()
 
     class RuntimeWithoutTta:
-        threshold = 0.25
+        threshold = 0.263567715883255
         model_name = "Synthetic test runtime"
         checkpoint_sha256 = "b" * 64
 
@@ -244,4 +306,5 @@ def test_app_does_not_execute_tta_for_non_ambiguous_study():
     )
 
     assert runtime.calls == 1
-    assert result["agent_report"]["agent_status"] == "not_called_no_ambiguity"
+    assert result["agent_report"]["agent_status"] == "not_called_no_optional_tools"
+    assert result["research_agent_report"]["agent_status"] == "not_configured"

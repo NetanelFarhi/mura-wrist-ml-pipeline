@@ -276,20 +276,31 @@ function outcomeTone(outcome) {
 function readableAgentStatus(status) {
   return {
     completed_bounded_investigation: "Evidence check completed",
-    not_called_no_ambiguity: "Not needed for this study",
+    not_called_no_optional_tools: "No optional tool authorized",
     not_called_deterministic_route: "Blocked by the safety route",
     safe_failure: "Evidence check unavailable",
     not_run: "Not run",
   }[String(status)] || "Deterministic route retained";
 }
 
+function readableResearchAgentStatus(status) {
+  return {
+    completed_research_explanation: "Research explanation completed",
+    not_configured: "Optional research explanation is off",
+    not_called: "Not eligible for research explanation",
+    safe_failure: "Research explanation unavailable",
+    not_run: "Not run",
+  }[String(status)] || "Deterministic route retained";
+}
+
 function readableAgentReason(reason) {
   return {
-    view_disagreement_investigated_with_tta: "Views fell on different sides of the frozen threshold, so stability evidence was collected.",
-    no_approved_ambiguity_trigger: "All views supported the same fixed-threshold route, so no extra check was needed.",
+    deterministic_policy_authorized_tta_and_gradcam: "The fixed evidence policy authorized local TTA and Grad-CAM summaries. The review route did not change.",
+    consistent_normal_without_optional_tool_trigger: "This was a consistent normal study outside the configured borderline band, so no optional evidence tool was authorized.",
     deterministic_route_not_eligible_for_agent: "The study was already routed by a deterministic safety rule before the model workflow.",
-    agent_tool_unavailable: "The optional uncertainty check was unavailable, so the case was escalated safely.",
-    agent_tool_failure: "The optional uncertainty check did not return valid evidence, so the case was escalated safely.",
+    optional_tool_policy_not_authorized: "The fixed optional-evidence policy did not authorize tool use for this study.",
+    agent_tool_unavailable: "An authorized optional evidence tool was unavailable, so the case was escalated safely.",
+    agent_tool_failure: "An authorized optional evidence tool did not return valid evidence, so the case was escalated safely.",
   }[String(reason)] || "The deterministic route was retained for human review.";
 }
 
@@ -300,21 +311,24 @@ function readableToolName(tool) {
     primary_model: "Fixed Model B",
     view_evidence: "View evidence",
     uncertainty_tta: "Local TTA stability check",
+    gradcam_explainer: "Local Grad-CAM attribution summary",
   }[String(tool)] || String(tool).replaceAll("_", " ");
 }
 
 function agentEvidencePanel(study) {
   const report = study.result?.agent_report;
+  const researchReport = study.result?.research_agent_report;
   const meta = worklistMeta(study);
   if (!study.result) {
-    return `<section class="agent-evidence-card pending"><div class="agent-evidence-heading"><span class="agent-icon" aria-hidden="true">↗</span><div><p class="section-overline">AMBIGUITY CHECK</p><h4>Available after review</h4></div></div><p>After Model B and the deterministic rules run, the local evidence check is considered only for conflicting view scores.</p></section>`;
+    return `<section class="agent-evidence-card pending"><div class="agent-evidence-heading"><span class="agent-icon" aria-hidden="true">↗</span><div><p class="section-overline">OPTIONAL EVIDENCE</p><h4>Available after review</h4></div></div><p>After Model B and the deterministic rules run, optional evidence is considered only when the fixed policy finds an abnormal mean, conflicting views, or a borderline study score.</p></section>`;
   }
 
   const status = String(report?.agent_status || meta.agent_status || "not_run");
   const reason = String(report?.reason_for_escalation_or_rejection || meta.agent_note || "");
   const tools = Array.isArray(report?.allowed_tools_called) ? report.allowed_tools_called : [];
   const tta = tools.find((tool) => tool?.tool === "uncertainty_tta" && tool?.status === "OK")?.payload;
-  const trigger = Array.isArray(report?.triggers_fired) && report.triggers_fired.includes("view_threshold_disagreement");
+  const gradcam = tools.find((tool) => tool?.tool === "gradcam_explainer" && tool?.status === "OK")?.payload;
+  const triggers = Array.isArray(report?.triggers_fired) ? report.triggers_fired : [];
   const tone = status === "completed_bounded_investigation" ? "completed" : status === "safe_failure" ? "attention" : "quiet";
   const toolsMarkup = tools.length
     ? `<div class="agent-tool-list">${tools.map((tool) => `<span class="agent-tool ${tool?.status === "FAILED" ? "failed" : ""}">${escapeHtml(readableToolName(tool?.tool))}</span>`).join("")}</div>`
@@ -322,14 +336,37 @@ function agentEvidencePanel(study) {
   const ttaMarkup = tta
     ? `<div class="tta-facts"><span>TTA range<b>${(Number(tta.tta_range) * 100).toFixed(1)} pts</b></span><span>Variation<b>${(Number(tta.tta_std) * 100).toFixed(1)} pts</b></span><span>Changed route?<b>No</b></span></div>`
     : "";
+  const gradcamMarkup = gradcam
+    ? `<div class="tta-facts"><span>Grad-CAM views<b>${escapeHtml(String(gradcam.views_processed || 0))}</b></span><span>Maps saved<b>No</b></span><span>Localization claim?<b>No</b></span></div>`
+    : "";
+  const triggerLabels = {
+    abnormal_mean_prediction: "abnormal mean study score",
+    view_threshold_disagreement: "conflicting view scores around the frozen threshold",
+    borderline_mean_probability: "mean score inside the configured borderline band",
+  };
+  const triggerMarkup = triggers.length
+    ? `<p class="agent-trigger">Trigger: ${triggers.map((trigger) => triggerLabels[trigger] || String(trigger)).join(" · ")}.</p>`
+    : "";
+  const researchStatus = String(researchReport?.agent_status || meta.research_agent_status || "not_run");
+  const researchSummary = typeof researchReport?.summary === "string" ? researchReport.summary : "";
+  const researchLimitations = Array.isArray(researchReport?.limitations) ? researchReport.limitations : [];
+  const researchTone = researchStatus === "completed_research_explanation" ? "completed" : researchStatus === "safe_failure" ? "attention" : "quiet";
+  const researchMarkup = `<div class="research-explanation ${researchTone}">
+    <div><p class="section-overline">OPTIONAL RESEARCH EXPLANATION</p><h5>${escapeHtml(readableResearchAgentStatus(researchStatus))}</h5></div>
+    ${researchSummary ? `<p>${escapeHtml(researchSummary)}</p>` : `<p>${researchStatus === "not_configured" ? "The deterministic route is complete. CrewAI is opt-in and was not enabled for this local session." : "This optional layer is available after a valid supported deterministic route."}</p>`}
+    ${researchLimitations.length ? `<ul>${researchLimitations.slice(0, 3).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
+    <small>${researchStatus === "completed_research_explanation" ? "It received structured, de-identified evidence only. It cannot change the route or review requirement." : "Raw images, paths, labels, and patient identifiers are never sent to this layer."}</small>
+  </div>`;
 
   return `<section class="agent-evidence-card ${tone}">
-    <div class="agent-evidence-heading"><span class="agent-icon" aria-hidden="true">${status === "completed_bounded_investigation" ? "✓" : "↗"}</span><div><p class="section-overline">AMBIGUITY CHECK</p><h4>${escapeHtml(readableAgentStatus(status))}</h4></div></div>
+    <div class="agent-evidence-heading"><span class="agent-icon" aria-hidden="true">${status === "completed_bounded_investigation" ? "✓" : "↗"}</span><div><p class="section-overline">OPTIONAL EVIDENCE</p><h4>${escapeHtml(readableAgentStatus(status))}</h4></div></div>
     <p>${escapeHtml(readableAgentReason(reason))}</p>
-    ${trigger ? `<p class="agent-trigger">Trigger: conflicting view scores around the frozen threshold.</p>` : ""}
+    ${triggerMarkup}
     ${toolsMarkup}
     ${ttaMarkup}
+    ${gradcamMarkup}
     <small>Evidence only — it cannot change the model score, frozen threshold, queue route, or human-review requirement.</small>
+    ${researchMarkup}
   </section>`;
 }
 
@@ -423,7 +460,7 @@ function renderResults() {
   const investigated = ordered.filter((study) => String(worklistMeta(study).agent_status) === "completed_bounded_investigation").length;
   target.innerHTML = `
     <div class="results-heading"><div><p class="section-overline">HUMAN-REVIEW ORDER</p><h3>Prioritized worklist</h3><p>Higher-priority studies appear first. This is a workflow order, not a diagnosis.</p></div><div class="result-counts"><span class="priority">${priority} priority</span><span class="attention">${attention} attention</span><span class="routine">${routine} routine</span></div></div>
-    <p class="agent-run-summary">${investigated ? `${investigated} ${investigated === 1 ? "study used" : "studies used"} the bounded ambiguity check.` : "No study needed the bounded ambiguity check."} It adds evidence only; every study remains in human review.</p>
+    <p class="agent-run-summary">${investigated ? `${investigated} ${investigated === 1 ? "study used" : "studies used"} the bounded optional-evidence check.` : "No study was authorized for an optional evidence tool."} It adds evidence only; every study remains in human review.</p>
     <div class="ranked-results">${ordered.map((study, index) => {
       const result = study.result;
       const meta = worklistMeta(study);
@@ -516,7 +553,15 @@ async function loadModelStatus() {
       target.innerHTML = `<div class="info-icon blue">!</div><p class="status-problem">Model bundle not ready: ${escapeHtml(issue)}.</p>`;
       return;
     }
-    target.innerHTML = `<div class="info-icon teal">✓</div><p class="status-ready"><b>${escapeHtml(status.model || "Model B")}</b> verified locally · frozen threshold ${(Number(status.threshold) * 100).toFixed(1)}% · ${escapeHtml(status.study_aggregation || "mean probability")}</p>`;
+    const research = status.research_agent || {};
+    const optionalPolicy = status.optional_tool_policy || {};
+    const policyCopy = optionalPolicy.ready
+      ? `Optional evidence: abnormal score, conflicting views, or within ±${(Number(optionalPolicy.borderline_margin) * 100).toFixed(0)} points of the frozen threshold.`
+      : "Optional evidence policy is unavailable, so its tools will remain blocked safely.";
+    const researchCopy = research.ready
+      ? `CrewAI research explanation is enabled · max ${escapeHtml(String(research.max_llm_calls || 3))} LLM calls per eligible study · no raw images shared.`
+      : "CrewAI research explanation is optional and off for this local session; local safety rules and optional evidence remain active.";
+    target.innerHTML = `<div class="info-icon teal">✓</div><div><p class="status-ready"><b>${escapeHtml(status.model || "Model B")}</b> verified locally · frozen threshold ${(Number(status.threshold) * 100).toFixed(1)}% · ${escapeHtml(status.study_aggregation || "mean probability")}</p><p class="status-note">${policyCopy}</p><p class="status-note">${researchCopy}</p></div>`;
   } catch (_error) {
     target.innerHTML = `<div class="info-icon blue">!</div><p class="status-problem">Could not verify the local model bundle.</p>`;
   }

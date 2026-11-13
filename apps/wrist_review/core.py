@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 import io
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -29,7 +30,7 @@ def worklist_metadata(result: dict[str, Any]) -> dict[str, Any]:
     """Describe one completed study for the local human-review worklist.
 
     The worklist is an ordering aid only.  It never converts a study into a
-    diagnosis or removes it from human review.  The bounded ambiguity
+    diagnosis or removes it from human review. The bounded optional-evidence
     investigation is reported explicitly; it cannot change the model score,
     threshold, or human-review requirement.
     """
@@ -42,6 +43,8 @@ def worklist_metadata(result: dict[str, Any]) -> dict[str, Any]:
     disagreement = bool(evidence.get("threshold_disagreement", False))
     agent_report = result.get("agent_report")
     agent_report = agent_report if isinstance(agent_report, dict) else {}
+    research_report = result.get("research_agent_report")
+    research_report = research_report if isinstance(research_report, dict) else {}
 
     if outcome == "RAISE_PRIORITY":
         bucket, rank = "priority", 0
@@ -61,6 +64,13 @@ def worklist_metadata(result: dict[str, Any]) -> dict[str, Any]:
             agent_report.get(
                 "reason_for_escalation_or_rejection",
                 "Bounded agent report was unavailable; deterministic routing was retained.",
+            )
+        ),
+        "research_agent_status": str(research_report.get("agent_status", "not_run")),
+        "research_agent_note": str(
+            research_report.get(
+                "stop_reason",
+                "No CrewAI research explanation was requested for this study.",
             )
         ),
     }
@@ -84,6 +94,10 @@ class AppConfiguration:
     @property
     def policy_path(self) -> Path:
         return self.model_dir / "frozen_primary_operating_policy.json"
+
+    @property
+    def optional_tool_policy_path(self) -> Path:
+        return self.project_root / "configs" / "agentic_ai" / "app_optional_tool_policy.json"
 
 
 @dataclass
@@ -156,6 +170,17 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest().upper()
 
 
+def load_optional_tool_policy(config: AppConfiguration, *, expected_threshold: float) -> dict[str, Any]:
+    """Load the explicit, non-model-changing policy for optional evidence tools."""
+
+    from src.runtime.agent_tool_policy import validate_policy_config
+
+    return validate_policy_config(
+        _read_json(config.optional_tool_policy_path),
+        expected_threshold=expected_threshold,
+    )
+
+
 def artifact_status(config: AppConfiguration) -> dict[str, Any]:
     """Verify the exact bundle identity before a user can request inference."""
 
@@ -197,6 +222,24 @@ def artifact_status(config: AppConfiguration) -> dict[str, Any]:
         issues.append("unexpected_study_aggregation")
         return status
 
+    try:
+        optional_tool_policy = load_optional_tool_policy(
+            config,
+            expected_threshold=float(policy["threshold"]),
+        )
+        optional_tool_policy_status: dict[str, Any] = {
+            "ready": True,
+            "version": optional_tool_policy["version"],
+            "borderline_margin": optional_tool_policy["borderline_margin"],
+            "authorized_tools": optional_tool_policy["authorized_tools"],
+        }
+    except (FileNotFoundError, TypeError, ValueError) as exc:
+        # Model inference remains available; optional evidence fails closed later.
+        optional_tool_policy_status = {
+            "ready": False,
+            "reason": f"optional_tool_policy_unavailable:{type(exc).__name__}",
+        }
+
     status.update(
         {
             "ready": True,
@@ -208,6 +251,7 @@ def artifact_status(config: AppConfiguration) -> dict[str, Any]:
             "checkpoint_sha256": actual,
             "study_aggregation": policy["study_aggregation"],
             "selection_split": policy["source_split"],
+            "optional_tool_policy": optional_tool_policy_status,
         }
     )
     return status
@@ -293,11 +337,39 @@ def run_guarded_review(
     }
     if captured_probabilities:
         result["per_view_probabilities"] = [round(value, 6) for value in captured_probabilities]
+    try:
+        from src.runtime.agent_tool_policy import evaluate_optional_tool_policy
+
+        configured_policy = load_optional_tool_policy(
+            resolve_configuration(),
+            expected_threshold=runtime.threshold,
+        )
+        result["optional_tool_policy"] = evaluate_optional_tool_policy(
+            result,
+            policy=configured_policy,
+        )
+    except (FileNotFoundError, TypeError, ValueError) as exc:
+        result["optional_tool_policy"] = {
+            "status": "SAFETY_BLOCK",
+            "reason": f"optional_tool_policy_unavailable:{type(exc).__name__}",
+            "research_use_only": True,
+            "human_review_required": True,
+            "classification_modified": False,
+            "threshold_modified": False,
+            "route_modified": False,
+            "authorized_tools": [],
+            "triggers": [],
+            "tool_execution_allowed": False,
+        }
     result["agent_report"] = _run_bounded_ambiguity_investigation(
         runtime=runtime,
         images=images,
         deterministic_result=result,
         base_probabilities=captured_probabilities,
+    )
+    result["research_agent_report"] = _run_optional_crewai_research(
+        deterministic_result=result,
+        bounded_report=result["agent_report"],
     )
     result["worklist"] = worklist_metadata(result)
     return result
@@ -328,12 +400,12 @@ def _tta_uncertainty_check(
     image_bytes = getattr(image, "image_bytes", None)
     image_id = str(getattr(image, "image_id", "ambiguous_view"))
     if not isinstance(image_bytes, bytes):
-        raise TypeError("Ambiguity check requires image bytes.")
+        raise TypeError("TTA evidence check requires image bytes.")
     try:
         with Image.open(io.BytesIO(image_bytes)) as source:
             source_image = source.convert("RGB").copy()
     except (OSError, ValueError) as exc:
-        raise ValueError("Ambiguity check could not decode the selected view.") from exc
+        raise ValueError("TTA evidence check could not decode the selected view.") from exc
 
     augmentations = {
         "brightness_minus_5pct": ImageEnhance.Brightness(source_image).enhance(0.95),
@@ -368,6 +440,109 @@ def _tta_uncertainty_check(
     }
 
 
+def _gradcam_explanation_check(
+    runtime: ModelRuntime,
+    *,
+    images: Sequence[Any],
+    base_probabilities: Sequence[float],
+) -> dict[str, Any]:
+    """Create in-memory Grad-CAM summaries for a verified Model B study.
+
+    The maps are intentionally not persisted or sent to CrewAI. The returned
+    values document only that the visualization was generated for each local
+    view; they are not lesion localization or a clinical explanation.
+    """
+
+    if len(images) != len(base_probabilities) or not images:
+        raise ValueError("Grad-CAM requires one probability per study view.")
+    backbone = getattr(runtime.model, "backbone", None)
+    layer4 = getattr(backbone, "layer4", None)
+    if layer4 is None or not len(layer4):
+        raise ValueError("The verified Model B architecture does not expose ResNet layer4.")
+    target_layer = getattr(layer4[-1], "conv2", None)
+    if not isinstance(target_layer, torch.nn.Module):
+        raise ValueError("The verified Model B architecture does not expose the Grad-CAM target layer.")
+
+    summaries: list[dict[str, Any]] = []
+    model = runtime.model
+    was_training = model.training
+    model.eval()
+    try:
+        for index, (item, probability) in enumerate(zip(images, base_probabilities, strict=True)):
+            image_bytes = getattr(item, "image_bytes", None)
+            if not isinstance(image_bytes, bytes):
+                raise TypeError("Grad-CAM requires image bytes.")
+            try:
+                with Image.open(io.BytesIO(image_bytes)) as source:
+                    tensor = runtime.evaluation_transform(source.copy())
+            except (OSError, ValueError) as exc:
+                raise ValueError("A view could not be decoded for Grad-CAM.") from exc
+            if not isinstance(tensor, torch.Tensor):
+                raise RuntimeError("The evaluation transform did not return a torch tensor for Grad-CAM.")
+
+            captured: dict[str, torch.Tensor] = {}
+
+            def capture_activations(_module: Any, _inputs: Any, output: torch.Tensor) -> None:
+                captured["activations"] = output.detach()
+
+            def capture_gradients(_module: Any, _grad_inputs: Any, grad_outputs: Any) -> None:
+                gradient = grad_outputs[0] if grad_outputs else None
+                if isinstance(gradient, torch.Tensor):
+                    captured["gradients"] = gradient.detach()
+
+            forward_handle = target_layer.register_forward_hook(capture_activations)
+            backward_handle = target_layer.register_full_backward_hook(capture_gradients)
+            try:
+                model.zero_grad(set_to_none=True)
+                logit = model(tensor.unsqueeze(0).to(runtime.device))[0]
+                logit.backward()
+            finally:
+                forward_handle.remove()
+                backward_handle.remove()
+
+            activations = captured.get("activations")
+            gradients = captured.get("gradients")
+            if activations is None or gradients is None:
+                raise RuntimeError("Grad-CAM hooks did not return a valid activation map.")
+            weights = gradients.mean(dim=(2, 3), keepdim=True)
+            heatmap = torch.relu((weights * activations).sum(dim=1, keepdim=True))
+            heatmap = torch.nn.functional.interpolate(
+                heatmap,
+                size=(224, 224),
+                mode="bilinear",
+                align_corners=False,
+            ).squeeze()
+            minimum = float(heatmap.min().item())
+            maximum = float(heatmap.max().item())
+            if not math.isfinite(minimum) or not math.isfinite(maximum):
+                raise ValueError("Grad-CAM produced non-finite values.")
+            normalized = torch.zeros_like(heatmap) if maximum <= minimum else (heatmap - minimum) / (maximum - minimum)
+            summaries.append(
+                {
+                    "view_index": index,
+                    "model_probability": round(float(probability), 6),
+                    "heatmap_shape": [224, 224],
+                    "normalized_activation_mean": round(float(normalized.mean().item()), 6),
+                    "normalized_activation_std": round(float(normalized.std(unbiased=False).item()), 6),
+                    "visualization_generated_in_memory": True,
+                }
+            )
+    finally:
+        model.zero_grad(set_to_none=True)
+        model.train(was_training)
+
+    return {
+        "status": "SUCCESS",
+        "method": "gradcam_layer4_last_block_conv2",
+        "views_processed": len(summaries),
+        "view_summaries": summaries,
+        "maps_persisted": False,
+        "maps_shared_with_crewai": False,
+        "limitation": "Grad-CAM is a qualitative model-attribution visualization, not validated lesion localization.",
+        "scope": "local_evidence_only",
+    }
+
+
 def _run_bounded_ambiguity_investigation(
     *,
     runtime: ModelRuntime,
@@ -375,17 +550,18 @@ def _run_bounded_ambiguity_investigation(
     deterministic_result: dict[str, Any],
     base_probabilities: Sequence[float],
 ) -> dict[str, Any]:
-    """Run the approved local agent path, only if its ambiguity trigger fires."""
+    """Run only the deterministic policy-authorized local evidence tools."""
 
     from src.runtime.bounded_agent import run_bounded_agent
 
-    if len(images) != len(base_probabilities):
-        return run_bounded_agent(deterministic_result, tta_runner=None)
-
-    evidence = deterministic_result.get("view_evidence")
-    evidence = evidence if isinstance(evidence, dict) else {}
-    if not bool(evidence.get("threshold_disagreement", False)):
-        return run_bounded_agent(deterministic_result, tta_runner=None)
+    policy = deterministic_result.get("optional_tool_policy")
+    policy = policy if isinstance(policy, dict) else {}
+    if len(images) != len(base_probabilities) or not policy.get("tool_execution_allowed"):
+        return run_bounded_agent(
+            deterministic_result,
+            tta_runner=None,
+            gradcam_runner=None,
+        )
 
     closest_index = min(
         range(len(base_probabilities)),
@@ -399,6 +575,33 @@ def _run_bounded_ambiguity_investigation(
             image=images[closest_index],
             original_probability=float(base_probabilities[closest_index]),
         ),
+        gradcam_runner=lambda: _gradcam_explanation_check(
+            runtime,
+            images=images,
+            base_probabilities=base_probabilities,
+        ),
+    )
+
+
+def _run_optional_crewai_research(
+    *,
+    deterministic_result: dict[str, Any],
+    bounded_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Request an opt-in research explanation after the local evidence path.
+
+    The CrewAI bridge receives de-identified structured evidence only.  It is
+    deliberately invoked after deterministic routing and cannot mutate this
+    result.  With the default configuration it returns a transparent
+    ``not_configured`` status and makes no external request.
+    """
+
+    from src.runtime.crewai_research import run_crewai_research_explanation
+
+    return run_crewai_research_explanation(
+        deterministic_result,
+        bounded_report,
+        project_root=resolve_configuration().project_root,
     )
 
 
@@ -418,7 +621,9 @@ def deidentified_evidence_record(result: dict[str, Any]) -> str:
         "human_review_required",
         "runtime_seconds",
         "model_metadata",
+        "optional_tool_policy",
         "agent_report",
+        "research_agent_report",
         "worklist",
     }
     safe = {key: value for key, value in result.items() if key in allowed}

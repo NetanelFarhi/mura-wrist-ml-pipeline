@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "scope": "local_wrist_review_research_prototype",
+  "frozen_classification_threshold": 0.263567715883255,
+  "borderline_probability_margin": 0.05,
+  "borderline_definition": "absolute_distance_from_frozen_threshold_less_than_or_equal_to_margin",
+  "tool_authorization": {
+    "required_preconditions": [
+      "successful_technical_qc",
+      "supported_wrist_anatomy",
+      "completed_frozen_model_b_classification",
+      "valid_study_level_view_evidence",
+      "mandatory_human_review"
+    ],
+    "triggers_any": [
+      "abnormal_mean_prediction",
+      "view_threshold_disagreement",
+      "borderline_mean_probability"
+    ],
+    "authorized_tools": [
+      "tta_uncertainty",
+      "gradcam_explainer"
+    ]
+  },
+  "safety": {
+    "tools_change_model_prediction": false,
+    "tools_change_threshold": false,
+    "tools_change_worklist_route": false,
+    "human_review_required": true,
+    "research_use_only": true
+  }
+}

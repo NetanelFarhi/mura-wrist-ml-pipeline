@@ -1,9 +1,9 @@
-"""Bounded ambiguity investigation for the local Wrist Review prototype.
+"""Bounded optional-evidence investigation for the local Wrist Review prototype.
 
 This module implements the data-contract shape proposed for the future Agentic
 AI layer without granting it clinical authority.  Deterministic safety and the
-frozen Model B route run first.  Only supported studies with conflicting
-view-level evidence can receive one extra, approved uncertainty/TTA check.
+frozen Model B route runs first. Only a supported study authorized by the
+explicit deterministic tool policy can receive approved optional evidence.
 
 There is deliberately no LLM or external API in this version.  The module is a
 traceable, local bridge from the implemented deterministic runtime to the
@@ -20,10 +20,11 @@ from uuid import uuid4
 
 
 CONTRACT_VERSION = "1.0"
-AGENT_VERSION = "bounded-ambiguity-v0.1"
+AGENT_VERSION = "bounded-optional-evidence-v0.2"
 MAX_TOOL_CALLS = 6
 
 TTARunner = Callable[[], Mapping[str, Any]]
+GradCAMRunner = Callable[[], Mapping[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -127,13 +128,15 @@ def run_bounded_agent(
     deterministic_result: Mapping[str, Any],
     *,
     tta_runner: TTARunner | None,
+    gradcam_runner: GradCAMRunner | None,
 ) -> dict[str, Any]:
     """Create a constrained case report after deterministic routing.
 
-    The one allowed ambiguity trigger in this first implementation is
-    disagreement across views around the frozen threshold.  The only optional
-    call is a locally executed TTA stability check.  Its output is evidence for
-    the reviewer; it cannot modify the deterministic route.
+    The deterministic optional-tool policy may authorize evidence for an
+    abnormal mean prediction, view-level threshold disagreement, or an
+    explicitly configured borderline study mean. It is the authority for the
+    tool allowlist; this agent cannot widen it. Tool output is evidence for the
+    reviewer and cannot modify the deterministic route.
     """
 
     trace_id = uuid4().hex
@@ -147,7 +150,6 @@ def run_bounded_agent(
         and outcome in {"RAISE_PRIORITY", "STANDARD_HUMAN_REVIEW"}
         and evidence.get("status") == "SUCCESS"
     )
-    disagreement = bool(evidence.get("threshold_disagreement", False))
     if not valid_supported:
         return _safe_report(
             deterministic_result=deterministic_result,
@@ -158,19 +160,35 @@ def run_bounded_agent(
             triggers=(),
             reason="deterministic_route_not_eligible_for_agent",
         )
-    if not disagreement:
+    tool_policy = deterministic_result.get("optional_tool_policy")
+    tool_policy = tool_policy if isinstance(tool_policy, Mapping) else {}
+    policy_status = str(tool_policy.get("status", "SAFETY_BLOCK"))
+    authorized_tools = tool_policy.get("authorized_tools")
+    authorized_tools = list(authorized_tools) if isinstance(authorized_tools, Sequence) and not isinstance(authorized_tools, (str, bytes)) else []
+    triggers = tool_policy.get("triggers")
+    triggers = [str(item) for item in triggers] if isinstance(triggers, Sequence) and not isinstance(triggers, (str, bytes)) else []
+
+    if policy_status == "NO_TOOLS":
         return _safe_report(
             deterministic_result=deterministic_result,
             trace_id=trace_id,
-            agent_status="not_called_no_ambiguity",
+            agent_status="not_called_no_optional_tools",
             agent_outcome=None,
             allowed_tools=records,
             triggers=(),
-            reason="no_approved_ambiguity_trigger",
+            reason="consistent_normal_without_optional_tool_trigger",
         )
-
-    triggers = ["view_threshold_disagreement"]
-    if tta_runner is None:
+    if policy_status != "AUTHORIZED" or set(authorized_tools) != {"tta_uncertainty", "gradcam_explainer"}:
+        return _safe_report(
+            deterministic_result=deterministic_result,
+            trace_id=trace_id,
+            agent_status="not_called_policy_blocked",
+            agent_outcome=None,
+            allowed_tools=records,
+            triggers=triggers,
+            reason="optional_tool_policy_not_authorized",
+        )
+    if tta_runner is None or gradcam_runner is None:
         return _safe_report(
             deterministic_result=deterministic_result,
             trace_id=trace_id,
@@ -178,7 +196,7 @@ def run_bounded_agent(
             agent_outcome="NEEDS_HUMAN_REVIEW",
             allowed_tools=records,
             triggers=triggers,
-            missing_evidence=("uncertainty_tta_unavailable",),
+            missing_evidence=("uncertainty_tta_or_gradcam_unavailable",),
             reason="agent_tool_unavailable",
             final_outcome="NEEDS_HUMAN_REVIEW",
         )
@@ -203,6 +221,33 @@ def run_bounded_agent(
             final_outcome="NEEDS_HUMAN_REVIEW",
         )
 
+    try:
+        gradcam = dict(gradcam_runner())
+        required_gradcam = {
+            "status",
+            "method",
+            "views_processed",
+            "view_summaries",
+            "maps_persisted",
+            "maps_shared_with_crewai",
+        }
+        if not required_gradcam.issubset(gradcam) or gradcam.get("status") != "SUCCESS":
+            raise ValueError("invalid_gradcam_result")
+        records.append(_tool_result("gradcam_explainer", "OK", gradcam))
+    except (OSError, TypeError, ValueError, RuntimeError) as exc:
+        records.append(_tool_result("gradcam_explainer", "FAILED", {}, str(exc)))
+        return _safe_report(
+            deterministic_result=deterministic_result,
+            trace_id=trace_id,
+            agent_status="safe_failure",
+            agent_outcome="NEEDS_HUMAN_REVIEW",
+            allowed_tools=records,
+            triggers=triggers,
+            missing_evidence=("valid_gradcam_result",),
+            reason="agent_tool_failure",
+            final_outcome="NEEDS_HUMAN_REVIEW",
+        )
+
     if len(records) > MAX_TOOL_CALLS:
         return _safe_report(
             deterministic_result=deterministic_result,
@@ -223,5 +268,5 @@ def run_bounded_agent(
         agent_outcome="NO_CHANGE",
         allowed_tools=records,
         triggers=triggers,
-        reason="view_disagreement_investigated_with_tta",
+        reason="deterministic_policy_authorized_tta_and_gradcam",
     )

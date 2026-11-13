@@ -171,6 +171,13 @@ select:focus { border-color: #58a799; box-shadow: 0 0 0 3px rgba(10, 135, 121, .
 .tta-facts span { color: #668194; font-size: 7px; font-weight: 800; letter-spacing: .02em; }
 .tta-facts b { margin-top: 3px; color: #17685f; font-size: 9px; letter-spacing: normal; }
 .agent-evidence-card > small { display: block; margin-top: 10px; color: #72879a; font-size: 8px; line-height: 1.35; }
+.research-explanation { margin-top: 12px; padding: 10px; border: 1px solid #d6e2ed; border-radius: 10px; background: rgba(255, 255, 255, .7); }
+.research-explanation.completed { border-color: #b9e4db; background: #f4fcfa; }
+.research-explanation.attention { border-color: #f0c5cc; background: #fff8f9; }
+.research-explanation h5 { margin: 2px 0 0; color: #274762; font-size: 10px; letter-spacing: -.01em; }
+.research-explanation > p { margin: 7px 0 0; color: #5f748b; font-size: 9px; line-height: 1.45; }
+.research-explanation ul { padding-left: 16px; margin: 7px 0 0; color: #6a8095; font-size: 8px; line-height: 1.45; }
+.research-explanation small { display: block; margin-top: 8px; color: #72879a; font-size: 8px; line-height: 1.35; }
 .inspector-footer { display: flex; justify-content: space-between; gap: 8px; padding: 10px 2px 0; color: #6e8094; font-size: 9px; line-height: 1.35; }
 .inspector-footer > span:last-child { color: #35627b; font-weight: 750; text-align: right; }
 .detail-score { color: #126c62; font-weight: 800; }
@@ -220,6 +227,7 @@ select:focus { border-color: #58a799; box-shadow: 0 0 0 3px rgba(10, 135, 121, .
 @keyframes rotate { to { transform: rotate(360deg); } }
 .status-ready { color: #176858 !important; }
 .status-problem { color: #9a3542 !important; }
+.status-note { margin-top: 4px !important; color: #647a90 !important; font-size: 9px !important; line-height: 1.35; font-weight: 500 !important; }
 .info-card { align-items: flex-start; }
 .info-icon { display: grid; place-items: center; flex: none; width: 35px; height: 35px; border-radius: 11px; font-weight: 850; }
 .info-icon.teal { color: #087368; background: #e0f5f0; }
