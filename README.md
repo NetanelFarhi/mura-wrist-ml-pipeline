@@ -74,6 +74,27 @@ Mean probability pooling remains the primary Model B policy.
 
 ---
 
+## Final evaluation on official MURA `valid` (pre-registered, single run)
+
+One pre-registered run of the frozen Model B and the deterministic decision layer on official MURA `valid`, XR_WRIST (237 studies: 97 ABNORMAL, 140 NORMAL; 207 patients). The plan is in [PREREGISTRATION.md](PREREGISTRATION.md), committed before the run (commit `7d86084`). This set was opened once in Phase 1, so the result is a second look at an already-observed set, not an untouched test.
+
+| Measure | Official `valid` [95% CI] | Internal validation (development) |
+|---|---|---|
+| Sensitivity | 0.897 [0.828, 0.953] | 0.952 |
+| Missed ABNORMAL studies (FN) | 10 of 97 | 13 of 269 |
+| Specificity | 0.643 [0.562, 0.727] | 0.583 |
+| False positives (FP) | 50 of 140 | 176 of 422 |
+| Flagged | 57.8% | 62.5% |
+| AUROC | 0.903 [0.859, 0.943] | 0.913 |
+
+Reading fixed in advance: compatible with the ≥ 0.95 sensitivity target, but below it in the point estimate. Decision layer: 159 studies routed to priority review, 78 to routine (7 of them ABNORMAL), no `SAFETY_BLOCK`.
+
+Phase 1 on the same set is a historical reference, not a fair comparison (other models, split and thresholds): Model A missed 17 and Model B missed 26 of the 97 ABNORMAL studies.
+
+Deviation from the pre-registration: the first attempt stopped while parsing the manifest, before any image was read by the model; four lines of manifest parsing in notebook 10 were fixed and committed before the run. Model, threshold, rule and metrics were not changed.
+
+Full report: [reports/official_valid_final/report.md](reports/official_valid_final/report.md). Run code: [notebooks/10_MURA_Official_Valid_Final_Evaluation.ipynb](notebooks/10_MURA_Official_Valid_Final_Evaluation.ipynb).
+
 ## Notebook Map
 
 | Notebook | Purpose | Status |
@@ -88,6 +109,7 @@ Mean probability pooling remains the primary Model B policy.
 | [07 — Shortcut and Geometry Audit](notebooks/07_MURA_Shortcut_and_Geometry_Audit.ipynb) | Diagnostic audit | Diagnostic |
 | [08 — Runtime Study Viewer](notebooks/08_MURA_Runtime_Study_Viewer.ipynb) | Study preview | Optional utility |
 | [09 — MURA Agentic AI](notebooks/09_MURA_Agentic_AI-final.ipynb) | Frozen Model B, deterministic policy, TTA, Grad-CAM, CrewAI, and structured reporting | Implemented and tested; research only |
+| [10 — Official Valid Final Evaluation](notebooks/10_MURA_Official_Valid_Final_Evaluation.ipynb) | Single pre-registered evaluation of frozen Model B and the deterministic decision layer on official MURA valid | Completed; see PREREGISTRATION.md |
 | [Legacy Notebooks](notebooks/legacy/README.md) | Historical notebooks and earlier policy implementations | Archived |
 | [Experimental All-Anatomy Notebooks](notebooks/experimental_all_anatomies/README.md) | Experimental extension beyond XR_WRIST | Outside wrist MVP |
 
@@ -297,8 +319,8 @@ Important limitations include:
 
 - MURA abnormality labels do not establish a specific fracture diagnosis.
 - The models do not provide validated lesion localization.
-- Model performance reported here comes from internal validation.
-- Official MURA `valid` was previously observed for historical reference and must not be described as an untouched final test for subsequent model selection.
+- Model performance reported here comes from internal validation, except the pre-registered final run on official MURA valid reported above.
+- Official MURA `valid` was previously observed for historical reference and must not be described as an untouched final test for subsequent model selection. The pre-registered final run is a second look at that already-observed set.
 - Agent-generated explanations may contain errors and require human review.
 - Grad-CAM visualizations are explanatory aids, not validated lesion-localization outputs.
 - The Agentic AI workflow does not replace professional clinical judgment.
@@ -308,6 +330,8 @@ Important limitations include:
 
 ## Results, Governance, and Further Reading
 
+- [Pre-registration](PREREGISTRATION.md) — plan of the single final run on official MURA valid, committed before the run.
+- [Official-valid final run report](reports/official_valid_final/report.md) — pre-registered result with confidence intervals.
 - [Full Current Results](docs/results/checkpoint1/README.md) — metrics, uncertainty, paired comparison, and diagnostic figures.
 - [Test-Set Governance](reports/TEST_SET_GOVERNANCE.md) — official MURA validation-set history and limitations.
 - [Result Lineage](docs/RESULT_LINEAGE.md) — current versus historical splits, operating policies, and model boundaries.
