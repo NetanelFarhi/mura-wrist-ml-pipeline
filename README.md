@@ -14,7 +14,7 @@ The scope is MURA-defined abnormality: the labels do not establish an acute-frac
 
 | Team member | Current responsibilities |
 | --- | --- |
-| **Netanel** | Model-bundle and runtime integration, study-level results, deterministic safety, local application/demo, bounded-agent workstream, and coordination of the experimental all-anatomy extension. |
+| **Netanel** | Model-bundle and runtime integration, study-level results, deterministic safety, local application/demo, bounded-agent workstream, Demo App and coordination of the experimental all-anatomy extension. |
 | **Hagit** | Data access and governance, patient/study/view organization, preprocessing, and data-scope review. Full development and implementation of the MURA Agentic AI workflow (Notebook 09), including deterministic agent policy, frozen Model B integration, TTA and Grad-CAM tools, CrewAI research explanations, structured reporting, safety controls, and end-to-end testing. |
 | **Hodaya** | Core fine-tuned model workflow, model-training evidence, model review, and the project presentation. |
 | **Artem** | Product framing, reproducibility review, and final-presentation readiness. |
