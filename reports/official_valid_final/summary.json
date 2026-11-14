@@ -1,0 +1,133 @@
+{
+ "mode": "official",
+ "started_utc": "2026-11-14T20:30:19+00:00",
+ "data_dir": "/content/drive/MyDrive/DATA",
+ "repo_zip": "/content/drive/MyDrive/DATA/mura-wrist-ml-pipeline-7d860849d643a96c0efdf2869923818bfe55ecec.zip",
+ "commit": "7d860849d643a96c0efdf2869923818bfe55ecec",
+ "code_commit_requested": "7d860849d643a96c0efdf2869923818bfe55ecec",
+ "official_images_found": 659,
+ "threshold": 0.263567715883255,
+ "checkpoint_sha256": "63AEDC6BEC1534BDED7C3CA4D0DAF03AFC17BF92166CB7848506A6F3A82DE5B6",
+ "versions": {
+  "python": "3.13.18",
+  "torch": "2.14.1+cpu",
+  "torchvision": "0.29.1+cpu",
+  "pillow": "11.3.0",
+  "numpy": "2.4.6",
+  "pandas": "2.2.3",
+  "sklearn": "1.6.1"
+ },
+ "device": "cpu",
+ "checks": {
+  "DATA folder found": true,
+  "MODE is valid": true,
+  "CODE_COMMIT empty or a 40-character hash": true,
+  "Code commit set": true,
+  "No previous official run": true,
+  "Repository ZIP found": true,
+  "ZIP comment is a commit hash": true,
+  "Code imported from the ZIP": true,
+  "SHA configs/model_b_artifact_bundle.json": true,
+  "SHA tools/agent_policy.py": true,
+  "SHA src/runtime/deterministic_safety.py": true,
+  "Bundle id and governance": true,
+  "selection.json: validation only": true,
+  "frozen policy: internal validation, mean": true,
+  "Threshold identical in 3 sources": true,
+  "Checkpoint SHA-256 = bundle": true,
+  "SHA validation_predictions_mean.csv": true,
+  "SHA wrist_internal_val_clean.csv": true,
+  "SHA wrist_official_validation.csv": true,
+  "Official valid images present": true,
+  "Labels are negative/positive only": true,
+  "Counts = expected": true,
+  "No macOS '._' files": true,
+  "All images from the expected MURA folder": true,
+  "SHA mura_wrist_internal_split.csv": true,
+  "Internal train patients = 2614": true,
+  "No patient overlap with internal train": true,
+  "Every study and image predicted": true,
+  "agent_policy version 1.1.0": true,
+  "QC result for every image": true,
+  "Every study routed": true,
+  "Policy accepts every clean record": true,
+  "Still no previous official run": true,
+  "summary.json not written yet": true,
+  "Labels joined for every study": true,
+  "AUROC = sklearn": true,
+  "AUPRC = sklearn": true,
+  "FN and FP = plain counts": true
+ },
+ "run_dir": "/content/drive/MyDrive/DATA/OFFICIAL_VALID_FINAL/official_20261114T203242Z",
+ "predictions_sha256": {
+  "view_predictions.csv": "2C685D421B264CB61B02A43623295D85A996697B38F88BCF3C78AE94F04B6520",
+  "study_predictions.csv": "DA5662B5BAAC9650F86A06D1DDCE4BD16CDB8F33826DBFED6ECF1FAE9D0AE229",
+  "study_routes.csv": "F06E708CBE36DC57393A4B3BC963AE67E9161A7D4641CB855C74804F6C5DE263"
+ },
+ "predictions_saved_utc": "2026-11-14T20:32:42+00:00",
+ "routes_saved_utc": "2026-11-14T20:32:45+00:00",
+ "population": {
+  "studies": 237,
+  "abnormal": 97,
+  "normal": 140,
+  "patients": 207,
+  "studies_within_0.001_of_threshold": 0
+ },
+ "endpoints": {
+  "sensitivity": 0.8969072164948454,
+  "fn": 10,
+  "specificity": 0.6428571428571429,
+  "fp": 50,
+  "flagged_share": 0.5780590717299579,
+  "auroc": 0.9033136966126657,
+  "auprc": 0.9018784893717764,
+  "priority_share": 0.6708860759493671,
+  "priority_by_disagreement_only": 22,
+  "routine_fn": 7,
+  "abnormal_outside_priority": 7,
+  "safety_block": 0
+ },
+ "ci95": {
+  "sensitivity": [
+   0.8282746823069403,
+   0.9534883720930233
+  ],
+  "specificity": [
+   0.561978714715941,
+   0.7266187050359713
+  ],
+  "flagged_share": [
+   0.5120746238970056,
+   0.6393944110119665
+  ],
+  "auroc": [
+   0.8587332571143718,
+   0.9429353846566754
+  ],
+  "auprc": [
+   0.8500256886103822,
+   0.9402147508923744
+  ],
+  "priority_share": [
+   0.6058033426460134,
+   0.7295108351509182
+  ]
+ },
+ "bootstrap": {
+  "replicates": 1000,
+  "seed": 42,
+  "skipped_one_class": 0,
+  "unit": "patient",
+  "threshold": "fixed",
+  "method": "as in notebook 06 bootstrap_interval"
+ },
+ "primary_reading": "compatible with the target, but below it in the point estimate",
+ "route_counts": {
+  "priority_human_review": 159,
+  "routine_workflow": 78
+ },
+ "qc_counts": {
+  "PASS": 237
+ },
+ "summary_saved_utc": "2026-11-14T20:32:50+00:00"
+}
