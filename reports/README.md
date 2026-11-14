@@ -8,4 +8,4 @@ This index groups the reports by purpose. Existing report paths are retained so 
 - [Governance](governance/README.md)
 - [Review and status reports](reviews/README.md)
 
-The detailed current result table is in [docs/results/checkpoint1](../docs/results/checkpoint1/README.md). Raw radiographs, weights, per-study predictions, and local manifests stay outside Git.
+Current evidence includes the [Checkpoint 1 internal-validation comparison](../docs/results/checkpoint1/README.md) and the [pre-registered official-validation run](official_valid_final/report.md). Model B sensitivity is 95.2% internally and 89.7% on official validation; official validation had prior exposure and is not an untouched test. Raw radiographs, weights, per-study predictions, and local manifests stay outside Git.

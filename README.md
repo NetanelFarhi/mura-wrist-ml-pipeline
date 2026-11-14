@@ -45,7 +45,9 @@ The Agentic AI workflow is a separate research component and does not replace th
 
 ## Main Result and Model Comparison
 
-**Model B reached AUROC 0.913 on the current internal validation cohort.**
+**Model B reached AUROC 0.913 on internal validation and 0.903 on official MURA `valid`. Sensitivity was 95.2% internally and 89.7% on official validation at the same frozen threshold.**
+
+### Model A versus Model B on internal validation
 
 Both models were evaluated on the same **691 studies from 653 patients**, comprising 422 NORMAL and 269 ABNORMAL studies.
 
@@ -72,28 +74,36 @@ See the [full Checkpoint 1 results](docs/results/checkpoint1/README.md) for unce
 
 Mean probability pooling remains the primary Model B policy.
 
----
+### Model B: internal versus official validation (pre-registered final run)
 
-## Final evaluation on official MURA `valid` (pre-registered, single run)
-
-One pre-registered run of the frozen Model B and the deterministic decision layer on official MURA `valid`, XR_WRIST (237 studies: 97 ABNORMAL, 140 NORMAL; 207 patients). The plan is in [PREREGISTRATION.md](PREREGISTRATION.md), committed before the run (commit `7d86084`). This set was opened once in Phase 1, so the result is a second look at an already-observed set, not an untouched test.
+One pre-registered run of the frozen Model B and the deterministic decision layer on official MURA `valid`, XR_WRIST (237 studies: 97 ABNORMAL, 140 NORMAL; 207 patients). The plan is in [PREREGISTRATION.md](PREREGISTRATION.md), committed before the run (commit `7d86084`). This set was evaluated in Phase 1 and selected cases were inspected in Notebooks 09/09A before registration. The result is a repeat evaluation of an already-observed set, not an untouched test. The current model, aggregation, threshold and routing rule were frozen before the November case checks and were not changed because of them; see [pre-registration, section 6](PREREGISTRATION.md#6-single-run).
 
 | Measure | Official `valid` [95% CI] | Internal validation (development) |
 |---|---|---|
-| Sensitivity | 0.897 [0.828, 0.953] | 0.952 |
+| Studies / patients | 237 / 207 | 691 / 653 |
+| NORMAL / ABNORMAL studies | 140 / 97 | 422 / 269 |
+| Sensitivity | 89.7% [82.8%, 95.3%] | 95.2% |
 | Missed ABNORMAL studies (FN) | 10 of 97 | 13 of 269 |
-| Specificity | 0.643 [0.562, 0.727] | 0.583 |
+| Specificity | 64.3% [56.2%, 72.7%] | 58.3% |
 | False positives (FP) | 50 of 140 | 176 of 422 |
 | Flagged | 57.8% | 62.5% |
 | AUROC | 0.903 [0.859, 0.943] | 0.913 |
+| AUPRC | 0.902 [0.850, 0.940] | 0.878 |
+| Frozen threshold | 0.263567715883255 | 0.263567715883255 |
 
-Reading fixed in advance: compatible with the ≥ 0.95 sensitivity target, but below it in the point estimate. Decision layer: 159 studies routed to priority review, 78 to routine (7 of them ABNORMAL), no `SAFETY_BLOCK`.
+**The official sensitivity point estimate is below the 95% target.** Its 95% confidence interval includes 95%, so the pre-registered reading is compatible with the target, but below it in the point estimate; this does not establish that the target was achieved. Official intervals use 1,000 patient-cluster bootstrap resamples with the threshold fixed.
+
+The threshold was selected on internal validation, so internal operating-point performance can be optimistic. Different case difficulty and sampling variation may also contribute to the difference; the official cohort is smaller. These are possible explanations, not established causes or a statistical test of the difference between cohorts.
+
+The **deterministic decision layer** routed 159/237 studies (67.1%) to priority review and 78 to routine, including 7 ABNORMAL studies. View disagreement added 22 priority routes beyond the model's threshold flags; `SAFETY_BLOCK` was 0. All 38 execution checks passed. These checks and routes do not establish diagnostic correctness. The LLM/CrewAI explanation layer was **not run** in this evaluation.
 
 Phase 1 on the same set is a historical reference, not a fair comparison (other models, split and thresholds): Model A missed 17 and Model B missed 26 of the 97 ABNORMAL studies.
 
 Deviation from the pre-registration: the first attempt stopped while parsing the manifest, before any image was read by the model; four lines of manifest parsing in notebook 10 were fixed and committed before the run. Model, threshold, rule and metrics were not changed.
 
 Full report: [reports/official_valid_final/report.md](reports/official_valid_final/report.md). Run code: [notebooks/10_MURA_Official_Valid_Final_Evaluation.ipynb](notebooks/10_MURA_Official_Valid_Final_Evaluation.ipynb).
+
+---
 
 ## Notebook Map
 

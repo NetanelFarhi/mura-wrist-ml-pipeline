@@ -44,6 +44,10 @@ Model selection and threshold selection use internal train/validation only.
 Official MURA `valid` is not permitted for later selection; see
 [`reports/TEST_SET_GOVERNANCE.md`](../reports/TEST_SET_GOVERNANCE.md).
 
+## Official-validation evaluation of the frozen bundle
+
+The same canonical Model B, mean aggregation and frozen threshold were evaluated on 237 official MURA `valid` studies on 14 November 2026. Sensitivity was 89.7% (95% CI 82.8–95.3%), specificity 64.3% and AUROC 0.903. The internal ≥95% sensitivity policy is a threshold-selection target, not a guarantee on another cohort. Official validation had prior exposure; this is not an untouched test. See the [run report](../reports/official_valid_final/report.md) and [pre-registration](../PREREGISTRATION.md). No bundle or threshold changed for this documentation update.
+
 ## Model A (Checkpoint 1)
 
 No canonical weights bundle is recorded for Model A (frozen ResNet-18 embeddings + logistic regression, C = 0.1 selected by patient-grouped CV on internal train). Its internal-validation predictions are stored on shared Drive at `DATA/BASELINE_MODEL_A/model_a_C0.1_validation_predictions.csv` (SHA-256 `03e93f6e54aa80cb15c0b8445392224b060e843c87e4d243ab59017fd4a91455`; AUROC 0.880, matches the README). In the same folder, `validation_predictions.csv` is the superseded Phase 1 model (C = 0.01) and must not be used; see `DATA/BASELINE_MODEL_A/README_MODEL_A.md`.
