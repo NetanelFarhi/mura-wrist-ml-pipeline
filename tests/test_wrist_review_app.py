@@ -21,6 +21,7 @@ from src.runtime.deterministic_safety import StudyImage
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 CORE_PATH = REPOSITORY_ROOT / "apps" / "wrist_review" / "core.py"
 SERVER_PATH = REPOSITORY_ROOT / "apps" / "wrist_review" / "server.py"
+RESEARCH_PDF_PATH = REPOSITORY_ROOT / "apps" / "wrist_review" / "research_report_pdf.py"
 
 
 def load_app_core():
@@ -50,6 +51,18 @@ def load_app_server():
         return module
     finally:
         sys.path.remove(app_directory)
+
+
+def load_research_pdf_exporter():
+    """Load the PDF presentation layer without starting the app server."""
+
+    module_name = "wrist_review_research_pdf_for_test"
+    specification = importlib.util.spec_from_file_location(module_name, RESEARCH_PDF_PATH)
+    assert specification is not None and specification.loader is not None
+    module = importlib.util.module_from_spec(specification)
+    sys.modules[module_name] = module
+    specification.loader.exec_module(module)
+    return module
 
 
 def test_local_app_default_paths_resolve_inside_repository(monkeypatch):
@@ -142,6 +155,7 @@ def test_browser_worklist_groups_folder_studies_and_does_not_truncate_views():
     assert "zipWorklistPicker" in page
     assert 'fetch("/api/worklist-zip"' in script
     assert "function agentEvidencePanel" in script
+    assert 'fetch("/api/research-report.pdf"' in script
     assert "Evidence only — it cannot change the model score" in script
     assert "Bounded optional evidence" in page
 
@@ -308,3 +322,60 @@ def test_app_does_not_execute_tta_for_non_ambiguous_study(monkeypatch):
     assert runtime.calls == 1
     assert result["agent_report"]["agent_status"] == "not_called_no_optional_tools"
     assert result["research_agent_report"]["agent_status"] == "not_configured"
+
+
+def completed_research_review() -> dict:
+    """Safe, synthetic output equivalent to a completed LLM explanation."""
+
+    return {
+        "case_id": "LOCAL-DEMO-001",
+        "deterministic_outcome": "RAISE_PRIORITY",
+        "model_predicted_abnormal": True,
+        "view_evidence": {
+            "mean_probability": 0.41,
+            "threshold": 0.263567715883255,
+            "threshold_disagreement": True,
+        },
+        "agent_report": {
+            "allowed_tools_called": [
+                {"tool": "uncertainty_tta", "status": "OK"},
+                {"tool": "gradcam_explainer", "status": "OK"},
+            ]
+        },
+        "research_agent_report": {
+            "agent_status": "completed_research_explanation",
+            "research_use_only": True,
+            "human_review_required": True,
+            "summary": "The fixed study score crossed the review threshold. Local evidence was summarized for human review only.",
+            "evidence_used": ["Frozen study score and threshold", "Authorized local TTA summary"],
+            "limitations": ["Research prototype only.", "Human review remains required."],
+        },
+    }
+
+
+def test_completed_llm_explanation_exports_a_memory_only_pdf():
+    from pypdf import PdfReader
+
+    exporter = load_research_pdf_exporter()
+    pdf_bytes = exporter.build_research_report_pdf(completed_research_review())
+
+    assert pdf_bytes.startswith(b"%PDF")
+    assert exporter.report_filename(completed_research_review()) == "LOCAL-DEMO-001_research_explanation.pdf"
+    extracted = "\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(pdf_bytes)).pages)
+    assert "LLM research explanation" in extracted
+    assert "Priority human review" in extracted
+    assert "no diagnostic recommendation" in extracted.lower()
+    assert "image1.png" not in extracted
+
+
+def test_research_pdf_refuses_an_unavailable_llm_report():
+    exporter = load_research_pdf_exporter()
+    review = completed_research_review()
+    review["research_agent_report"]["agent_status"] = "not_configured"
+
+    try:
+        exporter.build_research_report_pdf(review)
+    except ValueError as error:
+        assert "completed CrewAI research explanation" in str(error)
+    else:  # pragma: no cover - PDF safety contract
+        raise AssertionError("An unavailable LLM explanation must not create a PDF.")

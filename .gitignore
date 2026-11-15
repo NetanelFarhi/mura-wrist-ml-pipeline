@@ -59,6 +59,8 @@ __pycache__/
 htmlcov/
 .ipynb_checkpoints/
 .venv/
+.venv-agent/
+.venv-agent-runtime/
 venv/
 env/
 
@@ -74,3 +76,5 @@ Thumbs.db
 
 # Local artifact-rendering intermediates
 tmp/
+tmp_crewai_install.out
+tmp_crewai_install.err

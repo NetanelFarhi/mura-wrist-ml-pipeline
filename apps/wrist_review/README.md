@@ -26,6 +26,15 @@ The CrewAI layer receives no radiograph
 pixels, local paths, file names, labels, or patient identifiers; it may not run
 inference or modify Model B, the threshold, queue route, or review requirement.
 
+When that explanation completes successfully, the selected-study panel offers
+**Download PDF report**. The PDF is generated in memory for that request only;
+it contains the model score and fixed route, the LLM explanation, the evidence
+provided to it, and its stated limitations. It deliberately contains **no
+radiographs, image paths, file names, labels, or patient identifiers**. If
+CrewAI is disabled, unavailable, or returns an invalid response, there is no
+PDF button because the app must not present a generated LLM report that does
+not exist.
+
 ## Local patient-folder layout
 
 Choose one patient folder at a time. After each selection, use **Add patient
@@ -57,6 +66,41 @@ only — never patient identifiers or other identifying information. For a ZIP,
 preserve the same folder tree and use a maximum of 100 MB compressed, 50 MB
 expanded, 400 files, and 15 MB per image.
 
+## Reading the worklist
+
+After review, each study has a short, visible workflow state in both the queue
+and the selected-study panel:
+
+- **Routine case**: a consistent score with no optional evidence trigger.
+- **Ambiguous views**: view scores fall on different sides of the frozen
+  threshold; TTA and Grad-CAM summaries are authorized as evidence only.
+- **Borderline score**: the mean score falls in the configured borderline band;
+  the same bounded evidence tools are authorized.
+- **Priority signal**: the mean score crossed the frozen threshold.
+- **Unsupported anatomy** or **Input attention**: the safety layer stopped
+  before inference; no optional evidence tool runs.
+
+These are workflow descriptions, not diagnoses. An optional tool label shows
+what was actually used for that study; it never means that the tool changed the
+score, frozen threshold, route, or human-review requirement.
+
+### Agent & evidence report in the app
+
+The results page includes an **Agent & evidence report** for every study. It
+makes the separation between the two layers explicit:
+
+- The **deterministic safety/model layer** runs first for every supported input
+  and owns the final worklist route.
+- The **bounded local evidence workflow** runs TTA and Grad-CAM only after one
+  of the three fixed triggers above. For a consistent normal case, it records
+  `No extra tools needed`; it does not run either optional tool.
+- The separate **CrewAI research explanation** is opt-in and defaults to off.
+  Its status is reported separately; it is never required for a deterministic
+  route and cannot modify one.
+
+Each row shows the actual trigger, local tools used, and CrewAI status. This is
+an execution record for the prototype, not a clinical recommendation.
+
 ## Run locally
 
 Install repository dependencies, place the authorized canonical Model B bundle outside
@@ -80,11 +124,29 @@ the bounded CrewAI explanation, install the
 separate Agent dependencies and configure credentials only in your own local
 shell (never in a notebook, source file, or Git):
 
+The simplest local setup is deliberately separate from Git and does not save a
+provider key. From `apps/wrist_review`, run:
+
 ```powershell
-pip install -r requirements_agent.txt
+.\install_agent_runtime.ps1
+.\start_with_crewai.ps1 -ModelDir "C:\authorized-local-artifacts\MODEL_B_FINE_TUNING"
+```
+
+The launcher asks for the Google AI Studio key in the local PowerShell window,
+keeps it only for that running process, enables the CrewAI bridge, and starts
+the app. It checks that the selected folder contains the canonical Model B
+weights before starting. Do not paste a key into a notebook, source file, Git,
+or chat. CrewAI telemetry is disabled for this launcher. CrewAI may create its
+own local runtime state under the operator's application-data folder; this is
+outside Git and never contains the uploaded radiographs.
+
+Advanced users can configure the equivalent environment variables manually:
+
+```powershell
 $env:MURA_CREWAI_ENABLED = "1"
 $env:MURA_CREWAI_LLM_MODEL = "gemini/gemini-3.1-flash-lite"
 $env:GOOGLE_API_KEY = "your-local-provider-key"
+$env:CREWAI_DISABLE_TELEMETRY = "true"
 python apps/wrist_review/server.py
 ```
 
@@ -96,6 +158,27 @@ summaries; Grad-CAM maps themselves are never sent or stored. If
 configuration, a provider call, the response schema, or the evidence contract fails,
 the deterministic local route remains in force and the research explanation is marked
 unavailable.
+
+The PDF export uses `reportlab`, included in `requirements_agent.txt`. It is
+available only after a completed, schema-validated explanation; generating the
+PDF makes no additional LLM call and does not write a copy of the report to disk.
+
+### Recorded demo and example report
+
+The [`demo/`](demo/) folder contains two companion artifacts for the current
+application version:
+
+- [`Wrist Review demo (1.5x, with report ending)`](demo/Wrist_Review_Demo_1_5x_with_PDF.mp4)
+  shows the local multi-study worklist, deterministic priority order, optional
+  evidence states, and the generated report as its final six seconds. Playback
+  is intentionally 1.5x and the report page is held separately for reading.
+- [`Example generated research report`](demo/MURA_WRIST_NO_TOOLS_001_research_explanation.pdf)
+  is the de-identified PDF exported by the app after a successful no-tools
+  CrewAI explanation. It is an execution example, not an evaluation result or
+  a clinical recommendation.
+
+The demo uses local study aliases only. It does not include original MURA paths,
+ground-truth labels, patient identifiers, or any radiograph pixels in the PDF.
 
 ## What happens to each study
 
@@ -115,9 +198,11 @@ unavailable.
    no optional tool for a consistent normal study and may retrieve the precomputed
    TTA and Grad-CAM summaries only when the fixed policy authorizes both. It is not a new classifier
    and does not receive images or change the route.
-6. The worklist is ordered as `RAISE_PRIORITY`, input-attention cases, then
+6. A completed explanation can be exported as a de-identified, in-memory PDF.
+   A disabled, unavailable, or invalid explanation cannot produce a PDF.
+7. The worklist is ordered as `RAISE_PRIORITY`, input-attention cases, then
    `STANDARD_HUMAN_REVIEW`. Within a route, higher study scores appear first.
-7. Every route requires human review. Inputs stay in process memory for the current
+8. Every route requires human review. Inputs stay in process memory for the current
    request and are not written by the application.
 
 ## Safety boundaries

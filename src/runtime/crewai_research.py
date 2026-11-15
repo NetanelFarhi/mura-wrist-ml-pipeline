@@ -30,7 +30,7 @@ from typing import Any
 from uuid import uuid4
 
 
-AGENT_VERSION = "crewai-research-explanation-v1.2"
+AGENT_VERSION = "crewai-research-explanation-v1.3"
 CONTRACT_VERSION = "1.0"
 MAX_ITERATIONS = 3
 MAX_LLM_CALLS = 3
@@ -118,6 +118,9 @@ def research_agent_status(project_root: Path) -> dict[str, Any]:
         return status
     if find_spec("crewai") is None:
         status["reason"] = "crewai_dependency_not_installed"
+        return status
+    if not os.environ.get("GOOGLE_API_KEY", "").strip():
+        status["reason"] = "google_api_key_not_configured"
         return status
 
     status.update({"ready": True, "reason": "ready", "llm_model": model_name})
@@ -314,19 +317,24 @@ def _task_description(context: Mapping[str, Any]) -> str:
     return """Prepare a concise, research-only explanation of already-computed evidence.
 
 """ + tool_instruction + """
-Do not perform new inference. Do not provide a diagnosis, treatment
-advice, or lesion location.
+Do not perform new inference. Do not make any clinical claim or provide a
+lesion location. This is a technical research trace, not an interpretation of
+the radiograph. Do not use these words in any generated string: diagnosis,
+diagnose, fracture, treatment, medication, discharge.
 Do not modify or recommend modifying the frozen probability, threshold, or queue
 route. Mandatory human review remains required.
 
 Return only JSON with this exact schema:
 {
-  "summary": "plain-language evidence summary, maximum 500 characters",
-  "evidence_used": ["allowed evidence item"],
-  "limitations": ["research limitation"],
+  "summary": "plain-language technical evidence summary, maximum 500 characters",
+  "evidence_used": ["one or more allowed evidence items"],
+  "limitations": ["one or more research limitations, including that human review remains required"],
   "research_use_only": true,
   "human_review_required": true
 }
+
+Keep every list item concise. Return a JSON object only: no markdown fence,
+heading, commentary, or text before or after the object.
 
 De-identified context follows:\n""" + json.dumps(prompt_context, ensure_ascii=False, sort_keys=True)
 
@@ -367,6 +375,28 @@ def _validated_summary(raw: str) -> dict[str, Any]:
     }
 
 
+_SAFE_VALIDATION_FAILURE_CODES = frozenset(
+    {
+        "agent_response_not_object",
+        "invalid_research_summary",
+        "invalid_evidence_used",
+        "invalid_limitations",
+        "required_safety_flags_missing",
+        "unsupported_clinical_claim",
+    }
+)
+
+
+def _safe_research_failure_reason(exc: Exception) -> str:
+    """Expose only a known local validation code, never provider error text."""
+
+    if isinstance(exc, ValueError):
+        detail = str(exc).strip()
+        if detail in _SAFE_VALIDATION_FAILURE_CODES:
+            return detail
+    return type(exc).__name__
+
+
 def _run_live_crewai(
     context: dict[str, Any],
     model_name: str,
@@ -376,6 +406,17 @@ def _run_live_crewai(
 
     from crewai import Agent, Crew, LLM, Process, Task
     from crewai.tools import tool
+    from pydantic import BaseModel, Field
+    from typing import Literal
+
+    class ResearchExplanationOutput(BaseModel):
+        """Strict, non-clinical output contract for the optional LLM layer."""
+
+        summary: str = Field(min_length=1, max_length=500)
+        evidence_used: list[str] = Field(min_length=1, max_length=6)
+        limitations: list[str] = Field(min_length=1, max_length=6)
+        research_use_only: Literal[True]
+        human_review_required: Literal[True]
 
     tool_calls = {"tta_uncertainty": 0, "gradcam_explainer": 0}
     tools: list[Any] = []
@@ -418,6 +459,7 @@ def _run_live_crewai(
         description=_task_description(context),
         expected_output="A valid JSON object matching the requested research-only schema.",
         agent=agent,
+        output_json=ResearchExplanationOutput,
     )
     crew = Crew(
         agents=[agent],
@@ -551,7 +593,7 @@ def run_crewai_research_explanation(
             deterministic_result,
             status="safe_failure",
             execution_status="INCOMPLETE",
-            reason=f"research_explanation_unavailable:{type(exc).__name__}",
+            reason=f"research_explanation_unavailable:{_safe_research_failure_reason(exc)}",
             trace_id=trace_id,
             authorized_tools=authorized_tools,
         )

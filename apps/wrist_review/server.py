@@ -28,6 +28,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 import core
 from PIL import Image, UnidentifiedImageError
+from research_report_pdf import build_research_report_pdf, report_filename
 from src.runtime.deterministic_safety import StudyImage
 
 
@@ -38,6 +39,7 @@ MAX_WORKLIST_ZIP_BYTES = 100 * 1024 * 1024
 MAX_WORKLIST_ZIP_FILES = 400
 MAX_WORKLIST_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
 MAX_IMAGE_BYTES = 15 * 1024 * 1024
+MAX_RESEARCH_REPORT_REQUEST_BYTES = 1 * 1024 * 1024
 IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"})
 
 _runtime: core.ModelRuntime | None = None
@@ -200,15 +202,20 @@ class WristReviewHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         route = urlparse(self.path).path
-        if route not in {"/api/review", "/api/worklist-zip"}:
+        if route not in {"/api/review", "/api/worklist-zip", "/api/research-report.pdf"}:
             return self.send_json(HTTPStatus.NOT_FOUND, {"error": "Unknown endpoint."})
         try:
             content_length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             content_length = 0
-        max_size = MAX_WORKLIST_ZIP_BYTES if route == "/api/worklist-zip" else MAX_REQUEST_BYTES
+        if route == "/api/worklist-zip":
+            max_size = MAX_WORKLIST_ZIP_BYTES
+        elif route == "/api/research-report.pdf":
+            max_size = MAX_RESEARCH_REPORT_REQUEST_BYTES
+        else:
+            max_size = MAX_REQUEST_BYTES
         if not 0 < content_length <= max_size:
-            label = "ZIP archive" if route == "/api/worklist-zip" else "Study payload"
+            label = "ZIP archive" if route == "/api/worklist-zip" else "Research report request" if route == "/api/research-report.pdf" else "Study payload"
             return self.send_json(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, {"error": f"{label} is too large."})
         if route == "/api/worklist-zip":
             try:
@@ -220,6 +227,15 @@ class WristReviewHandler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             return self.send_json(HTTPStatus.BAD_REQUEST, {"error": "Could not read the review request."})
+        if route == "/api/research-report.pdf":
+            try:
+                review = payload.get("review") if isinstance(payload, dict) else None
+                if not isinstance(review, dict):
+                    raise ValueError("A completed study result is required to create a PDF.")
+                pdf_bytes = build_research_report_pdf(review)
+                return self.send_pdf(HTTPStatus.OK, pdf_bytes, report_filename(review))
+            except (RuntimeError, ValueError, OSError) as exc:
+                return self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
         try:
             raw_views = payload.get("views") if isinstance(payload, dict) else None
             if not isinstance(raw_views, list) or not raw_views:
@@ -247,6 +263,16 @@ class WristReviewHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(encoded)))
         self.end_headers()
         self.wfile.write(encoded)
+
+    def send_pdf(self, status: HTTPStatus, payload: bytes, filename: str) -> None:
+        """Return a freshly generated report without writing it to disk."""
+
+        self.send_response(status)
+        self.send_header("Content-Type", "application/pdf")
+        self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
 
     def serve_static(self, route: str) -> None:
         relative = "index.html" if route in {"", "/"} else route.lstrip("/")

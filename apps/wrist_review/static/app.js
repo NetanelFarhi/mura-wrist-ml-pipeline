@@ -278,6 +278,7 @@ function readableAgentStatus(status) {
     completed_bounded_investigation: "Evidence check completed",
     not_called_no_optional_tools: "No optional tool authorized",
     not_called_deterministic_route: "Blocked by the safety route",
+    not_called_policy_blocked: "Optional tools blocked by policy",
     safe_failure: "Evidence check unavailable",
     not_run: "Not run",
   }[String(status)] || "Deterministic route retained";
@@ -287,10 +288,43 @@ function readableResearchAgentStatus(status) {
   return {
     completed_research_explanation: "Research explanation completed",
     not_configured: "Optional research explanation is off",
+    google_api_key_not_configured: "Google API key is not configured",
+    crewai_dependency_not_installed: "CrewAI runtime is not installed",
     not_called: "Not eligible for research explanation",
     safe_failure: "Research explanation unavailable",
     not_run: "Not run",
   }[String(status)] || "Deterministic route retained";
+}
+
+function readableResearchAgentReason(reason) {
+  const value = String(reason || "");
+  const knownReasons = {
+    disabled_by_operator: "Start the app with the optional CrewAI explanation enabled to request a research-only report.",
+    llm_model_not_configured: "No LLM model was configured for this local session.",
+    google_api_key_not_configured: "The local session has no Google API key, so no external explanation was requested.",
+    crewai_dependency_not_installed: "The optional CrewAI runtime is not installed in this Python environment.",
+    deterministic_route_not_eligible_for_agent: "The deterministic safety route ended before a research explanation could be requested.",
+  };
+  if (knownReasons[value]) return knownReasons[value];
+  if (value.startsWith("research_explanation_unavailable:")) {
+    const category = value.slice("research_explanation_unavailable:".length) || "unknown runtime error";
+    const validationReasons = {
+      agent_response_not_object: "CrewAI returned a response outside the required report format, so it was rejected safely.",
+      invalid_research_summary: "CrewAI returned an incomplete summary, so it was rejected safely.",
+      invalid_evidence_used: "CrewAI returned an invalid evidence list, so it was rejected safely.",
+      invalid_limitations: "CrewAI returned an invalid limitations list, so it was rejected safely.",
+      required_safety_flags_missing: "CrewAI omitted required research-safety flags, so it was rejected safely.",
+      unsupported_clinical_claim: "CrewAI returned an unsupported clinical claim, so it was rejected safely.",
+    };
+    if (validationReasons[category]) {
+      return `${validationReasons[category]} No PDF was created; the deterministic route remains unchanged.`;
+    }
+    return `CrewAI stopped safely before it returned an explanation (${category}). No PDF was created; the deterministic route remains unchanged.`;
+  }
+  if (value.startsWith("context_validation_failed:")) {
+    return "The local evidence record did not satisfy the research-report contract, so no external explanation was requested.";
+  }
+  return "The optional research explanation was not completed. The deterministic route remains unchanged.";
 }
 
 function readableAgentReason(reason) {
@@ -301,6 +335,7 @@ function readableAgentReason(reason) {
     optional_tool_policy_not_authorized: "The fixed optional-evidence policy did not authorize tool use for this study.",
     agent_tool_unavailable: "An authorized optional evidence tool was unavailable, so the case was escalated safely.",
     agent_tool_failure: "An authorized optional evidence tool did not return valid evidence, so the case was escalated safely.",
+    agent_tool_budget_exceeded: "The optional-evidence tool budget was exceeded, so the case was escalated safely.",
   }[String(reason)] || "The deterministic route was retained for human review.";
 }
 
@@ -313,6 +348,143 @@ function readableToolName(tool) {
     uncertainty_tta: "Local TTA stability check",
     gradcam_explainer: "Local Grad-CAM attribution summary",
   }[String(tool)] || String(tool).replaceAll("_", " ");
+}
+
+function optionalToolSummary(study) {
+  const report = study.result?.agent_report;
+  const policy = study.result?.optional_tool_policy;
+  const completedTools = Array.isArray(report?.allowed_tools_called)
+    ? report.allowed_tools_called.filter((tool) => tool?.status === "OK").map((tool) => String(tool?.tool || ""))
+    : [];
+  const authorizedTools = Array.isArray(policy?.authorized_tools) ? policy.authorized_tools.map(String) : [];
+  // Once an execution report exists, show only tools that actually completed.
+  // The policy allowlist is useful before execution, but is not evidence of a tool call.
+  const allTools = [...new Set(report ? completedTools : authorizedTools)];
+  const names = [];
+  if (allTools.includes("uncertainty_tta") || allTools.includes("tta_uncertainty")) names.push("TTA");
+  if (allTools.includes("gradcam_explainer")) names.push("Grad-CAM");
+  return names;
+}
+
+function studyDecision(study) {
+  if (!study.result) {
+    return { label: "Awaiting review", detail: "The fixed model has not run yet.", tools: [], tone: "pending" };
+  }
+  const result = study.result;
+  const policy = result.optional_tool_policy || {};
+  const report = result.agent_report || {};
+  const triggers = Array.isArray(policy.triggers) ? policy.triggers : (Array.isArray(report.triggers_fired) ? report.triggers_fired : []);
+  const tools = optionalToolSummary(study);
+
+  if (result.deterministic_outcome === "UNSUPPORTED") {
+    return { label: "Unsupported anatomy", detail: "Stopped before Model B inference.", tools: [], tone: "blocked" };
+  }
+  if (result.classification_performed !== true) {
+    return { label: "Input attention", detail: "The deterministic safety route blocked classification.", tools: [], tone: "blocked" };
+  }
+  if (triggers.includes("view_threshold_disagreement")) {
+    return { label: "Ambiguous views", detail: "View scores fall on both sides of the frozen threshold.", tools, tone: "ambiguous" };
+  }
+  if (triggers.includes("borderline_mean_probability")) {
+    return { label: "Borderline score", detail: "The mean score is inside the fixed borderline band.", tools, tone: "ambiguous" };
+  }
+  if (triggers.includes("abnormal_mean_prediction")) {
+    return { label: "Priority signal", detail: "The mean score crossed the frozen threshold.", tools, tone: "priority" };
+  }
+  return { label: "Routine case", detail: "Consistent score with no optional evidence trigger.", tools: [], tone: "routine" };
+}
+
+function readableAgentTrigger(trigger) {
+  return {
+    abnormal_mean_prediction: "mean score was abnormal",
+    view_threshold_disagreement: "views disagreed around the frozen threshold",
+    borderline_mean_probability: "mean score was inside the borderline band",
+  }[String(trigger)] || String(trigger).replaceAll("_", " ");
+}
+
+function agentWorkflowSummary(study) {
+  if (!study.result) {
+    return {
+      state: "Waiting for review",
+      detail: "Model, safety rules, and the optional-evidence policy have not run yet.",
+      tools: [],
+      triggers: [],
+      tone: "pending",
+      research: "Not run",
+    };
+  }
+
+  const result = study.result;
+  const report = result.agent_report || {};
+  const policy = result.optional_tool_policy || {};
+  const status = String(report.agent_status || "not_run");
+  const reason = String(report.reason_for_escalation_or_rejection || policy.reason || "");
+  const triggers = Array.isArray(report.triggers_fired) && report.triggers_fired.length
+    ? report.triggers_fired
+    : (Array.isArray(policy.triggers) ? policy.triggers : []);
+  const tools = optionalToolSummary(study);
+  const researchStatus = String(result.research_agent_report?.agent_status || "not_configured");
+  const research = readableResearchAgentStatus(researchStatus);
+
+  if (result.deterministic_outcome === "UNSUPPORTED") {
+    return {
+      state: "Safety gate — agent not used",
+      detail: "The declared anatomy is outside the wrist scope, so Model B and optional evidence tools are not called.",
+      tools: [], triggers: [], tone: "blocked", research,
+    };
+  }
+  if (result.classification_performed !== true) {
+    return {
+      state: "Safety gate — agent not used",
+      detail: "Input safety checks stopped model classification before any optional evidence could run.",
+      tools: [], triggers: [], tone: "blocked", research,
+    };
+  }
+  if (status === "completed_bounded_investigation") {
+    return {
+      state: "Extra evidence ran",
+      detail: "The fixed policy authorized local evidence. The deterministic route did not change.",
+      tools, triggers, tone: "active", research,
+    };
+  }
+  if (status === "not_called_no_optional_tools") {
+    return {
+      state: "No extra tools needed",
+      detail: "Consistent normal result outside the borderline band. The policy kept TTA and Grad-CAM off.",
+      tools: [], triggers: [], tone: "quiet", research,
+    };
+  }
+  if (status === "safe_failure") {
+    return {
+      state: "Extra evidence unavailable",
+      detail: readableAgentReason(reason),
+      tools, triggers, tone: "attention", research,
+    };
+  }
+  return {
+    state: readableAgentStatus(status),
+    detail: readableAgentReason(reason),
+    tools, triggers, tone: "quiet", research,
+  };
+}
+
+function agentReportRow(study, index) {
+  const summary = agentWorkflowSummary(study);
+  const decision = studyDecision(study);
+  const triggerText = summary.triggers.length
+    ? summary.triggers.map(readableAgentTrigger).join(" · ")
+    : "No trigger";
+  const toolsText = summary.tools.length ? summary.tools.join(" + ") : "None";
+  return `<article class="agent-report-row ${escapeHtml(summary.tone)}">
+    <span class="agent-report-rank">${index + 1}</span>
+    <div class="agent-report-main">
+      <div><h4>${escapeHtml(study.studyFolder)}</h4><span>${escapeHtml(decision.label)}</span></div>
+      <b>${escapeHtml(summary.state)}</b>
+      <p>${escapeHtml(summary.detail)}</p>
+      <div class="agent-report-tags"><span><em>TRIGGER</em>${escapeHtml(triggerText)}</span><span><em>LOCAL TOOLS</em>${escapeHtml(toolsText)}</span></div>
+    </div>
+    <div class="agent-report-research"><em>CREWAI</em><b>${escapeHtml(summary.research)}</b><small>Separate, opt-in explanation</small></div>
+  </article>`;
 }
 
 function agentEvidencePanel(study) {
@@ -350,12 +522,17 @@ function agentEvidencePanel(study) {
   const researchStatus = String(researchReport?.agent_status || meta.research_agent_status || "not_run");
   const researchSummary = typeof researchReport?.summary === "string" ? researchReport.summary : "";
   const researchLimitations = Array.isArray(researchReport?.limitations) ? researchReport.limitations : [];
+  const researchReason = String(researchReport?.stop_reason || "");
   const researchTone = researchStatus === "completed_research_explanation" ? "completed" : researchStatus === "safe_failure" ? "attention" : "quiet";
+  const pdfAction = researchStatus === "completed_research_explanation"
+    ? `<button class="research-pdf-button" type="button" data-research-pdf="${escapeHtml(study.key)}"><span aria-hidden="true">↓</span> Download PDF report</button>`
+    : "";
   const researchMarkup = `<div class="research-explanation ${researchTone}">
-    <div><p class="section-overline">OPTIONAL RESEARCH EXPLANATION</p><h5>${escapeHtml(readableResearchAgentStatus(researchStatus))}</h5></div>
-    ${researchSummary ? `<p>${escapeHtml(researchSummary)}</p>` : `<p>${researchStatus === "not_configured" ? "The deterministic route is complete. CrewAI is opt-in and was not enabled for this local session." : "This optional layer is available after a valid supported deterministic route."}</p>`}
+    <div><p class="section-overline">LLM RESEARCH EXPLANATION</p><h5>${escapeHtml(readableResearchAgentStatus(researchStatus))}</h5></div>
+    ${researchSummary ? `<p>${escapeHtml(researchSummary)}</p>` : `<p>${escapeHtml(readableResearchAgentReason(researchReason))}</p>`}
     ${researchLimitations.length ? `<ul>${researchLimitations.slice(0, 3).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
     <small>${researchStatus === "completed_research_explanation" ? "It received structured, de-identified evidence only. It cannot change the route or review requirement." : "Raw images, paths, labels, and patient identifiers are never sent to this layer."}</small>
+    ${pdfAction}
   </div>`;
 
   return `<section class="agent-evidence-card ${tone}">
@@ -368,6 +545,49 @@ function agentEvidencePanel(study) {
     <small>Evidence only — it cannot change the model score, frozen threshold, queue route, or human-review requirement.</small>
     ${researchMarkup}
   </section>`;
+}
+
+async function downloadResearchReport(studyKey) {
+  const study = appState.studies.find((item) => item.key === studyKey);
+  if (!study?.result) {
+    showToast("Review the study before requesting its report.");
+    return;
+  }
+  const button = document.querySelector(`[data-research-pdf="${CSS.escape(studyKey)}"]`);
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Creating PDF…";
+  }
+  try {
+    const response = await fetch("/api/research-report.pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ review: study.result }),
+    });
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => ({}));
+      throw new Error(errorPayload.error || "The PDF report could not be created.");
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const download = document.createElement("a");
+    const disposition = response.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="?([^";]+)"?/i);
+    download.href = url;
+    download.download = match?.[1] || "wrist_research_explanation.pdf";
+    document.body.appendChild(download);
+    download.click();
+    download.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+    showToast("Research report PDF downloaded. It contains no radiographs.");
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : "The PDF report could not be created.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = "<span aria-hidden=\"true\">↓</span> Download PDF report";
+    }
+  }
 }
 
 function visibleStatus(study) {
@@ -387,9 +607,11 @@ function renderStudyList() {
     const status = visibleStatus(study);
     const score = worklistMeta(study).study_score;
     const scoreText = Number.isFinite(score) ? `${(score * 100).toFixed(1)}%` : `${study.views.length} views`;
+    const decision = studyDecision(study);
+    const toolText = decision.tools.length ? `Tools: ${decision.tools.join(" + ")}` : decision.label === "Routine case" ? "No optional tools" : decision.label === "Awaiting review" ? "Not run" : "Tools blocked";
     return `<button type="button" class="study-row ${study.key === appState.selectedStudyKey ? "selected" : ""}" data-study-key="${escapeHtml(study.key)}">
       <span class="study-order">${study.result ? index + 1 : "·"}</span>
-      <span class="study-row-copy"><b>${escapeHtml(study.studyFolder)}</b><small>${escapeHtml(study.patientFolder || "Local study folder")} · ${escapeHtml(scoreText)}</small></span>
+      <span class="study-row-copy"><b>${escapeHtml(study.studyFolder)}</b><small>${escapeHtml(study.patientFolder || "Local study folder")} · ${escapeHtml(scoreText)}</small><em class="study-decision ${escapeHtml(decision.tone)}">${escapeHtml(decision.label)} · ${escapeHtml(toolText)}</em></span>
       <span class="route-pill ${status.tone}">${escapeHtml(status.label)}</span>
     </button>`;
   }).join("");
@@ -410,9 +632,12 @@ function renderInspector() {
   const status = visibleStatus(study);
   const score = worklistMeta(study).study_score;
   const scoreLine = Number.isFinite(score) ? `<span class="detail-score">${(score * 100).toFixed(1)}% study score</span>` : "";
+  const decision = studyDecision(study);
+  const toolsLine = decision.tools.length ? decision.tools.join(" + ") : decision.label === "Routine case" ? "No optional tools" : decision.label === "Awaiting review" ? "Pending" : "Tools blocked";
   target.innerHTML = `
     <div class="inspector-header"><div><p class="section-overline">SELECTED STUDY</p><h3>${escapeHtml(study.studyFolder)}</h3><p>${escapeHtml(study.patientFolder || "Local study folder")} · ${escapeHtml(study.folderPath)}</p></div><span class="route-pill ${status.tone}">${escapeHtml(status.label)}</span></div>
     ${study.inputIssue ? `<div class="input-warning"><b>Not submitted to the model.</b><span>${escapeHtml(study.inputIssue.replaceAll("_", " "))}</span></div>` : ""}
+    <section class="decision-card ${escapeHtml(decision.tone)}"><div><p>CASE STATE</p><b>${escapeHtml(decision.label)}</b><small>${escapeHtml(decision.detail)}</small></div><div><p>OPTIONAL TOOLS</p><b>${escapeHtml(toolsLine)}</b><small>${decision.tools.length ? "Evidence only — it cannot change the route." : "The deterministic route stays in control."}</small></div></section>
     <div class="study-preview-grid">
       <div class="view-rail">${study.views.map((view, index) => `<button type="button" class="view-thumb ${index === study.selectedViewIndex ? "selected" : ""}" data-view-index="${index}"><img src="${view.blobUrl}" alt=""/><span>View ${index + 1}</span></button>`).join("")}</div>
       <div class="preview-panel">
@@ -427,6 +652,9 @@ function renderInspector() {
   $$(".view-thumb").forEach((button) => button.addEventListener("click", () => {
     study.selectedViewIndex = Number(button.dataset.viewIndex);
     renderInspector();
+  }));
+  $$(".research-pdf-button").forEach((button) => button.addEventListener("click", () => {
+    downloadResearchReport(button.dataset.researchPdf);
   }));
 }
 
@@ -458,8 +686,11 @@ function renderResults() {
   const attention = ordered.filter((study) => worklistMeta(study).bucket === "input_attention").length;
   const routine = ordered.filter((study) => worklistMeta(study).bucket === "routine").length;
   const investigated = ordered.filter((study) => String(worklistMeta(study).agent_status) === "completed_bounded_investigation").length;
+  const ambiguous = ordered.filter((study) => studyDecision(study).tone === "ambiguous").length;
+  const noOptionalTools = ordered.filter((study) => String(worklistMeta(study).agent_status) === "not_called_no_optional_tools").length;
+  const safetyBlocked = ordered.filter((study) => String(worklistMeta(study).agent_status) === "not_called_deterministic_route").length;
   target.innerHTML = `
-    <div class="results-heading"><div><p class="section-overline">HUMAN-REVIEW ORDER</p><h3>Prioritized worklist</h3><p>Higher-priority studies appear first. This is a workflow order, not a diagnosis.</p></div><div class="result-counts"><span class="priority">${priority} priority</span><span class="attention">${attention} attention</span><span class="routine">${routine} routine</span></div></div>
+    <div class="results-heading"><div><p class="section-overline">HUMAN-REVIEW ORDER</p><h3>Prioritized worklist</h3><p>Higher-priority studies appear first. This is a workflow order, not a diagnosis.</p></div><div class="result-counts"><span class="priority">${priority} priority</span><span class="attention">${attention} attention</span><span class="routine">${routine} routine</span><span class="ambiguous">${ambiguous} ambiguous</span></div></div>
     <p class="agent-run-summary">${investigated ? `${investigated} ${investigated === 1 ? "study used" : "studies used"} the bounded optional-evidence check.` : "No study was authorized for an optional evidence tool."} It adds evidence only; every study remains in human review.</p>
     <div class="ranked-results">${ordered.map((study, index) => {
       const result = study.result;
@@ -467,8 +698,21 @@ function renderResults() {
       const score = Number.isFinite(meta.study_score) ? `${(meta.study_score * 100).toFixed(1)}%` : "—";
       const agentStatus = String(meta.agent_status || "not_run");
       const agentText = readableAgentStatus(agentStatus);
-      return `<article class="result-row ${outcomeTone(result.deterministic_outcome)}"><span class="result-rank">${index + 1}</span><div class="result-copy"><div><h4>${escapeHtml(study.studyFolder)}</h4><span>${escapeHtml(study.patientFolder || "Local study folder")} · ${study.views.length} views</span></div><p>${escapeHtml(resultReason(result))}</p><small>${escapeHtml(agentText)} · Human review required</small></div><div class="result-score"><b>${escapeHtml(score)}</b><span>${escapeHtml(outcomeTitle(result.deterministic_outcome))}</span></div></article>`;
+      const decision = studyDecision(study);
+      const toolsText = decision.tools.length ? decision.tools.join(" + ") : decision.label === "Routine case" ? "No optional tools" : "Tools blocked";
+      return `<article class="result-row ${outcomeTone(result.deterministic_outcome)}"><span class="result-rank">${index + 1}</span><div class="result-copy"><div><h4>${escapeHtml(study.studyFolder)}</h4><span>${escapeHtml(study.patientFolder || "Local study folder")} · ${study.views.length} views</span></div><p>${escapeHtml(resultReason(result))}</p><div class="result-decision ${escapeHtml(decision.tone)}"><b>${escapeHtml(decision.label)}</b><span>${escapeHtml(toolsText)}</span></div><small>${escapeHtml(agentText)} · Human review required</small></div><div class="result-score"><b>${escapeHtml(score)}</b><span>${escapeHtml(outcomeTitle(result.deterministic_outcome))}</span></div></article>`;
     }).join("")}</div>`;
+  target.innerHTML += `
+    <section class="agent-report-card">
+      <div class="agent-report-heading"><div><p class="section-overline">AGENT & EVIDENCE REPORT</p><h3>When extra tools were used</h3><p>The deterministic model and safety rules always decide the review route first. The local bounded evidence workflow can only add evidence; it cannot change the score, threshold, route, or need for human review.</p></div><div class="agent-report-counts"><span>${investigated} evidence run${investigated === 1 ? "" : "s"}</span><span>${noOptionalTools} no tools</span><span>${safetyBlocked} safety block${safetyBlocked === 1 ? "" : "s"}</span></div></div>
+      <div class="agent-policy-guide">
+        <div><b>1</b><span><strong>View disagreement</strong>Some views are above and some below the frozen threshold.</span></div>
+        <div><b>2</b><span><strong>Borderline mean</strong>The study score is within ±5 percentage points of the frozen threshold.</span></div>
+        <div><b>3</b><span><strong>Abnormal mean</strong>The study mean score crosses the frozen threshold.</span></div>
+      </div>
+      <p class="agent-policy-note"><b>What happens then?</b> The app runs local TTA stability and Grad-CAM evidence summaries. A consistent normal case receives a trace but no optional tools. CrewAI is a separate, opt-in research explanation and is shown independently for each case.</p>
+      <div class="agent-report-list">${ordered.map(agentReportRow).join("")}</div>
+    </section>`;
   target.classList.remove("hidden");
 }
 
@@ -483,7 +727,8 @@ async function runWorklist() {
   if (appState.running) return;
   const candidates = appState.studies.filter((study) => !study.inputIssue && !study.result);
   if (!candidates.length) {
-    showToast("There are no unreviewed studies ready for the model. Choose another folder to start again.");
+    renderWorklist();
+    showToast("This worklist is already reviewed. Its report is shown below the prioritized queue.");
     return;
   }
   appState.running = true;

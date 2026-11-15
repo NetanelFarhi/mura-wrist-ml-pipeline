@@ -1,17 +1,18 @@
-# Draft dependencies extracted from 09_MURA_Agentic_AI-final.ipynb
-# CrewAI version confirmed in saved execution output (Steps 56C, 61A).
-# Other package versions NOT established from saved outputs; validate before final release.
+# Optional local runtime for the Notebook 09-compatible CrewAI explanation.
+# CrewAI 1.15.39 was confirmed in the saved notebook execution output.
+# The two compatibility bounds below were validated in the local app environment.
 crewai==1.15.39
+kubernetes<37
+google-genai
 torch
 torchvision
 numpy
 pandas
 Pillow
 matplotlib
-pydantic
+pydantic>=2.11.9,<2.13
 psutil
 reportlab
 pypdf
 # google.colab is provided by Google Colab, not installed via this file.
-# google-genai is not explicitly required by the notebook's direct imports;
-# Gemini is configured through CrewAI's LLM interface.
+# CrewAI's native Gemini provider imports this package at runtime.
