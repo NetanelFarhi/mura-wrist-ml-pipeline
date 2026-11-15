@@ -1,0 +1,44 @@
+{
+  "report_type": "MURA Agent Research Report",
+  "research_use_only": true,
+  "artifact_scope": "deidentified aggregate example",
+  "study_alias": "MURA_WRIST_AGENT_EXAMPLE",
+  "image_count": 4,
+  "workflow": {
+    "status": "COMPLETED",
+    "reason": "Mandatory checks passed"
+  },
+  "technical_qc": {
+    "status": "PASS",
+    "summary": "All four supplied views passed the non-diagnostic technical checks."
+  },
+  "anatomical_scope": {
+    "status": "SUPPORTED_WRIST",
+    "metadata_source": "MURA_LOOKUP",
+    "anatomy_image_verified": false
+  },
+  "classification": {
+    "performed": true,
+    "predicted_class": "ABNORMAL",
+    "study_probability": 0.9800305664539337,
+    "threshold": 0.263567715883255,
+    "image_threshold_disagreement": false
+  },
+  "agent_decision": {
+    "action": "priority_human_review",
+    "classification_modified": false
+  },
+  "optional_evidence": {
+    "tta_status": "SUCCESS",
+    "augmentation_count": 5,
+    "tta_range": 0.021157503128051758,
+    "gradcam_view_count": 4,
+    "maps_stored_in_repository": false
+  },
+  "limitations": [
+    "Deidentified aggregate example only; no raw paths, images, or person-like identifiers are retained.",
+    "Research prototype; not validated for clinical use.",
+    "Model predictions are not radiologist diagnoses.",
+    "Optional evidence does not change the frozen classification or human-review requirement."
+  ]
+}

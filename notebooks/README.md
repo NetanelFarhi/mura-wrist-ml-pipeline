@@ -13,12 +13,12 @@ This guide identifies the current workflow, supporting viewers, experiments, and
 
 Intermediate artifacts must be persisted in the configured Drive/data folders; Jupyter variables do not carry from one notebook to another. Paths can be set with each notebook's documented `MURA_*` environment variables. Notebook 01 regenerates the split if rerun, so retain the current manifests when continuity with existing results matters.
 
-## Diagnostics and active deterministic runtime
+## Diagnostics, runtime viewer, and preserved policy notebooks
 
 - [07 — Shortcut/geometry audit](07_MURA_Shortcut_and_Geometry_Audit.ipynb): diagnostic only; reads the frozen Model B artifacts and does not train or select a threshold.
 - [08 — Runtime study viewer](08_MURA_Runtime_Study_Viewer.ipynb): optional local preview of authorized internal-train studies. Keep preview disabled and clear outputs before commit.
-- [09 — Deterministic Agent Policy](09_MURA_Deterministic_Agent_Policy.ipynb): new active policy demonstration. Uses synthetic inputs, the current deterministic safety module and `tools/agent_policy.py` v1.1; it does not load a checkpoint or run TTA/Grad-CAM.
-- [09 — Deterministic safety tools](09_MURA_Deterministic_Safety_Tools.ipynb): existing supporting smoke-test notebook, retained unchanged.
+- [09 — Deterministic Agent Policy](legacy/MURA_Deterministic_Agent_Policy.ipynb): preserved policy demonstration. It uses synthetic inputs and does not load a checkpoint or run TTA/Grad-CAM. The active deterministic logic is maintained under `tools/` and `src/`.
+- [09 — Deterministic safety tools](legacy/09_MURA_Deterministic_Safety_Tools.ipynb): preserved supporting smoke-test notebook, retained unchanged.
 - [Saved results viewer](06_results_viewer.ipynb): read-only presentation, separate from the execution sequence.
 - [09 - MURA Agentic AI](09_MURA_Agentic_AI-final.ipynb): Completed and successfully executed end-to-end. Integrates frozen Model B, deterministic policy, authorized TTA and Grad-CAM tools, CrewAI-based research explanations, and safety controls. Three structured research artifacts were validated. Final notebook uploaded to GitHub; research use only, with mandatory human review.
 - [09A — Independent Model B Verification](09A_MURA_Ground_True_Independent_Model_B_Validation.ipynb): Independently verifies frozen Model B predictions across three XR_WRIST studies (False Positive, True Positive, and True Negative). Reproduces all eight image-level predictions, verifies original MURA image identity, analyzes image-level disagreement, and documents Grad-CAM visualization and previously recorded agentic tool execution. Successfully rerun in a fresh Colab runtime without retraining or executing CrewAI; research use only.

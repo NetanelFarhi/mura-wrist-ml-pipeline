@@ -1,6 +1,6 @@
 # Review: `09_MURA_Deterministic_Agent_Policy.ipynb`
 
-[Open notebook source](../09_MURA_Deterministic_Agent_Policy.ipynb)
+[Open notebook source](../legacy/MURA_Deterministic_Agent_Policy.ipynb)
 
 **Classification:** Active deterministic policy demonstration
 **Purpose:** Exercise policy v1.1 and deterministic safety with synthetic records, using the threshold metadata from the canonical Model B bundle.

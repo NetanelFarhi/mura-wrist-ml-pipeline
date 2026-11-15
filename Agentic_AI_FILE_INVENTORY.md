@@ -55,11 +55,12 @@ The frozen Model B threshold is `0.263567715883255`, with `mean_probability` stu
 
 | File |
 |---|
-| `valid_XR_WRIST_patient11185_study1_positive_final_integrated_research_report.json` |
-| `valid_XR_WRIST_patient11185_study1_positive_complete_agent_research_report.json` |
-| `valid_XR_WRIST_patient11185_study1_positive_frozen_agent_result.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_final_integrated_research_report.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_complete_research_report.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_frozen_result.json` |
 
-These files document integrated agent research outputs for a selected wrist study.
+These files are deidentified aggregate examples. Raw paths, image-level predictions, and person-like identifiers are intentionally not kept in public reports.
+See the [integrated-report notes](reports/agentic_ai/integrated/README.md) for the scope of each example.
 
 ## 5. Research Artifacts — `reports/agentic_ai/research_artifacts/`
 

@@ -279,11 +279,12 @@ Directory: [`reports/agentic_ai/integrated/`](reports/agentic_ai/integrated/)
 
 | File |
 | --- |
-| `valid_XR_WRIST_patient11185_study1_positive_final_integrated_research_report.json` |
-| `valid_XR_WRIST_patient11185_study1_positive_complete_agent_research_report.json` |
-| `valid_XR_WRIST_patient11185_study1_positive_frozen_agent_result.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_final_integrated_research_report.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_complete_research_report.json` |
+| `MURA_WRIST_AGENT_EXAMPLE_frozen_result.json` |
 
-These JSON files contain integrated research outputs for a selected wrist study.
+These JSON files are deidentified aggregate examples of integrated research outputs. Raw paths, image-level predictions, and person-like identifiers are intentionally kept outside Git.
+See the [integrated-report notes](reports/agentic_ai/integrated/README.md) for the scope of each example.
 
 ### Research Artifacts
 
@@ -303,9 +304,9 @@ Directory: [`reports/agentic_ai/research_reports/`](reports/agentic_ai/research_
 | --- | --- |
 | [`MURA_WRIST_RANDOM_001_research_report_with_metrics.pdf`](reports/agentic_ai/research_reports/MURA_WRIST_RANDOM_001_research_report_with_metrics.pdf) | Included — final metrics version |
 | [`MURA_WRIST_RANDOM_002_research_report.pdf`](reports/agentic_ai/research_reports/MURA_WRIST_RANDOM_002_research_report.pdf) | Included |
-| [`MURA_WRIST_NO_TOOLS_001_research_report.pdf`](MURA_WRIST_NO_TOOLS_001_research_report.pdf) |Included |
+| [`MURA_WRIST_NO_TOOLS_001_research_report.pdf`](reports/agentic_ai/research_reports/MURA_WRIST_NO_TOOLS_001_research_report.pdf) | Included |
 
-The research artifacts and the two available PDF reports have been uploaded to GitHub.
+The research artifacts and the three available PDF reports have been uploaded to GitHub.
 
 The older RANDOM_001 PDF without metrics is excluded from the final inventory.
 

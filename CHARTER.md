@@ -45,7 +45,7 @@ Hard rules are deterministic: supported-anatomy checks, corrupt/missing-input ha
 
 ## 5. Agent seat
 
-**Status: designed, not implemented or evaluated.** A fixed script handles known rules and routine cases. A bounded adaptive agent is only proposed for supported cases with case-specific ambiguity, for example:
+**Charter status: adaptive agent designed, not evaluated.** A fixed script handles known rules and routine cases. The current Wrist Review product separately implements deterministic routing and an opt-in bounded CrewAI research-explanation bridge; it is not presented as an evaluated adaptive planner. A bounded adaptive agent remains proposed for supported cases with case-specific ambiguity, for example:
 
 1. view-level evidence conflicts substantially;
 2. the fixed decision is borderline and QC evidence is also borderline; or

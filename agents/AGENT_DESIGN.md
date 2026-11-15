@@ -1,4 +1,10 @@
-# Bounded agent design — planned, not implemented
+# Bounded adaptive-agent design — reference specification
+
+This document specifies the proposed **adaptive** agent and its evaluation. It is
+not evidence that an adaptive planner has been evaluated. The implemented product
+path is documented separately in [AGENT_IMPLEMENTATION_STATUS.md](AGENT_IMPLEMENTATION_STATUS.md):
+it uses deterministic routing plus a bounded, opt-in CrewAI research-explanation
+bridge that cannot alter score, threshold, queue route, or mandatory human review.
 
 ## 1. Deterministic guardrail policy
 

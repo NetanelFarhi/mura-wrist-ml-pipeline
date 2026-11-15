@@ -1,0 +1,22 @@
+{
+  "artifact_type": "Frozen deterministic agent result",
+  "research_use_only": true,
+  "artifact_scope": "deidentified aggregate example",
+  "study_alias": "MURA_WRIST_AGENT_EXAMPLE",
+  "workflow": {
+    "status": "COMPLETED",
+    "reason": "Mandatory checks passed"
+  },
+  "classification": {
+    "performed": true,
+    "study_probability": 0.9800305664539337,
+    "threshold": 0.263567715883255,
+    "predicted_class": "ABNORMAL",
+    "image_threshold_disagreement": false
+  },
+  "agent_action": {
+    "action": "priority_human_review",
+    "classification_modified": false
+  },
+  "provenance_note": "Summary preserved for repository review; detailed run outputs are kept outside Git."
+}

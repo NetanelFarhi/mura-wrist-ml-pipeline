@@ -19,7 +19,7 @@ Status meanings: **DONE** = an auditable artifact exists; **IN PROGRESS** = work
 | Architecture and deterministic no-agent path | `CHARTER.md` §4 | DONE (design) | Charter |
 | Adaptive agent justification beyond if/else routing | `CHARTER.md` §5; `agents/AGENT_DESIGN.md` | DONE (design) | Charter |
 | Agent comparison on independent same-case suite | `evaluation/AGENT_EVAL_PLAN.md` | PLANNED | Checkpoint 2 |
-| Agent implementation | no implementation artifact | PLANNED | Checkpoint 2 |
+| Bounded agent implementation | `src/runtime/bounded_agent.py`; `src/runtime/crewai_research.py`; `apps/wrist_review/` | DONE (deterministic evidence workflow plus optional structured research-explanation bridge; no adaptive-agent performance claim) | Checkpoint 2 |
 | Bootstrap CIs for performance estimates | `docs/results/checkpoint1/README.md`; generated safe result artifacts | DONE (internal-validation estimates) | Checkpoint 1 / final evaluation |
 
 ## Lecturer Part B: development and product alignment

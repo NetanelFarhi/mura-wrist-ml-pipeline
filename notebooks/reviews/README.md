@@ -4,7 +4,7 @@ Static reviews document purpose, named inputs/outputs, prerequisites, and issues
 
 | Notebook | Review note | Status |
 |---|---|---|
-| [09_MURA_Deterministic_Agent_Policy.ipynb](../09_MURA_Deterministic_Agent_Policy.ipynb) | [Review](./09_MURA_Deterministic_Agent_Policy.md) | new; not executed |
+| [MURA_Deterministic_Agent_Policy.ipynb](../legacy/MURA_Deterministic_Agent_Policy.ipynb) | [Review](./09_MURA_Deterministic_Agent_Policy.md) | preserved legacy policy demo; not executed |
 | [01_MURA_Data_Preparation_and_EDA.ipynb](../01_MURA_Data_Preparation_and_EDA.ipynb) | [Review](./01_MURA_Data_Preparation_and_EDA.md) | reviewed statically; not re-executed |
 | [02_MURA_Preprocessing.ipynb](../02_MURA_Preprocessing.ipynb) | [Review](./02_MURA_Preprocessing.md) | reviewed statically; not re-executed |
 | [03_MURA_Baseline_ResNet18_LogReg.ipynb](../03_MURA_Baseline_ResNet18_LogReg.ipynb) | [Review](./03_MURA_Baseline_ResNet18_LogReg.md) | reviewed statically; not re-executed |
@@ -15,7 +15,7 @@ Static reviews document purpose, named inputs/outputs, prerequisites, and issues
 | [07_MURA_Shortcut_and_Geometry_Audit.ipynb](../07_MURA_Shortcut_and_Geometry_Audit.ipynb) | [Review](./07_MURA_Shortcut_and_Geometry_Audit.md) | reviewed statically; not re-executed |
 | [08_MURA_Runtime_Study_Viewer.ipynb](../08_MURA_Runtime_Study_Viewer.ipynb) | [Review](./08_MURA_Runtime_Study_Viewer.md) | reviewed statically; not re-executed |
 | [09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb](../legacy/09_MURA_Agentic_AI_Hagit_contributor_draft.ipynb) | [Review](./legacy__09_MURA_Agentic_AI_Hagit_contributor_draft.md) | excluded, preserved unchanged |
-| [09_MURA_Deterministic_Safety_Tools.ipynb](../09_MURA_Deterministic_Safety_Tools.ipynb) | [Review](./09_MURA_Deterministic_Safety_Tools.md) | reviewed statically; not re-executed |
+| [09_MURA_Deterministic_Safety_Tools.ipynb](../legacy/09_MURA_Deterministic_Safety_Tools.ipynb) | [Review](./09_MURA_Deterministic_Safety_Tools.md) | preserved legacy smoke test; not re-executed |
 | [10_MURA_All_Anatomies_Data_Preparation.ipynb](../experimental_all_anatomies/10_MURA_All_Anatomies_Data_Preparation.ipynb) | [Review](./experimental_all_anatomies__10_MURA_All_Anatomies_Data_Preparation.md) | reviewed statically; not re-executed |
 | [11_MURA_All_Anatomies_Preprocessing.ipynb](../experimental_all_anatomies/11_MURA_All_Anatomies_Preprocessing.ipynb) | [Review](./experimental_all_anatomies__11_MURA_All_Anatomies_Preprocessing.md) | reviewed statically; not re-executed |
 | [12_MURA_All_Anatomies_Baseline_ResNet18_LogReg.ipynb](../experimental_all_anatomies/12_MURA_All_Anatomies_Baseline_ResNet18_LogReg.ipynb) | [Review](./experimental_all_anatomies__12_MURA_All_Anatomies_Baseline_ResNet18_LogReg.md) | reviewed statically; not re-executed |

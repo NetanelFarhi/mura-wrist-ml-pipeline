@@ -1,0 +1,29 @@
+{
+  "report_type": "Integrated Agent Research Report",
+  "research_use_only": true,
+  "artifact_scope": "deidentified aggregate example",
+  "study_alias": "MURA_WRIST_AGENT_EXAMPLE",
+  "workflow_status": "COMPLETED",
+  "mandatory_checks": {
+    "technical_qc": "PASS",
+    "anatomical_scope": "SUPPORTED_WRIST"
+  },
+  "frozen_model": {
+    "name": "Model B - Fine-tuned ResNet18",
+    "aggregation": "mean_probability",
+    "study_probability": 0.9800305664539337,
+    "threshold": 0.263567715883255,
+    "predicted_class": "ABNORMAL"
+  },
+  "deterministic_policy": {
+    "action": "priority_human_review",
+    "requires_human_review": true,
+    "classification_modified": false
+  },
+  "optional_evidence": {
+    "tta_requested": true,
+    "gradcam_requested": true,
+    "route_changed": false
+  },
+  "provenance_note": "This public summary intentionally excludes raw-image paths, image-level predictions, heatmap locations, and person-like identifiers."
+}
