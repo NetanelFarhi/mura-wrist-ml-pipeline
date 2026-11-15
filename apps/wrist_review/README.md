@@ -172,6 +172,8 @@ application version:
   shows the local multi-study worklist, deterministic priority order, optional
   evidence states, and the generated report as its final six seconds. Playback
   is intentionally 1.5x and the report page is held separately for reading.
+  It is a technical app-version capture, not the reviewed final-presentation
+  fallback; see [`presentation/README.md`](../../presentation/README.md).
 - [`Example generated research report`](demo/MURA_WRIST_NO_TOOLS_001_research_explanation.pdf)
   is the de-identified PDF exported by the app after a successful no-tools
   CrewAI explanation. It is an execution example, not an evaluation result or

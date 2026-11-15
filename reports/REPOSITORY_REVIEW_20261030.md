@@ -6,6 +6,13 @@ This is a documentation and governance review before the lecturer's project
 review. It does not retrain a model, alter a threshold, recompute a historical
 metric, or open official MURA `valid`.
 
+> **Historical-status note:** this review records the repository state on
+> 2026-10-30. Later work added an optional, bounded CrewAI research-explanation
+> bridge to the local app. Its current implementation status and boundaries are
+> documented in [`agents/AGENT_IMPLEMENTATION_STATUS.md`](../agents/AGENT_IMPLEMENTATION_STATUS.md)
+> and [`apps/wrist_review/README.md`](../apps/wrist_review/README.md); this
+> record's original findings are retained unchanged.
+
 ## What was checked
 
 | Review item | Evidence inspected | Result |

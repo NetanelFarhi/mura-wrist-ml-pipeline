@@ -1,8 +1,11 @@
 # Presentation and demo preparation
 
-No final slide deck or demo recording is committed yet. This folder exists so
-the final presentation and its non-sensitive demo fallback have one clear,
-reviewable location.
+No final slide deck is committed yet. The version-specific technical application
+capture is kept with the runnable product in
+[`apps/wrist_review/demo/`](../apps/wrist_review/demo/); it is evidence of the
+current interface and PDF-export flow, not the final presentation fallback.
+This folder remains the dedicated location for the final slide deck and its
+reviewed, non-sensitive demo backup.
 
 ## Recommended ten-slide outline
 
@@ -34,3 +37,7 @@ Before the final presentation, add a short recording that demonstrates only:
 Do not record MURA radiographs, identifiers, credentials, local Drive paths,
 or a fabricated patient/model outcome. The app should show its intentional
 `model_bundle_missing` state if the verified local artifact bundle is absent.
+
+The current technical app capture must therefore be reviewed and, if needed,
+re-recorded with non-sensitive placeholders before it is used as the final
+presentation backup.

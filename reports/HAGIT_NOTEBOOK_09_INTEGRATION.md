@@ -8,6 +8,12 @@ not executed directly as the active runtime. This organization does not
 rewrite the notebook; the safety-oriented components listed below were adapted
 into the canonical deterministic path.
 
+> **Current-status note:** this is an incoming-notebook integration record.
+> Subsequent work added the optional bounded CrewAI research-explanation bridge
+> to `apps/wrist_review/`; its active behavior is documented in
+> [`agents/AGENT_IMPLEMENTATION_STATUS.md`](../agents/AGENT_IMPLEMENTATION_STATUS.md).
+> The historical notebook itself remains separate from the runnable app path.
+
 ## What was retained
 
 | Contribution from the incoming notebook | Canonical project location |
