@@ -3,7 +3,7 @@
 # The two compatibility bounds below were validated in the local app environment.
 crewai==1.15.39
 kubernetes<37
-google-genai
+google-genai==3.3.0
 torch
 torchvision
 numpy
@@ -12,7 +12,7 @@ Pillow
 matplotlib
 pydantic>=2.11.9,<2.13
 psutil
-reportlab
-pypdf
+reportlab==5.1.0
+pypdf==7.1.0
 # google.colab is provided by Google Colab, not installed via this file.
 # CrewAI's native Gemini provider imports this package at runtime.
