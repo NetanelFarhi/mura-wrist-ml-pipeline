@@ -177,15 +177,26 @@ Raw radiographs, model weights, private manifests, and sensitive study data must
 
 ## Wrist Review Application
 
+The runnable browser application is deliberately located in
+[`apps/wrist_review/`](apps/wrist_review/), with an
+[application-folder guide](apps/README.md) that distinguishes it from reusable
+runtime code in `src/`, the agent assets in `agents/`, evaluation materials in
+`evaluation/`, and final presentation assets in `presentation/`.
+
 The [local application guide](apps/wrist_review/README.md) explains how to point `MURA_APP_MODEL_DIR` to an authorized local copy of the canonical bundle and launch the browser interface.
 
 The application uses the verified Model B bundle and deterministic safety policy.
 
 It checks technical image quality and declared anatomy. The anatomy selector is not an automatic body-part detector.
 
-Missing or invalid artifacts prevent a model result.
+Missing or invalid artifacts prevent a model result. The deterministic route
+always runs independently of an LLM. When explicitly enabled by a local operator,
+the app can request the bounded, de-identified CrewAI research explanation that
+implements the same fixed Model B and safety constraints described in Notebook 09;
+it cannot change the score, threshold, priority route, or human-review requirement.
 
-**The local Wrist Review application does not run the separate Notebook 09 Agentic AI workflow.**
+The app's optional LLM explanation is a runnable product integration of the
+Notebook 09 design, not a new model-training or evaluation workflow.
 
 ---
 
